@@ -432,26 +432,27 @@ def make_task_understood(df, complete_task_df, to_do):
         task_understood_temp=pd.DataFrame({'participant_no': [i]})
         sub_df=df[df.participant_no==float(i)].reset_index()
 
-        #attention checks 
+         #attention checks 
         attention=sub_df[sub_df.trial_var=="attention_check"].reset_index()
-        if attention.loc[0].response == "{'Q0': ['Apple', 'Banana']}":
-            block1=2
-        elif (attention.loc[0].response == "{'Q0': ['Banana']}") or (attention.loc[0].response == "{'Q0': ['Spoon']}"):
-            block1=1
+        if ast.literal_eval(attention.loc[0].response) == "{'Q0': ['Apple', 'Banana']}" or attention.loc[0].response == "{'Q0': ['Apple', 'Banana']}":
+                    block1=2
+        elif 'Apple' in ast.literal_eval(attention.loc[0].response)['Q0'] or 'Banana' in ast.literal_eval(attention.loc[0].response)['Q0']:
+                    block1=1
         else:
-            block1=0
+                    block1=0
+                
         if attention.loc[1].response== "{'Q0': ['Bowl', 'Spoon']}":
-            block2=2
-        elif (attention.loc[1].response== "{'Q0': ['Bowl']}") or (attention.loc[1].response== "{'Q0': ['Spoon']}"):
-            block2=1
+                    block2=2
+        elif 'Bowl' in ast.literal_eval(attention.loc[1].response)['Q0'] or 'Spoon' in ast.literal_eval(attention.loc[1].response)['Q0']:
+                    block2=1
         else:
-            block2=0
+                    block2=0
         if attention.loc[2].response== "{'Q0': ['River', 'Mountain']}":
-            block3=2
-        elif (attention.loc[2].response== "{'Q0': ['River']}") or (attention.loc[2].response== "{'Q0': ['Mountain']}"):
-            block3=1
+                    block3=2
+        elif 'River' in ast.literal_eval(attention.loc[2].response)['Q0'] or 'Mountain' in ast.literal_eval(attention.loc[2].response)['Q0']:
+                    block3=1
         else:
-            block3=0
+                    block3=0
 
         attention_checks = pd.DataFrame({
             'block': ['block 1', 'block 2', 'block 3'],
@@ -487,7 +488,7 @@ def make_task_understood(df, complete_task_df, to_do):
         task_understood_temp['criteria_total']=task_understood_temp[['criteria_f', 'criteria_d', 'criteria_p']].sum(axis=1)
 
         ##Checking they learnt the task correctly
-        if task_understood_temp.attention_checks[0]>=4 and task_understood_temp.criteria_total[0]<3 and task_understood_temp.long_breaks[0]=="No" and task_understood_temp.total_time[0]<120:
+        if task_understood_temp.attention_checks[0]>=4 and task_understood_temp.criteria_total[0]<3 and task_understood_temp.long_breaks[0]=="No":
             task_understood_temp['task_understood']="Yes"
         else:
             task_understood_temp['task_understood']="No"
@@ -576,7 +577,10 @@ def make_task_outcomes(df):
 
                 #find first correct response
                 for i in range(reversal_length):
-                    if reversal_df.loc[i].correct == True:
+                    if len(reversal_df)<=i: ##if the reversal is only 1 trial long break
+                            first_correct=0
+                            break
+                    elif reversal_df.loc[i].correct == True:
                         first_correct=i
                         break
                 perseverative_er+=first_correct ##when they first get the correct response is an index of perseveration
@@ -584,7 +588,7 @@ def make_task_outcomes(df):
                 if first_correct == 0:
                     reversal_perseverative_er=0
                 else:
-                    reversal_perseverative_er=first_correct-1
+                    reversal_perseverative_er=first_correct-1 #as first trial doesn't count
                 block_perseverative_er+=reversal_perseverative_er
                 mean_perseverative_er=block_perseverative_er/(n_reversal-1) ##mean perseverative errors per reversal
 
