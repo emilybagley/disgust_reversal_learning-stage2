@@ -298,12 +298,21 @@ def create_block_df(df, block_name, participant_no):
     fractal_val={'F000', 'F009', 'F010', 'F012', 'F014', 'F015', 'F018', 'F020'}
     fractal_vals = [next((val for val in fractal_val if val in item), item) for item in fractals]
 
+    #extract punishment colour
+    first_punishment = task_df.loc[task_df['stimulus'].str.contains(block_name, case=False, na=False), 'stimulus'].iat[0]
+    if first_punishment.find('YELLOW') != -1:
+        punish_colour='YELLOW'
+    elif first_punishment.find('BLUE') != -1:
+        punish_colour='BLUE'
+    else:
+        punish_colour='ERROR'
+
     for i in set(block.n_trial):
         trial=block[block.n_trial==i]
         trial.reset_index(inplace=True)
 
         row = []
-        if "red" in trial.feedback[2]:
+        if punish_colour in trial.feedback[2]:
             feedback='incorrect'
         else:
             feedback='correct'
@@ -324,7 +333,8 @@ def create_block_df(df, block_name, participant_no):
             'participant_no': trial.participant_no[0],#
             'timed_out': 0,
             'time_taken': (block.time_elapsed.iloc[-1]-block.time_elapsed[0])/60000, ##in minutes
-            'fractals': fractal_vals
+            'fractals': fractal_vals,
+            'punish_colour': punish_colour
         })
         block_df=pd.concat([block_df, pd.DataFrame(row)])
     block_df.reset_index(inplace=True)
