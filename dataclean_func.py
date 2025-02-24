@@ -284,7 +284,7 @@ def vid_ratings(df, participant_no, to_do):
 ##REVERSAL LEARNING TASK
 #create_block_df - creates a dataframe with all needed data from one experimental block
 def create_block_df(df, block_name, participant_no):
-    sub_df=df[df.participant_no==participant_no].reset_index()
+    sub_df=df[df.participant_no==participant_no]
     task_df=sub_df[sub_df.task=="main_task"]
     block_df=pd.DataFrame(columns=['n_trial', 'rt', 'stim_selected', 'correct_stim', 'correct', 'feedback', 'feedback_congruent', 'correct_count', 'trial_till_correct', 'reversal', 'block_no', 'participant_no', 'timed_out'])
     block=task_df[task_df.block_type==block_name]
@@ -430,7 +430,7 @@ def make_task_understood(df, complete_task_df, to_do):
     task_understood=pd.DataFrame()
     for i in set(df.participant_no):
         task_understood_temp=pd.DataFrame({'participant_no': [i]})
-        sub_df=df[df.participant_no==float(i)].reset_index()
+        sub_df=df[df.participant_no==float(i)]
 
          #attention checks 
         attention=sub_df[sub_df.trial_var=="attention_check"].reset_index()
