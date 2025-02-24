@@ -143,30 +143,30 @@ def vid_ratings(df, participant_no, to_do):
         frightening=response['Q3']
 
         #extract which video it is
-        if "0888.gif" in stim:
+        if "0888" in stim:
             vid="0888"
-        elif "1414.gif" in stim:
+        elif "1414" in stim:
             vid="1414"
-        elif "1765.gif" in stim:
+        elif "1765" in stim:
             vid="1765"
-        elif "1987.gif" in stim:
+        elif "1987" in stim:
             vid="1987"
-        elif "2106.gif" in stim:
+        elif "2106" in stim:
             vid="2106"
-        elif "0046.gif" in stim:
+        elif "0046" in stim:
             vid = "0046"
-        elif "0374.gif" in stim:
+        elif "0374" in stim:
             vid = "0374"
-        elif "0548.gif" in stim:
+        elif "0548" in stim:
             vid = "0548"
-        elif "0877.gif" in stim:
+        elif "0877" in stim:
             vid = "0877"
-        elif "1202.gif" in stim:
+        elif "1202" in stim:
             vid = "1202"
         else:
             vid = "ERROR"
 
-        if val in range(0, 30, 3):
+        if val in range(0, 30, 2):
             rating_vids_a.append({
                 'Vid' : vid,
                 'trial_type': trial_type,
@@ -177,7 +177,7 @@ def vid_ratings(df, participant_no, to_do):
                 'disgust_stim': 0,
                 'fear_stim': 0,
             })
-        elif val in range(1,30,3):
+        elif val in range(1,30,2):
             rating_vids_b.append({
                 'Vid' : vid,
                 'trial_type': trial_type,
@@ -198,28 +198,28 @@ def vid_ratings(df, participant_no, to_do):
     fear_stim=str(sub_df.fear_stimulus.dropna())
     disgust_stim=str(sub_df.disgust_stimulus.dropna())
 
-    if "0888.gif" in disgust_stim:
+    if "0888" in disgust_stim:
         rating_vids.loc[rating_vids['Vid']=="0888", ['disgust_stim']]=1
-    elif "1414.gif" in disgust_stim:
+    elif "1414" in disgust_stim:
         rating_vids.loc[rating_vids['Vid']=="1414", ['disgust_stim']]=1
-    elif "1765.gif" in disgust_stim:
+    elif "1765" in disgust_stim:
         rating_vids.loc[rating_vids['Vid']=="1765", ['disgust_stim']]=1
-    elif "1987.gif" in disgust_stim:
+    elif "1987" in disgust_stim:
         rating_vids.loc[rating_vids['Vid']=="1987", ['disgust_stim']]=1
-    elif "2106.gif" in disgust_stim:
+    elif "2106" in disgust_stim:
         rating_vids.loc[rating_vids['Vid']=="2106", ['disgust_stim']]=1
     else:
         print("error")
 
-    if "0046.gif" in fear_stim:
+    if "0046" in fear_stim:
         rating_vids.loc[rating_vids['Vid']=="0046", ['fear_stim']]=1
-    elif "0374.gif" in fear_stim:
+    elif "0374" in fear_stim:
         rating_vids.loc[rating_vids['Vid']=="0374", ['fear_stim']]=1
-    elif "0548.gif" in fear_stim:
+    elif "0548" in fear_stim:
         rating_vids.loc[rating_vids['Vid']=="0548", ['fear_stim']]=1
-    elif "0877.gif" in fear_stim:
+    elif "0877" in fear_stim:
         rating_vids.loc[rating_vids['Vid']=="0877", ['fear_stim']]=1
-    elif "1202.gif" in fear_stim:
+    elif "1202" in fear_stim:
         rating_vids.loc[rating_vids['Vid']=="1202", ['fear_stim']]=1
     else:
         print("error")
@@ -232,8 +232,15 @@ def vid_ratings(df, participant_no, to_do):
     
     #extract ratings of points loss (after points block)
     points_rating=sub_df[sub_df.trial_var=="points_rate_stim"]
-    #response = ast.literal_eval(points_rating.iloc[0].response) #makes it a dictionary
-    response = {'Q0': 4, 'Q1': 3, 'Q2': 2, 'Q3': 1} ###REMOVE ONCE HAVE ACTUAL DATA
+    #extract ratings of points loss (after points block)
+    ##due to glitch - 1/3rd of participants don't have points ratings
+        #happened when the points block was last
+    if len(sub_df[sub_df.trial_var=="points_rate_stim"])==0:
+        response = {'Q0': np.nan, 'Q1': np.nan, 'Q2': np.nan, 'Q3': np.nan}
+    else:
+        points_rating=sub_df[sub_df.trial_var=="points_rate_stim"]
+        response = ast.literal_eval(points_rating.iloc[0].response) #makes it a dictionary
+    #response = {'Q0': 4, 'Q1': 3, 'Q2': 2, 'Q3': 1} ###REMOVE ONCE HAVE ACTUAL DATA
     points_rating=pd.DataFrame({
         'participant_no': [participant_no],
         'Vid' : ["points"],
