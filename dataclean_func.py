@@ -28,6 +28,80 @@ def make_diagnosis(df):
             temp_diagnosis=pd.DataFrame({'diagnosis': [ast.literal_eval(temp_diagnosis.response[0])['Q0']]})
         temp_diagnosis['participant_no']=sub_df[0:1].participant_no.iloc[0]
         
+        check_diagnosis=temp_diagnosis.diagnosis.iloc[0].lower()
+        cleaned_diagnosis='MANUAL CHECK'
+        depression=0
+        anxiety=0
+        adhd=0
+        autism=0
+        ptsd=0
+        eating_disorder=0
+        ocd=0
+        personality_disorder=0
+        fnd=0
+        bipolar=0
+        historical=0
+        unspecified=0
+        
+        if 'depression' in check_diagnosis or 'dqepression' in check_diagnosis or 'depressive' in check_diagnosis:
+            depression=1
+            cleaned_diagnosis='Yes'
+        if 'anxiety' in check_diagnosis or 'panic disorder' in check_diagnosis or 'gad' in check_diagnosis or 'general anxiety disorder' in check_diagnosis or 'anxious' in check_diagnosis:
+            anxiety=1
+            cleaned_diagnosis='Yes'
+        if 'adhd' in check_diagnosis:
+            adhd=1
+            cleaned_diagnosis='Yes'
+        if 'autism' in check_diagnosis or 'asc' in check_diagnosis or 'asd' in check_diagnosis:
+            autism=1
+            cleaned_diagnosis='Yes'
+        if 'ptsd' in check_diagnosis or 'post traumatic stress disorder' in check_diagnosis or 'post-traumatic stress disorder' in check_diagnosis:
+            ptsd=1
+            cleaned_diagnosis='Yes'
+        if 'eating disorder' in check_diagnosis or 'anorexia' in check_diagnosis or 'body dismorphia' in check_diagnosis or 'body dysmorphia' in check_diagnosis or 'body dysmorphic' in check_diagnosis:
+            eating_disorder=1
+            cleaned_diagnosis='Yes'
+        if 'ocd' in check_diagnosis:
+            ocd=1
+            cleaned_diagnosis='Yes'
+        if 'bpd' in check_diagnosis or 'borderline personality disorder' in check_diagnosis or 'border personality disorder' in check_diagnosis or 'anti social personality disorder' in check_diagnosis or 'eupd' in check_diagnosis or 'emotionally unstable personality disorder' in check_diagnosis:
+            personality_disorder=1
+            cleaned_diagnosis='Yes'
+        if 'bipolar' in check_diagnosis:
+            bipolar=1
+            cleaned_diagnosis='Yes'
+        if 'fnd' in check_diagnosis or 'functional neurological disorder' in check_diagnosis or 'non-epileptic attack disorder' in check_diagnosis or 'nead' in check_diagnosis:
+            fnd=1
+            cleaned_diagnosis='Yes'
+        if 'no ' in check_diagnosis or 'none' in check_diagnosis or check_diagnosis == ' no' or 'no, ' in check_diagnosis or "no\n" in check_diagnosis or check_diagnosis == 'mo' or 'na ' in check_diagnosis or ' na' in check_diagnosis or check_diagnosis == 'na' or 'n/a' in check_diagnosis or check_diagnosis == '' or check_diagnosis == 'no':
+            cleaned_diagnosis='No'
+        if 'a few years ago' in check_diagnosis or 'past' in check_diagnosis or 'years ago' in check_diagnosis or 'as a child' in check_diagnosis or 'nothing since' in check_diagnosis:
+            cleaned_diagnosis='No'
+            historical='Yes'
+        if check_diagnosis =='yes' or check_diagnosis == 'yess' or check_diagnosis == 'yes, am currently having councelling. cbt':
+            cleaned_diagnosis='Yes'
+            unspecified=1
+        ##catch exceptions
+        if 'by a gp' in check_diagnosis or 'currently medicated with' in check_diagnosis or 'from a dr' in check_diagnosis: 
+            ##to catch someone who says they were diagnosed, not by a psychiatrist but a gp
+            ##to catch someone who says they were diagnosed years ago but still take medication
+            ##someone says diagnosed from a dr not psychiatrist
+            cleaned_diagnosis='Yes'
+
+        temp_diagnosis['cleaned_diagnosis']=cleaned_diagnosis
+        temp_diagnosis['depression']=depression
+        temp_diagnosis['anxiety']=anxiety
+        temp_diagnosis['adhd']=adhd
+        temp_diagnosis['autism']=autism
+        temp_diagnosis['ptsd']=ptsd
+        temp_diagnosis['eating_disorder']=eating_disorder
+        temp_diagnosis['ocd']=ocd
+        temp_diagnosis['bpd']=personality_disorder
+        temp_diagnosis['bipolar']=bipolar
+        temp_diagnosis['fnd']=fnd
+        temp_diagnosis['historical']=historical
+        temp_diagnosis['unspecified']=unspecified
+
         diagnosis=pd.concat([diagnosis, temp_diagnosis])
     return diagnosis
 
