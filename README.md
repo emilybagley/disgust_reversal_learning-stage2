@@ -16,7 +16,7 @@
 
 
  
- Planned model-agnostic analyses
+ Planned model-agnostic analyses:
  
  1_video_ratings_analyses: Completes models A-H as specified by the analysis plan. Full analysis of the video-rating task.
  
@@ -26,7 +26,7 @@
 
 
 
-Power analysis (unchanged from stage 1 Registered Report)
+Power analysis (unchanged from stage 1 Registered Report):
 
 A_power_analysis_script: carries out both liberal and conservative power analyses, saving the outputs into power tables
 
