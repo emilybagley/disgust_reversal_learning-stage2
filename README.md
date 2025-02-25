@@ -10,7 +10,8 @@
  
  00_data_checks: used to make rolling exclusions. Look at data from one participant and determine if they passed the exclusion criteria (1 version for 1 example participant is included here).
  
- 0_data_clearning: Used to create useable dataframes for subsequent analysis. Excludes using pre-registered exclusion criteria and calculates key task-outcomes.
+ 0_data_cleaning: Used to create useable dataframes for subsequent analysis. Excludes using pre-registered exclusion criteria and calculates key task-outcomes.
+ 
  checking_exclusions: checks that participant exclusions in data_cleaning notebook has not hurt the representativeness of the final sample.
 
 
