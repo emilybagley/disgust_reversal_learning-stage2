@@ -570,20 +570,20 @@ def make_task_outcomes(df):
             n_till_correct=[]
 
             block_perseverative_er=0
-            for n in range(n_reversal):
+            for n in range(1, n_reversal):
                 reversal_df=block_df[block_df.reversal==n].reset_index()
                 reversal_length=np.shape(reversal_df)[0]+1
                 n_till_correct.append(reversal_df.trial_till_correct.iloc[-1]) 
 
                 #find first correct response
                 for i in range(reversal_length):
-                    if len(reversal_df)<=i: ##if the reversal is only 1 trial long break
+                    if len(reversal_df)<=i: ##if the reversal is only 1 trial long, break
                             first_correct=0
                             break
                     elif reversal_df.loc[i].correct == True:
                         first_correct=i
                         break
-                perseverative_er+=first_correct ##when they first get the correct response is an index of perseveration
+                #perseverative_er+=first_correct ##when they first get the correct response is an index of perseveration
                 #count perseverative errors with this (first trial doesn't count as an error)
                 if first_correct == 0:
                     reversal_perseverative_er=0
@@ -593,10 +593,10 @@ def make_task_outcomes(df):
                 mean_perseverative_er=block_perseverative_er/(n_reversal-1) ##mean perseverative errors per reversal
 
                 #count number of errors past this point --> gives you regressive errors
-                if np.shape(reversal_df.iloc[first_correct: reversal_length].correct.value_counts()) ==(1,):
+                if np.shape(reversal_df.iloc[first_correct+1: reversal_length].correct.value_counts()) ==(1,) or np.shape(reversal_df.iloc[first_correct+1: reversal_length].correct.value_counts()) ==(0,):
                     regressive_er=regressive_er
                 else:
-                    regressive_er+=reversal_df.iloc[first_correct: reversal_length].correct.value_counts()[False]
+                    regressive_er+=reversal_df.iloc[first_correct+1: reversal_length].correct.value_counts()[False]
                 mean_regressive_er=regressive_er/(n_reversal-1) ##mean regressive errors per reversal
 
             total_error=block_df['correct'].value_counts()[False]
