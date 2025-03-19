@@ -1,18 +1,19 @@
 ---
 title: "Model 3: win stay probability ~ feedback type"
-format: html
+format: gfm
 ---
 
 <p>This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on win-stay probability.</p>
 <br>
 Includes:
-<li>initial skew assessment (and resulting skew transformation)
-<li>initial hypothesis testing mixed effects model
-<li>assessment of assumptions of this model
-<li>assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
-<li>sensitivity analysis
-<li>final conclusions
-<p></p>
+<p>
+* initial skew assessment (and resulting skew transformation)
+* initial hypothesis testing mixed effects model
+* assessment of assumptions of this model
+* assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
+* sensitivity analysis
+* final conclusions
+</p>
 <h3>Load in packages and data- in python </h3>
 ```{python}
 #| label: Python packages
@@ -242,8 +243,8 @@ def replace_outliers_with_nan(df, column):
     Q1 = df[column].quantile(0.25)
     Q3 = df[column].quantile(0.75)
     IQR = Q3 - Q1
-    lower_bound = Q1- 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
+    lower_bound = Q1- 1.5 *  IQR
+    upper_bound = Q3 + 1.5 *  IQR
     df[column]=df[column].apply(lambda x: np.nan if x<lower_bound or x>upper_bound else x)
     return df
 
@@ -401,7 +402,8 @@ print(results.summary())
 
 
 <h4><b>Exploratory analyses</b></h4>
-<li>Effect of age
-<li>Points ratings
-<li>error rates
-<p></p>
+<p>
+* Effect of age
+* Points ratings
+* error rates
+</p>

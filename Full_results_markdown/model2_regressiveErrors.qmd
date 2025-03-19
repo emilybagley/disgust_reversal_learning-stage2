@@ -1,19 +1,20 @@
 ---
 title: "Model 2: mean regressive errors per reversal ~ feedback type"
-format: html
+format: gfm
 ---
 
 <p>This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on regressive errors.</p>
 <br>
 Includes:
-<li>initial skew assessment (and resulting skew transformation)
-<li>initial hypothesis testing mixed effects model
-<li>assessment of assumptions of this model (which was violated)
-<li>resulting generalized mixed effects model
-<li>assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
-<li>sensitivity analysis (including generalized mixed effects models)
-<li>final conclusions
-<p></p>
+<p>
+* initial skew assessment (and resulting skew transformation)
+* initial hypothesis testing mixed effects model
+* assessment of assumptions of this model (which was violated)
+* resulting generalized mixed effects model
+* assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
+* sensitivity analysis (including generalized mixed effects models)
+* final conclusions
+</p>
 <h3>Load in packages and data- in r and then in python </h3>
 ```{r, message=FALSE}
 #| label: R packages
@@ -130,9 +131,11 @@ for key, val in dict(zip(labels, norm_res)).items():
 
 <h4>Run a generalized mixed effects model (done in R)</h4>
 Model details:
-<li>Gamma probability distribution and inverse link function
-<li>random intercepts for individually selected feedback videos and by-participant random slopes
-<li>no additional covariates
+<p>
+* Gamma probability distribution and inverse link function
+* random intercepts for individually selected feedback videos and by-participant random slopes
+* no additional covariates
+</p>
 <p>This is the specification that produced the best fit (according to BIC)</p>
 
 <p>Results from this model show also show <b>no effect of block-type</b> on regressive error rate.</p>
@@ -206,9 +209,11 @@ for key, val in dict(zip(labels, norm_res)).items():
 ```
 <br>
 Generalized mixed effects model details:
-<li>Gamma probability distribution and inverse link function
-<li>random intercepts for fractals used as stimuli
-<li>no additional covariates
+<p>
+* Gamma probability distribution and inverse link function
+* random intercepts for fractals used as stimuli
+* no additional covariates
+</p>
 <p>This is the specification that produced the best fit (according to BIC)</p>
 <br>
 <p>Adding video ratings has <b> no effect </b> on the results (i.e., there remains no effect of block-type on  regressive error rate)</p>
@@ -236,8 +241,8 @@ def replace_outliers_with_nan(df, column):
     Q1 = df[column].quantile(0.25)
     Q3 = df[column].quantile(0.75)
     IQR = Q3 - Q1
-    lower_bound = Q1- 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
+    lower_bound = Q1- 1.5 *  IQR
+    upper_bound = Q3 + 1.5 *  IQR
     df[column]=df[column].apply(lambda x: np.nan if x<lower_bound or x>upper_bound else x)
     return df
 
@@ -375,5 +380,7 @@ for key, val in dict(zip(labels, het_white_res)).items():
 ```
 
 <h4><b>Exploratory analyses</b></h4>
-<li>Points ratings
-<li>error rates
+<p>
+* Points ratings
+* error rates
+</p>

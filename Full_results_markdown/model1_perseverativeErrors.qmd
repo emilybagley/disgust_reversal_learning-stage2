@@ -372,6 +372,7 @@ summary(generalized_model)
 ```
 
 <h4><b>Exploratory analyses</b></h4>
-<p>* Points ratings
+<p>
+* Points ratings
 * error rates
 </p>

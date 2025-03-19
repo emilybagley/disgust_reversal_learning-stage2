@@ -195,17 +195,15 @@ Model details:
 <p>
 
 - Gamma probability distribution and inverse link function
-  <p>
+- no additional random effects or slopes
+- no additional covariates
 
-  - no additional random effects or slopes
-    <p>
+</p>
 
-    - no additional covariates
-      <p>
+<p>
 
-      This is the specification that produced the best fit (according to
-      BIC)
-      </p>
+This is the specification that produced the best fit (according to BIC)
+</p>
 
 <p>
 
@@ -334,22 +332,20 @@ Model details:
 <p>
 
 - Gamma probability distribution and inverse link function
-  <p>
+- no additional random effects or slopes
+- no additional covariates
 
-  - no additional random effects or slopes
-    <p>
+</p>
 
-    - no additional covariates
-      <p>
+<p>
 
-      This is the specification that produced the best fit (according to
-      BIC)
-      </p>
+This is the specification that produced the best fit (according to BIC)
+</p>
 
-      <br>
-      <p>
+<br>
+<p>
 
-      This has <b> no effect </b> on the results
+This has <b> no effect </b> on the results
 
 ``` r
 task_summary$pos_perseverative_er <- task_summary$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
@@ -522,17 +518,15 @@ Model details:
 <p>
 
 - Gamma probability distribution and inverse link function
-  <p>
+- no additional random effects or slopes
+- no additional covariate
 
-  - no additional random effects or slopes
-    <p>
+</p>
 
-    - no additional covariate
-      <p>
+<p>
 
-      This is the specification that produced the best fit (according to
-      BIC)
-      </p>
+This is the specification that produced the best fit (according to BIC)
+</p>
 
 <p>
 
@@ -672,17 +666,15 @@ Generalized mixed effects model details:
 <p>
 
 - Gamma probability distribution and inverse link function
-  <p>
+- no additional random effects or slopes
+- no additional covariate
 
-  - no additional random effects or slopes
-    <p>
+</p>
 
-    - no additional covariate
-      <p>
+<p>
 
-      This is the specification that produced the best fit (according to
-      BIC)
-      </p>
+This is the specification that produced the best fit (according to BIC)
+</p>
 
 ``` r
 sensitivity_df <- read.csv("sensitivity_df.csv")
@@ -738,6 +730,6 @@ summary(generalized_model)
 <p>
 
 - Points ratings
-  <p>
+- error rates
 
-  - error rates
+</p>

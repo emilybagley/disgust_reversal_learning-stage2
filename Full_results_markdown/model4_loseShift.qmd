@@ -1,18 +1,19 @@
 ---
 title: "Model 4: lose shift probability ~ feedback type"
-format: html
+format: gfm
 ---
 
 <p>This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on lose-shift probability.</p>
 <br>
 Includes:
-<li>initial skew assessment
-<li>initial hypothesis testing mixed effects model
-<li>assessment of assumptions of this model
-<li>assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
-<li>sensitivity analysis 
-<li>final conclusions
-<p></p>
+<p>
+* initial skew assessment
+* initial hypothesis testing mixed effects model
+* assessment of assumptions of this model
+* assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
+* sensitivity analysis 
+* final conclusions
+</p>
 <h3>Load in packages and data- in python and in r </h3>
 ```{python}
 #| label: Python packages
@@ -203,9 +204,11 @@ for key, val in dict(zip(labels, het_white_res)).items():
 
 <p>So a generalized mixed effects model needs to be run (using R)</p>
 <p>Model details:
-<li>Gamma probability distribution and identity link function
-<li>no additional random intercepts or by-participant random slopes
-<li>no additional covariates
+<p>
+* Gamma probability distribution and identity link function
+* no additional random intercepts or by-participant random slopes
+* no additional covariates
+</p>
 <p>This is the specification that produced the best fit (according to BIC)</p>
 ```{r}
 #| label: generalized mixed effects model
