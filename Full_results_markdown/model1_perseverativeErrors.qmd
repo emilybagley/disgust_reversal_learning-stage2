@@ -1,19 +1,20 @@
 ---
 title: "Model 1: mean perseverative errors per reversal ~ feedback type"
-format: html
+format: gfm
 ---
 <p>This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on perseverative errors.</p>
 <br>
 Includes:
-<li>data visualisation
-<li>initial skew assessment (and resulting skew transformation)
-<li>initial hypothesis testing mixed effects model
-<li>assessment of assumptions of this model (which was violated)
-<li>resulting generalized mixed effects model
-<li>assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
-<li>sensitivity analysis (including generalized mixed effects models)
-<li>final conclusions
-<p></p>
+<p>
+* data visualisation
+* initial skew assessment (and resulting skew transformation)
+* initial hypothesis testing mixed effects model
+* assessment of assumptions of this model (which was violated)
+* resulting generalized mixed effects model
+* assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
+* sensitivity analysis (including generalized mixed effects models)
+* final conclusions
+</p>
 <h3>Load in packages and data- in r and then in python </h3>
 ```{r, message=FALSE}
 #| label: R packages
@@ -134,9 +135,11 @@ for key, val in dict(zip(labels, norm_res)).items():
 
 <h4><b>Run a generalized mixed effects model (done in R)</b></h4>
 Model details:
-<li>Gamma probability distribution and inverse link function
-<li>no additional random effects or slopes
-<li>no additional covariates
+<p>
+* Gamma probability distribution and inverse link function
+* no additional random effects or slopes
+* no additional covariates
+</p>
 <p>This is the specification that produced the best fit (according to BIC)</p>
 
 <p>Results from this model show a <b>significant effect of block-type</b>: specifically, a difference between disgust and points learning
@@ -198,9 +201,11 @@ for key, val in dict(zip(labels, norm_res)).items():
 ```
 
 Model details:
-<li>Gamma probability distribution and inverse link function
-<li>no additional random effects or slopes
-<li>no additional covariates
+<p>
+* Gamma probability distribution and inverse link function
+* no additional random effects or slopes
+* no additional covariates
+</p>
 <p>This is the specification that produced the best fit (according to BIC)</p>
 <br>
 <p>This has <b> no effect </b> on the results
@@ -286,9 +291,11 @@ for key, val in dict(zip(labels, norm_res)).items():
 
 <h4>Run a generalized mixed effects model (done in R)</h4>
 Model details:
-<li>Gamma probability distribution and inverse link function
-<li>no additional random effects or slopes
-<li>no additional covariate
+<p>
+* Gamma probability distribution and inverse link function
+* no additional random effects or slopes
+* no additional covariate
+</p>
 <p>This is the specification that produced the best fit (according to BIC)</p>
 
 <p>Results from this model show <b>no effect of block-type</b>: suggests that the difference seen before is driven by outliers.
@@ -350,9 +357,10 @@ for key, val in dict(zip(labels, norm_res)).items():
 ```
 
 Generalized mixed effects model details:
-<li>Gamma probability distribution and inverse link function
-<li>no additional random effects or slopes
-<li>no additional covariate
+<p>* Gamma probability distribution and inverse link function
+* no additional random effects or slopes
+* no additional covariate
+</p>
 <p>This is the specification that produced the best fit (according to BIC)</p>
 ```{r}
 #| label: generalized mixed effects model w video ratings- sensitivity (no covariate)
@@ -364,6 +372,6 @@ summary(generalized_model)
 ```
 
 <h4><b>Exploratory analyses</b></h4>
-<li>Points ratings
-<li>error rates
-<p></p>
+<p>* Points ratings
+* error rates
+</p>
