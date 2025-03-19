@@ -90,13 +90,13 @@ axes.set_title("Win-stay")
 
 </details>
 
-    C:\Users\eb08\AppData\Local\Temp\ipykernel_17808\2893565744.py:10: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+    C:\Users\eb08\AppData\Local\Temp\ipykernel_16824\2893565744.py:10: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
       axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
 
     Text(0.5, 1.0, 'Win-stay')
 
 <img
-src="model3_winStay_files/figure-commonmark/visualisation-output-3.png"
+src="model3_winStay_files/figure-commonmark/visualisation-output-3.jpeg"
 id="visualisation-2" />
 
 <br>
@@ -126,7 +126,7 @@ print('Win-stay skew: '+str(skew(task_summary.win_stay)))
 
     Win-stay skew: -1.4392950153974455
 
-<img src="model3_winStay_files/figure-commonmark/skewness-output-2.png"
+<img src="model3_winStay_files/figure-commonmark/skewness-output-2.jpeg"
 id="skewness" />
 
 <h3>
@@ -466,7 +466,7 @@ print('Win-stay skew: '+str(skew(sensitivity_df.win_stay.dropna())))
 
     Win-stay skew: -1.1512521637523532
 
-![](model3_winStay_files/figure-commonmark/cell-18-output-2.png)
+![](model3_winStay_files/figure-commonmark/cell-18-output-2.jpeg)
 
 <h3>
 

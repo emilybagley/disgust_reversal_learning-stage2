@@ -106,7 +106,7 @@ axes.set_title("Perseverative errors")
 
 </details>
 
-![](model1_perseverativeErrors_files/figure-commonmark/Visualisation-1.png)
+![](model1_perseverativeErrors_files/figure-commonmark/Visualisation-1.jpeg)
 
 <br>
 <h3>
@@ -134,7 +134,7 @@ print('Perseverative error skew: '+str(skew(task_summary.mean_perseverative_er))
 
     Perseverative error skew: 2.400818032551747
 
-![](model1_perseverativeErrors_files/figure-commonmark/Skewness-3.png)
+![](model1_perseverativeErrors_files/figure-commonmark/Skewness-3.jpeg)
 
 <h3>
 
@@ -456,7 +456,7 @@ print('Perseverative error skew: '+str(skew(sensitivity_df.mean_perseverative_er
 
     Perseverative error skew: 0.9439083554848277
 
-![](model1_perseverativeErrors_files/figure-commonmark/Skewness%20sensitivity-1.png)
+![](model1_perseverativeErrors_files/figure-commonmark/Skewness%20sensitivity-1.jpeg)
 
 <h3>
 

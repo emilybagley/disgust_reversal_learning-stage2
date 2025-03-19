@@ -1,6 +1,7 @@
 ---
 title: "Model 1: mean perseverative errors per reversal ~ feedback type"
 format: gfm
+fig-format: jpeg
 ---
 <p>This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on perseverative errors.</p>
 <br>

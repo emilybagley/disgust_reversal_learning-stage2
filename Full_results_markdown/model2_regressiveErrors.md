@@ -105,7 +105,7 @@ axes.set_title("Regressive errors")
 
 </details>
 
-![](model2_regressiveErrors_files/figure-commonmark/Visualisation-1.png)
+![](model2_regressiveErrors_files/figure-commonmark/Visualisation-1.jpeg)
 
 <br>
 
@@ -133,7 +133,7 @@ print('Regressive error skew: '+str(skew(task_summary.mean_regressive_er)))
 
     Regressive error skew: 6.465682277497517
 
-![](model2_regressiveErrors_files/figure-commonmark/Skewness-3.png)
+![](model2_regressiveErrors_files/figure-commonmark/Skewness-3.jpeg)
 
 <h3>
 
@@ -492,7 +492,7 @@ print('regressive error skew: '+str(skew(sensitivity_df.mean_regressive_er.dropn
 
     regressive error skew: 1.1057309176558778
 
-![](model2_regressiveErrors_files/figure-commonmark/Skewness%20sensitivity-1.png)
+![](model2_regressiveErrors_files/figure-commonmark/Skewness%20sensitivity-1.jpeg)
 
 <h3>
 

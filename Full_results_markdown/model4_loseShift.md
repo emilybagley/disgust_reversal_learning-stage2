@@ -104,7 +104,7 @@ axes.set_title("Lose-shift")
 
 </details>
 
-![](model4_loseShift_files/figure-commonmark/Visualisation-1.png)
+![](model4_loseShift_files/figure-commonmark/Visualisation-1.jpeg)
 
 <br>
 <h3>
@@ -129,7 +129,7 @@ print('lose-shift  skew: '+str(skew(task_summary.lose_shift, nan_policy='omit'))
 
     lose-shift  skew: 0.16189569452640257
 
-![](model4_loseShift_files/figure-commonmark/Skewness-3.png)
+![](model4_loseShift_files/figure-commonmark/Skewness-3.jpeg)
 
 <h3>
 
