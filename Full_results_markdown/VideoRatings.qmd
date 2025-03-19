@@ -1,6 +1,6 @@
 ---
 title: "Video ratings"
-format: html
+format: gfm
 ---
 
 <p>This file contains all the analyses for the video ratings task.</p>
@@ -12,11 +12,12 @@ format: html
 <p>Analysis of these responses is also detailed here.</p>
 <br>
 <p>This notebook contains</p>
-<li>Analysis of ratings of the selected Cowen and Keltner videos to identify any differences in valence, arousal and habituation between the two stimulus types (models A and B).
-<li>Analysis of ratings of the selected Cowen and Keltner videos to validate that fear and disgust was sucessfully induced (models C and D)
-<li>Analysis of the points ratings (in comparison to timepoint 1 of the selected videos) to assess how the points feedback differed from the fear and disgust feedback
-<li>Visualisation of these results
-<p></p>
+<p>
+* Analysis of ratings of the selected Cowen and Keltner videos to identify any differences in valence, arousal and habituation between the two stimulus types (models A and B).
+* Analysis of ratings of the selected Cowen and Keltner videos to validate that fear and disgust was sucessfully induced (models C and D)
+* Analysis of the points ratings (in comparison to timepoint 1 of the selected videos) to assess how the points feedback differed from the fear and disgust feedback
+* Visualisation of these results
+</p>
 
 <br>
 <h3>Step 1: load in packages and data</h3>
@@ -89,11 +90,12 @@ for i in chosen_stim_df.index:
 <h3>Step 3: Assess the valence, arousal, disgust and fear ratings of the fear and disgust videos used in the reversal learning task</h3>
 <p> Do this using 4 mixed effects models - testing effect of timepoint and stimulus type on ratings </p>
 <p>List of models to run:
-<li>Model A- 'Valence ~ trial_type*Timepoint'
-<li>Model B- 'Arousal ~ trial_type*Timepoint'
-<li>Model C- 'Disgust ~ trial_type*Timepoint'
-<li>Model D- 'Fear ~ trial_type*Timepoint'
-<p></p>
+<p>
+* Model A- 'Valence ~ trial_type*Timepoint'
+* Model B- 'Arousal ~ trial_type*Timepoint'
+* Model C- 'Disgust ~ trial_type*Timepoint'
+* Model D- 'Fear ~ trial_type*Timepoint'
+</p>
 <br>
 <br>
 <p>Before running the models, we can visualise this data:</p>
@@ -154,9 +156,10 @@ plt.show()
 <br>
 <p><b>MODEL A: VALENCE ~ TRIAL_TYPE*TIMEPOINT</b></p>
 <p>In this case, the basic model with a by-participant random slope, but no random intercepts or additional covariates produced the best fit (indexed by BIC scores).</p>
-<li>This model found an effect of trial-type: disgust videos had a more negative valence than fear (this was <b>counter to prediction</b>)
-<li>It also revealed a trial-type*timepoint interaction: valence ratings for disgust didn't change as much over time relative to fear (i.e., disgust is resistant to habituation).
-<p></p>
+<p>
+* This model found an effect of trial-type: disgust videos had a more negative valence than fear (this was <b>counter to prediction</b>)
+* It also revealed a trial-type*timepoint interaction: valence ratings for disgust didn't change as much over time relative to fear (i.e., disgust is resistant to habituation).
+</p>
 ```{python}
 #| label: Model A
 #| echo: true
@@ -173,9 +176,10 @@ print(results.summary())
 <br>
 <p><b>MODEL B: AROUSAL ~ TRIAL_TYPE*TIMEPOINT</b></p>
 <p>In this case, the basic model with no by-participant random slope, no random intercepts and no additional covariates produced the best fit (indexed by BIC scores).</p>
-<li>This model found an effect of trial-type: fear videos had were more arousing than disgust (this was <b>counter to prediction</b>)
-<li>There was no trial-type*timepoint interaction (no difference in habituation in the arousal measure)
-<p></p>
+<p>
+* This model found an effect of trial-type: fear videos had were more arousing than disgust (this was <b>counter to prediction</b>)
+* There was no trial-type*timepoint interaction (no difference in habituation in the arousal measure)
+</p>
 ```{python}
 #| label: Model B
 #| echo: true
@@ -190,10 +194,11 @@ print(results.summary())
 <br>
 <p><b>MODEL C: DISGUST ~ TRIAL_TYPE*TIMEPOINT</b></p>
 <p>In this case, the  model with a by-participant random slope, but no random intercepts and no additional covariates produced the best fit (indexed by BIC scores).</p>
-<li>This model found an effect of trial-type: disgust videos had were more disgusting than fear (this was <b>as predicted</b>)
-<li>There was an effect of timepoint (all stimuli got less disgusting over time)
-<li>There was a trial-type*timepoint interaction (the disgust ratings for fear and disgust videos changed differentially over time)
-<p></p>
+<p>
+* This model found an effect of trial-type: disgust videos had were more disgusting than fear (this was <b>as predicted</b>)
+* There was an effect of timepoint (all stimuli got less disgusting over time)
+* There was a trial-type*timepoint interaction (the disgust ratings for fear and disgust videos changed differentially over time)
+</p>
 ```{python}
 #| label: Model C
 #| echo: true
@@ -208,10 +213,11 @@ print(results.summary())
 <br>
 <p><b>MODEL D: FEAR ~ TRIAL_TYPE*TIMEPOINT</b></p>
 <p>In this case, the  model with a by-participant random slope, but no random intercepts and no additional covariates produced the best fit (indexed by BIC scores).</p>
-<li>This model found an effect of trial-type: disgust videos had were more disgusting than fear (this was <b>as predicted</b>)
-<li>There was an effect of timepoint (all stimuli got less disgusting over time)
-<li>There was a trial-type*timepoint interaction (the disgust ratings for fear and disgust videos changed differentially over time)
-<p></p>
+<p>
+* This model found an effect of trial-type: disgust videos had were more disgusting than fear (this was <b>as predicted</b>)
+* There was an effect of timepoint (all stimuli got less disgusting over time)
+* There was a trial-type*timepoint interaction (the disgust ratings for fear and disgust videos changed differentially over time)
+</p>
 ```{python}
 #| label: Model D
 #| echo: true
@@ -226,11 +232,12 @@ print(results.summary())
 <h3>Step 4: check how points-based feedback differed from disgust and fear-based feedback</h3>
 <p> Doing this using 4 mixed effects models - testing the effect of stimulus type on ratings </p>
 <p>List of models to run:
-<li>Model A- 'Valence ~ trial_type'
-<li>Model B- 'Arousal ~ trial_type'
-<li>Model C- 'Disgust ~ trial_type'
-<li>Model D- 'Fear ~ trial_type'
-<p></p>
+<p>
+* Model A- 'Valence ~ trial_type'
+* Model B- 'Arousal ~ trial_type'
+* Model C- 'Disgust ~ trial_type'
+* Model D- 'Fear ~ trial_type'
+</p>
 <p>NB there is only timepoint 1 of fear and disgust ratings are included in this model (as points rating only has one timepoint).</p>
 <br>
 <br>
@@ -268,15 +275,16 @@ sns.barplot(data=data, ax=axes[1,1], x='trial_type',  hue='trial_type', y='frigh
 #sns.stripplot(data=data, ax=axes[1,1], x='trial_type',  hue='trial_type',  y='frightening_1', palette=palette, legend=False, dodge=False, hue_order=order)
 axes[1,1].set_xlabel('')
 axes[1,1].set_ylabel('Fear')
+plt.show()
 ```
 
 <br>
 <br>
 <p><b>MODEL E: VALENCE ~ TRIAL_TYPE</b></p>
 <p>In this case, the basic model with no by-participant random slope,  no random intercepts but with sex added as a covariate produced the best fit (indexed by BIC scores).</p>
-<li>This model found an effect of trial-type: disgust videos had a more negative valence than points (<b>as predicted</b>)
-<li>But there was <b>no predicted difference</b> in valence between points and fear
-<li>There was also a significant negative effect of age
+* This model found an effect of trial-type: disgust videos had a more negative valence than points (<b>as predicted</b>)
+* But there was <b>no predicted difference</b> in valence between points and fear
+* There was also a significant negative effect of age
 <p></p>
 ```{python}
 #| label: Model E
@@ -307,9 +315,10 @@ print(results.summary())
 <br>
 <p><b>MODEL F: AROUSAL ~ TRIAL_TYPE</b></p>
 <p>In this case, the basic model with no by-participant random slope,  no random intercepts and no additional covariates produced the best fit (indexed by BIC scores).</p>
-<li>This model found an effect of trial-type: fear videos were more arousing than points (<b>as predicted</b>)
-<li>But there was <b>no predicted difference</b> in arousal between points and disgust
-<p></p>
+<p>
+* This model found an effect of trial-type: fear videos were more arousing than points (<b>as predicted</b>)
+* But there was <b>no predicted difference</b> in arousal between points and disgust
+</p>
 ```{python}
 #| label: Model F
 #| echo: true
@@ -323,10 +332,11 @@ print(results.summary())
 
 <p><b>MODEL G: DISGUST ~ TRIAL_TYPE</b></p>
 <p>In this case, the basic model with no by-participant random slope,  no random intercepts and age as a covariate produced the best fit (indexed by BIC scores).</p>
-<li>This model found an effect of trial-type: disgust videos were more disgusting than losing points (<b>as predicted</b>)
-<li>Fear videos, perhaps surprisingly, were significantly <b>less</b> disgusting than losing points
-<li>There was also a significant negative effect of age
-<p></p>
+<p>
+* This model found an effect of trial-type: disgust videos were more disgusting than losing points (<b>as predicted</b>)
+* Fear videos, perhaps surprisingly, were significantly <b>less</b> disgusting than losing points
+* There was also a significant negative effect of age
+</p>
 ```{python}
 #| label: Model G
 #| echo: true
@@ -352,10 +362,11 @@ print(results.summary())
 
 <p><b>MODEL H: FEAR ~ TRIAL_TYPE</b></p>
 <p>In this case, the basic model with no by-participant random slope,  no random intercepts and age as a covariate produced the best fit (indexed by BIC scores).</p>
-<li>This model found an effect of trial-type: fear videos were more frightening than losing points (<b>as predicted</b>)
-<li>Disgust videos, perhaps surprisingly (but mirroring results from model H), were significantly <b>less</b> frightening than losing points
-<li>There was also a significant negative effect of age
-<p></p>
+<p>
+* This model found an effect of trial-type: fear videos were more frightening than losing points (<b>as predicted</b>)
+* Disgust videos, perhaps surprisingly (but mirroring results from model H), were significantly <b>less</b> frightening than losing points
+* There was also a significant negative effect of age
+</p>
 ```{python}
 #| label: Model H
 #| echo: true
@@ -381,9 +392,10 @@ print(results.summary())
 
 <h3>Conclusions</h3>
 <p>Results from these models tells us:</p>
-<li>The stimulus selection procedure was unable to produce perfectly matched fear and disgust videos (with disgust videos being marginally more negatively valenced and fear videos being more arousing).
-<li>There was a difference in habituation between fear and disgust (fear habituated less than disgust), which is in-line with previous literature.
-<li>Fear and disgust videos reliably induced the emotions of fear and disgust (with fear videos producing much higher fear ratings and vice versa).
-<li>The 'loss' feedback type (from the points conditions) was more similar to the emotional learning conditions than expected. It did not differ from fear in terms of valence and did not differ from disgust in terms of arousal.
-<li>The 'loss' feedback type was, however, very different to the emotional conditions in terms of fear and disgust ratings. 
-<p></p>
+<p>
+* The stimulus selection procedure was unable to produce perfectly matched fear and disgust videos (with disgust videos being marginally more negatively valenced and fear videos being more arousing).
+* There was a difference in habituation between fear and disgust (fear habituated less than disgust), which is in-line with previous literature.
+* Fear and disgust videos reliably induced the emotions of fear and disgust (with fear videos producing much higher fear ratings and vice versa).
+* The 'loss' feedback type (from the points conditions) was more similar to the emotional learning conditions than expected. It did not differ from fear in terms of valence and did not differ from disgust in terms of arousal.
+* The 'loss' feedback type was, however, very different to the emotional conditions in terms of fear and disgust ratings. 
+</p>
