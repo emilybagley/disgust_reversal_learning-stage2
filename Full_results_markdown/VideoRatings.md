@@ -501,13 +501,12 @@ sns.barplot(data=data, ax=axes[1,1], x='trial_type',  hue='trial_type', y='frigh
 #sns.stripplot(data=data, ax=axes[1,1], x='trial_type',  hue='trial_type',  y='frightening_1', palette=palette, legend=False, dodge=False, hue_order=order)
 axes[1,1].set_xlabel('')
 axes[1,1].set_ylabel('Fear')
+plt.show()
 ```
 
 </details>
 
-    Text(332.0310606060606, 0.5, 'Fear')
-
-![](VideoRatings_files/figure-commonmark/cell-9-output-2.png)
+![](VideoRatings_files/figure-commonmark/cell-9-output-1.png)
 
 <br> <br>
 <p>
