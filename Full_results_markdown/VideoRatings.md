@@ -224,7 +224,7 @@ plt.show()
 
 </details>
 
-![](VideoRatings_files/figure-commonmark/cell-4-output-1.png)
+![](VideoRatings_files/figure-commonmark/cell-4-output-1.jpeg)
 
 <br> <br>
 <p>
@@ -506,7 +506,7 @@ plt.show()
 
 </details>
 
-![](VideoRatings_files/figure-commonmark/cell-9-output-1.png)
+![](VideoRatings_files/figure-commonmark/cell-9-output-1.jpeg)
 
 <br> <br>
 <p>
