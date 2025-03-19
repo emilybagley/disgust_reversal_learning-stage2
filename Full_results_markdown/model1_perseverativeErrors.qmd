@@ -1,0 +1,369 @@
+---
+title: "Model 1: mean perseverative errors per reversal ~ feedback type"
+format: html
+---
+<p>This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on perseverative errors.</p>
+<br>
+Includes:
+<li>data visualisation
+<li>initial skew assessment (and resulting skew transformation)
+<li>initial hypothesis testing mixed effects model
+<li>assessment of assumptions of this model (which was violated)
+<li>resulting generalized mixed effects model
+<li>assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
+<li>sensitivity analysis (including generalized mixed effects models)
+<li>final conclusions
+<p></p>
+<h3>Load in packages and data- in r and then in python </h3>
+```{r, message=FALSE}
+#| label: R packages
+#| echo: true
+#| code-fold: true
+library(tidyverse, quietly=TRUE)
+library(lme4)
+library(emmeans)
+library(DHARMa)
+
+task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+```
+
+
+```{python}
+#| label: Python packages
+#| echo: true
+#| code-fold: true
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import scipy.stats as stats
+import jsonlines
+from functools import reduce
+import statistics
+import scipy.stats
+import seaborn as sns
+import math
+import os
+import json
+import ast
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import pingouin as pg
+import warnings
+from scipy.stats import ttest_rel
+#from statannotations.Annotator import Annotator
+from scipy.stats import skew
+from statsmodels.stats.diagnostic import het_white
+from sklearn.preprocessing import PowerTransformer
+import statannot
+from scipy.stats import ttest_ind
+import itertools
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+pd.options.mode.copy_on_write = True
+
+task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+```
+
+<br>
+<h3><b>Visualise the data</b></h3>
+```{python}
+#| label: Visualisation
+#| echo: true
+#| code-fold: true
+
+palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
+
+##plot hypothesised results
+fig, axes = plt.subplots(1,1, sharey=False)
+
+sns.stripplot(data=task_summary, x="block_type", y="mean_perseverative_er", ax=axes, palette=palette, size=5, jitter=True, marker='.')
+sns.violinplot(data=task_summary, x="block_type", y="mean_perseverative_er", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
+#axes.set_xlabel("Feedback type")
+axes.set_xlabel("")
+axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
+axes.set_ylabel("Mean perseverative errors per reversal") 
+axes.set_title("Perseverative errors")
+```
+
+<br>
+<h3>Assess and correct for skewness in perservative error outcome</h3>
+```{python}
+#| label: Skewness
+#| echo: true
+#| code-fold: true
+pt=PowerTransformer(method='yeo-johnson', standardize=False)
+skl_yeojohnson=pt.fit(pd.DataFrame(task_summary.mean_perseverative_er))
+skl_yeojohnson=pt.transform(pd.DataFrame(task_summary.mean_perseverative_er))
+task_summary['perseverative_er_transformed'] = pt.transform(pd.DataFrame(task_summary.mean_perseverative_er))
+
+
+fig, axes = plt.subplots(1,2, sharey=True)
+sns.histplot(data=task_summary, x="mean_perseverative_er", ax=axes[0]) 
+sns.histplot(data=task_summary['perseverative_er_transformed'], ax=axes[1])
+print('Perseverative error skew: '+str(skew(task_summary.mean_perseverative_er)))
+```
+
+<h3><b>Hypothesis testing</b></h3>
+In this case, the basic model (no random slopes or random intercepts, and no covariates) produced the best fit (indexed by BIC scores).
+<p>The model shows no effect of feedback type (although disgust vs points comparison is nearing significance).
+
+```{python}
+#| label: Mixed effects model
+#| echo: true
+
+data=task_summary.reset_index()
+formula = 'perseverative_er_transformed ~ block_type'
+results=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+print(results.summary())
+
+```
+
+<b>BUT</b> the residuals of this model are significantly non-normal! So we will need to run a generalized mixed effects model. 
+```{python}
+#| label: Assumption violation
+#| echo: true
+
+
+#shapiro-Wilk test of normality of residuals
+labels = ["Statistic", "p-value"]
+norm_res = stats.shapiro(results.resid)
+for key, val in dict(zip(labels, norm_res)).items():
+    print(key, val)
+```
+
+<h4><b>Run a generalized mixed effects model (done in R)</b></h4>
+Model details:
+<li>Gamma probability distribution and inverse link function
+<li>no additional random effects or slopes
+<li>no additional covariates
+<p>This is the specification that produced the best fit (according to BIC)</p>
+
+<p>Results from this model show a <b>significant effect of block-type</b>: specifically, a difference between disgust and points learning
+```{r}
+#| label: generalized mixed effects model
+#| echo: true
+task_summary$pos_perseverative_er <- task_summary$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
+generalized_model <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=task_summary, family=Gamma(link="inverse"))
+summary(generalized_model)
+```
+
+<br>
+<p>As this hypothesis test found a no difference between fear and disgust, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+```{python}
+#| label: bayes factor function
+#| echo: true
+#|code-fold: true
+def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
+    df=df[(df.block_type==condition_1_name)| (df.block_type==condition_2_name)][[dependent_var, 'block_type', 'participant_no']]
+    df.dropna(inplace=True)
+    df=df.pivot(index='participant_no', columns='block_type', values=dependent_var).reset_index()
+    ttest=pg.ttest(df[condition_1_name], df[condition_2_name], paired=True)
+    bf_null=1/float(ttest.BF10)
+    return bf_null
+```
+
+```{python}
+#| label: disgust vs fear bayes factor
+#| echo: true
+print(bayes_factor(task_summary, 'perseverative_er_transformed', 'Disgust', 'Fear'))
+```
+<p>This means that there is <b>moderate</b> evidence for the null</p>
+
+<p>We also look at fear vs points (which is not directly assessed by the model)</p>
+```{python}
+#| label: points vs fear bayes factor
+#| echo: true
+print(bayes_factor(task_summary, 'perseverative_er_transformed', 'Points', 'Fear'))
+```
+<p>This means that there is <b>strong</b> evidence for the null</p>
+
+
+<br>
+<h3><b>Adding video ratings</b></h3>
+Finally, we will test whether this effect remains after video rating differences between fear and disgust have been controlled for. 
+<p>As before, the mixed effects model violated assumptions, so a generalized mixed effects model is run. </p>
+```{python}
+#| label: mixed effects model - w video ratings
+#| echo: true
+#| code-fold: true
+formula = 'perseverative_er_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'
+results=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+#shapiro-Wilk test of normality of residuals
+labels = ["Statistic", "p-value"]
+norm_res = stats.shapiro(results.resid)
+#
+for key, val in dict(zip(labels, norm_res)).items():
+    print(key, val)
+```
+
+Model details:
+<li>Gamma probability distribution and inverse link function
+<li>no additional random effects or slopes
+<li>no additional covariates
+<p>This is the specification that produced the best fit (according to BIC)</p>
+<br>
+<p>This has <b> no effect </b> on the results
+
+```{r}
+#| label: generalized mixed effects model - w video ratings
+#| echo: true
+task_summary$pos_perseverative_er <- task_summary$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
+generalized_model <- glmer(pos_perseverative_er ~ block_type +valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=task_summary, family=Gamma(link="inverse"))
+summary(generalized_model)
+```
+
+<br>
+<br>
+<h3> <b> Sensitivity analysis </b></h3>
+We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.
+
+<p>Firstly, exclude outliers from the dataframe (outliers are define as those >1.5 IQRs above or below the upper or lower quartile)
+```{python}
+#| label: exclude outliers
+#| echo: true
+#| code-fold: true
+#create outliers df --> removing those >1.5 IQRs above or below UQ and LQ
+def replace_outliers_with_nan(df, column):
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1- 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    df[column]=df[column].apply(lambda x: np.nan if x<lower_bound or x>upper_bound else x)
+    return df
+
+key_outcomes=['percentage_correct', 'mean_perseverative_er', 'mean_regressive_er', 'median_till_correct', 'win_stay', 'lose_shift']
+for col in key_outcomes:
+    task_summary=replace_outliers_with_nan(task_summary, col)
+task_summary.to_csv('sensitivity_df.csv')
+sensitivity_df=task_summary
+```
+
+
+<br>
+<h3>Assess and correct for skewness in perservative error outcome (excluding outliers)</h3>
+```{python}
+#| label: Skewness sensitivity
+#| echo: true
+#| code-fold: true
+pt=PowerTransformer(method='yeo-johnson', standardize=False)
+skl_yeojohnson=pt.fit(pd.DataFrame(sensitivity_df.mean_perseverative_er))
+skl_yeojohnson=pt.transform(pd.DataFrame(sensitivity_df.mean_perseverative_er))
+sensitivity_df['perseverative_er_transformed'] = pt.transform(pd.DataFrame(sensitivity_df.mean_perseverative_er))
+
+
+fig, axes = plt.subplots(1,2, sharey=True)
+sns.histplot(data=sensitivity_df, x="mean_perseverative_er", ax=axes[0]) 
+sns.histplot(data=sensitivity_df['perseverative_er_transformed'], ax=axes[1])
+print('Perseverative error skew: '+str(skew(sensitivity_df.mean_perseverative_er.dropna())))
+```
+
+
+<h3><b>Outlier-free hypothesis testing</b></h3>
+In this case, the basic model (no random slopes or random intercepts, and no covariates) produced the best fit (indexed by BIC scores).
+<p>The model shows no effect of feedback type (and this time no effect is approaching significance)
+```{python}
+#| label: Mixed effects model - sensitivity
+#| echo: true
+data=sensitivity_df.reset_index()
+formula = 'perseverative_er_transformed ~ block_type'
+
+results=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+print(results.summary())
+```
+<b>BUT, again</b> the residuals of this model are significantly non-normal! So we will need to run a generalized mixed effects model. 
+```{python}
+#| label: Assumption violation - sensitivity
+#| echo: true
+
+#shapiro-Wilk test of normality of residuals
+labels = ["Statistic", "p-value"]
+norm_res = stats.shapiro(results.resid)
+for key, val in dict(zip(labels, norm_res)).items():
+    print(key, val)
+```
+
+<h4>Run a generalized mixed effects model (done in R)</h4>
+Model details:
+<li>Gamma probability distribution and inverse link function
+<li>no additional random effects or slopes
+<li>no additional covariate
+<p>This is the specification that produced the best fit (according to BIC)</p>
+
+<p>Results from this model show <b>no effect of block-type</b>: suggests that the difference seen before is driven by outliers.
+```{r}
+#| label: generalized mixed effects model - sensitivity
+#| echo: true
+sensitivity_df <- read.csv("sensitivity_df.csv")
+sensitivity_df$pos_perseverative_er <- sensitivity_df$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
+generalized_model <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=sensitivity_df, family=Gamma(link="inverse"))
+summary(generalized_model)
+```
+
+<br>
+<p>As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+
+<p>Firstly for disgust vs fear:</p>
+```{python}
+#| label: disgust vs fear bayes factor sensitivity
+#| echo: true
+print(bayes_factor(task_summary, 'perseverative_er_transformed', 'Disgust', 'Fear'))
+```
+<p>This means that there is <b>strong</b> evidence for the null</p>
+
+<br>
+<p>Next for disgust vs points:</p>
+```{python}
+#| label: disgust vs points bayes factor sensitivity
+#| echo: true
+print(bayes_factor(task_summary, 'perseverative_er_transformed', 'Disgust', 'Points'))
+```
+<p>This means that there is <b>strong</b> evidence for the null</p>
+
+<br>
+<p>We also look at fear vs points (which is not directly assessed by the model)</p>
+```{python}
+#| label: points vs fear bayes factor sensitivity
+#| echo: true
+print(bayes_factor(task_summary, 'perseverative_er_transformed', 'Points', 'Fear'))
+```
+<p>This means that there is <b>strong</b> evidence for the null</p>
+
+<br>
+<br>
+<p><b>Finally, adding video rating values to this model has no effect: </b></p>
+
+<p>Again, a generalized mixed effects model must be run because assumptions for original model were violated</p>
+```{python}
+#| label: mixed effects model - w video ratings - sensitivity
+#| echo: true
+#| code-fold: true
+formula = 'perseverative_er_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'
+results=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+#shapiro-Wilk test of normality of residuals
+labels = ["Statistic", "p-value"]
+norm_res = stats.shapiro(results.resid)
+#
+for key, val in dict(zip(labels, norm_res)).items():
+    print(key, val)
+```
+
+Generalized mixed effects model details:
+<li>Gamma probability distribution and inverse link function
+<li>no additional random effects or slopes
+<li>no additional covariate
+<p>This is the specification that produced the best fit (according to BIC)</p>
+```{r}
+#| label: generalized mixed effects model w video ratings- sensitivity (no covariate)
+#| echo: true
+sensitivity_df <- read.csv("sensitivity_df.csv")
+sensitivity_df$pos_perseverative_er <- sensitivity_df$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
+generalized_model <- glmer(pos_perseverative_er ~ block_type + valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=sensitivity_df, family=Gamma(link="inverse"))
+summary(generalized_model)
+```
+
+<h4><b>Exploratory analyses</b></h4>
+<li>Points ratings
+<li>error rates
+<p></p>

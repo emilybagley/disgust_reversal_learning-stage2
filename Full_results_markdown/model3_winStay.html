@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Model 3: win stay probability ~ feedback type</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="model3_winStay_files/libs/clipboard/clipboard.min.js"></script>
+<script src="model3_winStay_files/libs/quarto-html/quarto.js"></script>
+<script src="model3_winStay_files/libs/quarto-html/popper.min.js"></script>
+<script src="model3_winStay_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="model3_winStay_files/libs/quarto-html/anchor.min.js"></script>
+<link href="model3_winStay_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="model3_winStay_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="model3_winStay_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="model3_winStay_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="model3_winStay_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Model 3: win stay probability ~ feedback type</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>
+This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on win-stay probability.
+</p>
+<br> Includes:
+<li>
+initial skew assessment (and resulting skew transformation)
+</li><li>
+initial hypothesis testing mixed effects model
+</li><li>
+assessment of assumptions of this model
+</li><li>
+assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
+</li><li>
+sensitivity analysis
+</li><li>
+final conclusions
+<p>
+</p>
+<h3 class="anchored">
+Load in packages and data- in python
+</h3>
+<div id="python-packages" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> stats</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jsonlines</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> <span class="bu">reduce</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statistics</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ast</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pingouin <span class="im">as</span> pg</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_rel</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#from statannotations.Annotator import Annotator</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> skew</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.stats.diagnostic <span class="im">import</span> het_white</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PowerTransformer</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statannot</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_ind</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>warnings.simplefilter(action<span class="op">=</span><span class="st">'ignore'</span>, category<span class="op">=</span><span class="pp">FutureWarning</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>pd.options.mode.copy_on_write <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>task_summary<span class="op">=</span>pd.read_csv(<span class="st">"U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<br>
+<h3 class="anchored">
+<b>Visualise the data</b>
+</h3>
+<div id="visualisation" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>palette <span class="op">=</span> [<span class="st">"#F72585"</span>, <span class="st">"#3A0CA3"</span>, <span class="st">"#4CC9F0"</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">##plot hypothesised results</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">1</span>, sharey<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>sns.stripplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"block_type"</span>, y<span class="op">=</span><span class="st">"win_stay"</span>, ax<span class="op">=</span>axes, palette<span class="op">=</span>palette, size<span class="op">=</span><span class="dv">5</span>, jitter<span class="op">=</span><span class="va">True</span>, marker<span class="op">=</span><span class="st">'.'</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>sns.violinplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"block_type"</span>, y<span class="op">=</span><span class="st">"win_stay"</span>, ax<span class="op">=</span>axes,fill<span class="op">=</span><span class="va">True</span>, inner<span class="op">=</span><span class="st">"quart"</span>, palette<span class="op">=</span>palette, saturation<span class="op">=</span><span class="fl">0.5</span>, cut<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#axes.set_xlabel("Feedback type")</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>axes.set_xlabel(<span class="st">""</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>axes.set_xticklabels(axes.get_xticklabels(), rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>axes.set_ylabel(<span class="st">"Win-stay probability"</span>) </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>axes.set_title(<span class="st">"Win-stay"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\eb08\AppData\Local\Temp\ipykernel_3588\2893565744.py:10: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  axes.set_xticklabels(axes.get_xticklabels(), rotation=0)</code></pre>
+</div>
+<div id="visualisation-1" class="cell-output cell-output-display" data-execution_count="30">
+<pre><code>Text(0.5, 1.0, 'Win-stay')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model3_winStay_files/figure-html/visualisation-output-3.png" id="visualisation-2" width="589" height="431" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><br></p>
+<br>
+<h3 class="anchored">
+Assess and correct for skewness in win-stay outcome
+</h3>
+<div id="cell-Skewness" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pt<span class="op">=</span>PowerTransformer(method<span class="op">=</span><span class="st">'yeo-johnson'</span>, standardize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.fit(pd.DataFrame(task_summary.win_stay))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.transform(pd.DataFrame(task_summary.win_stay))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>task_summary[<span class="st">'win_stay_transformed'</span>] <span class="op">=</span> pt.transform(pd.DataFrame(task_summary.win_stay))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">2</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"win_stay"</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>]) </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>task_summary[<span class="st">'win_stay_transformed'</span>], ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Win-stay skew: '</span><span class="op">+</span><span class="bu">str</span>(skew(task_summary.win_stay)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Win-stay skew: -1.4392950153974455</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model3_winStay_files/figure-html/skewness-output-2.png" id="skewness" width="593" height="432" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 class="anchored">
+<b>Hypothesis testing</b>
+</h3>
+In this case, the basic model (no random slopes or random intercepts) with an age covariate produced the best fit (indexed by BIC scores).
+<p>
+The model shows no effect of feedback type, and a significant effect of age.
+</p>
+<div id="mixed-effects-model" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>task_summary</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'win_stay_transformed ~ block_type + prolific_age'</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              Mixed Linear Model Regression Results
+==================================================================
+Model:            MixedLM Dependent Variable: win_stay_transformed
+No. Observations: 1020    Method:             ML                  
+No. Groups:       340     Scale:              1039.4970           
+Min. group size:  3       Log-Likelihood:     -5305.6971          
+Max. group size:  3       Converged:          Yes                 
+Mean group size:  3.0                                             
+------------------------------------------------------------------
+                      Coef.   Std.Err.   z    P&gt;|z| [0.025  0.975]
+------------------------------------------------------------------
+Intercept              89.746    8.173 10.981 0.000 73.728 105.764
+block_type[T.Fear]     -1.240    2.473 -0.501 0.616 -6.086   3.607
+block_type[T.Points]   -1.491    2.473 -0.603 0.547 -6.337   3.356
+prolific_age            0.507    0.170  2.976 0.003  0.173   0.840
+Group Var            1872.375    6.465                            
+==================================================================
+</code></pre>
+</div>
+</div>
+<p>
+And the model assumptions are not violated
+</p>
+<div id="shapiro-wilk-test" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9975892480030629
+p-value 0.13936987905953396</code></pre>
+</div>
+</div>
+<div id="homoskedasticity-test" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">##homoskedasticity of variance </span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#White Lagrange Multiplier Test for Heteroscedasticity</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>het_white_res <span class="op">=</span> het_white(results.resid, results.model.exog)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"LM Statistic"</span>, <span class="st">"LM-Test p-value"</span>, <span class="st">"F-Statistic"</span>, <span class="st">"F-Test p-value"</span>]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, het_white_res)).items():</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>LM Statistic 4.33424895515879
+LM-Test p-value 0.6315416360898078
+F-Statistic 0.7204788562016422
+F-Test p-value 0.6331641085900357</code></pre>
+</div>
+</div>
+<p>
+And the results remain unchanged when the age covariate is dropped:
+</p>
+<div id="mixed-effects-model---no-covariate" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'win_stay_transformed ~ block_type'</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Mixed Linear Model Regression Results
+===================================================================
+Model:             MixedLM Dependent Variable: win_stay_transformed
+No. Observations:  1020    Method:             ML                  
+No. Groups:        340     Scale:              1039.4992           
+Min. group size:   3       Log-Likelihood:     -5310.0694          
+Max. group size:   3       Converged:          Yes                 
+Mean group size:   3.0                                             
+-------------------------------------------------------------------
+                      Coef.   Std.Err.   z    P&gt;|z|  [0.025  0.975]
+-------------------------------------------------------------------
+Intercept             112.458    2.955 38.052 0.000 106.665 118.250
+block_type[T.Fear]     -1.240    2.473 -0.501 0.616  -6.086   3.607
+block_type[T.Points]   -1.491    2.473 -0.603 0.547  -6.337   3.356
+Group Var            1930.173    6.633                             
+===================================================================
+</code></pre>
+</div>
+</div>
+<br>
+<p>
+As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null
+</p>
+<div id="bayes-factor-function" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bayes_factor(df, dependent_var, condition_1_name, condition_2_name):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df[(df.block_type<span class="op">==</span>condition_1_name)<span class="op">|</span> (df.block_type<span class="op">==</span>condition_2_name)][[dependent_var, <span class="st">'block_type'</span>, <span class="st">'participant_no'</span>]]</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    df.dropna(inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df.pivot(index<span class="op">=</span><span class="st">'participant_no'</span>, columns<span class="op">=</span><span class="st">'block_type'</span>, values<span class="op">=</span>dependent_var).reset_index()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    ttest<span class="op">=</span>pg.ttest(df[condition_1_name], df[condition_2_name], paired<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    bf_null<span class="op">=</span><span class="dv">1</span><span class="op">/</span><span class="bu">float</span>(ttest.BF10)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bf_null</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>
+Firstly for disgust vs fear:
+</p>
+<div id="disgust-vs-fear-bayes-factor" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'win_stay_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>14.705882352941176</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+Next for disgust vs points:
+</p>
+<div id="disgust-vs-points-bayes-factor" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'win_stay_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Points'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>13.698630136986303</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+We also look at fear vs points (which is not directly assessed by the model)
+</p>
+<div id="points-vs-fear-bayes-factor" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'win_stay_transformed'</span>, <span class="st">'Points'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>16.39344262295082</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br> <br>
+<p>
+<b>Next, we showed that this result is unchanged by the addition of video-rating covariates.</b>
+</p>
+<p>
+(again, the model with no additional random effects/slopes, with an age covariate produced the best fit)
+</p>
+<div id="mixed-effects-model-with-video-ratinsg" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'win_stay_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff + prolific_age'</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              Mixed Linear Model Regression Results
+==================================================================
+Model:            MixedLM Dependent Variable: win_stay_transformed
+No. Observations: 1020    Method:             ML                  
+No. Groups:       340     Scale:              1039.4968           
+Min. group size:  3       Log-Likelihood:     -5305.3916          
+Max. group size:  3       Converged:          Yes                 
+Mean group size:  3.0                                             
+------------------------------------------------------------------
+                      Coef.   Std.Err.   z    P&gt;|z| [0.025  0.975]
+------------------------------------------------------------------
+Intercept              91.475    8.465 10.807 0.000 74.884 108.065
+block_type[T.Fear]     -1.240    2.473 -0.501 0.616 -6.086   3.607
+block_type[T.Points]   -1.491    2.473 -0.603 0.547 -6.337   3.356
+valence_diff            1.262    1.639  0.770 0.441 -1.951   4.475
+arousal_diff           -0.074    2.197 -0.034 0.973 -4.380   4.232
+valence_habdiff        -0.219    1.247 -0.175 0.861 -2.663   2.225
+prolific_age            0.493    0.172  2.866 0.004  0.156   0.831
+Group Var            1868.392    6.453                            
+==================================================================
+</code></pre>
+</div>
+</div>
+<p>
+Model assumptions are not violated
+</p>
+<div id="shapiro-wilk-test---video-ratings" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9975463051132777
+p-value 0.1298893515587406</code></pre>
+</div>
+</div>
+<div id="homoskedasticity-test--video-ratings" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">##homoskedasticity of variance </span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co">#White Lagrange Multiplier Test for Heteroscedasticity</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>het_white_res <span class="op">=</span> het_white(results.resid, results.model.exog)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"LM Statistic"</span>, <span class="st">"LM-Test p-value"</span>, <span class="st">"F-Statistic"</span>, <span class="st">"F-Test p-value"</span>]</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, het_white_res)).items():</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>LM Statistic 14.667815295792781
+LM-Test p-value 0.9301030557168437
+F-Statistic 0.6048778553564984
+F-Test p-value 0.9326863876596916</code></pre>
+</div>
+</div>
+<p>
+And the results remain unchanged when the age covariate is dropped:
+</p>
+<div id="mixed-effects-model-w-video-ratings--no-covariate" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'win_stay_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Mixed Linear Model Regression Results
+===================================================================
+Model:             MixedLM Dependent Variable: win_stay_transformed
+No. Observations:  1020    Method:             ML                  
+No. Groups:        340     Scale:              1039.4988           
+Min. group size:   3       Log-Likelihood:     -5309.4500          
+Max. group size:   3       Converged:          Yes                 
+Mean group size:   3.0                                             
+-------------------------------------------------------------------
+                      Coef.   Std.Err.   z    P&gt;|z|  [0.025  0.975]
+-------------------------------------------------------------------
+Intercept             113.594    3.512 32.345 0.000 106.711 120.477
+block_type[T.Fear]     -1.240    2.473 -0.501 0.616  -6.086   3.607
+block_type[T.Points]   -1.491    2.473 -0.603 0.547  -6.337   3.356
+valence_diff            1.624    1.654  0.982 0.326  -1.618   4.866
+arousal_diff            0.560    2.212  0.253 0.800  -3.775   4.896
+valence_habdiff        -0.063    1.261 -0.050 0.960  -2.534   2.407
+Group Var            1921.895    6.609                             
+===================================================================
+</code></pre>
+</div>
+</div>
+<br> <br>
+<h3 class="anchored">
+<b> Sensitivity analysis </b>
+</h3>
+<p>We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.</p>
+<p>
+</p><p>Firstly, exclude outliers from the dataframe (outliers are define as those &gt;1.5 IQRs above or below the upper or lower quartile)</p>
+<div id="exclude-outliers" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create outliers df --&gt; removing those &gt;1.5 IQRs above or below UQ and LQ</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> replace_outliers_with_nan(df, column):</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    Q1 <span class="op">=</span> df[column].quantile(<span class="fl">0.25</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    Q3 <span class="op">=</span> df[column].quantile(<span class="fl">0.75</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> Q3 <span class="op">-</span> Q1</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    lower_bound <span class="op">=</span> Q1<span class="op">-</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    upper_bound <span class="op">=</span> Q3 <span class="op">+</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    df[column]<span class="op">=</span>df[column].<span class="bu">apply</span>(<span class="kw">lambda</span> x: np.nan <span class="cf">if</span> x<span class="op">&lt;</span>lower_bound <span class="kw">or</span> x<span class="op">&gt;</span>upper_bound <span class="cf">else</span> x)</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>key_outcomes<span class="op">=</span>[<span class="st">'percentage_correct'</span>, <span class="st">'mean_perseverative_er'</span>, <span class="st">'mean_regressive_er'</span>, <span class="st">'median_till_correct'</span>, <span class="st">'win_stay'</span>, <span class="st">'lose_shift'</span>]</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> key_outcomes:</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    task_summary<span class="op">=</span>replace_outliers_with_nan(task_summary, col)</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>task_summary.to_csv(<span class="st">'sensitivity_df.csv'</span>)</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>sensitivity_df<span class="op">=</span>task_summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<br>
+<h3 class="anchored">
+Assess and correct for skewness in win-stay outcome (excluding outliers)
+</h3>
+<div id="fd3ecb0b" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>pt<span class="op">=</span>PowerTransformer(method<span class="op">=</span><span class="st">'yeo-johnson'</span>, standardize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.fit(pd.DataFrame(sensitivity_df.win_stay))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.transform(pd.DataFrame(sensitivity_df.win_stay))</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>sensitivity_df[<span class="st">'win_stay_transformed'</span>] <span class="op">=</span> pt.transform(pd.DataFrame(sensitivity_df.win_stay))</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">2</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>sensitivity_df[<span class="st">'win_stay'</span>], ax<span class="op">=</span>axes[<span class="dv">0</span>])</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>sensitivity_df[<span class="st">'win_stay_transformed'</span>], ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Win-stay skew: '</span><span class="op">+</span><span class="bu">str</span>(skew(sensitivity_df.win_stay.dropna())))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Win-stay skew: -1.1512521637523532</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model3_winStay_files/figure-html/cell-18-output-2.png" width="593" height="429" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 class="anchored">
+<b>Outlier-free hypothesis testing</b>
+</h3>
+In this case, the basic model (no random slopes or random intercepts) with just the age covariate produced the best fit (indexed by BIC scores).
+<p>
+The model shows no effect of feedback type but found an effect of age (as with the original analysis)
+</p>
+<div id="mixed-effects-model---sensitivity" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>sensitivity_df.reset_index()</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'win_stay_transformed ~ block_type +prolific_age'</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Mixed Linear Model Regression Results
+===================================================================
+Model:             MixedLM Dependent Variable: win_stay_transformed
+No. Observations:  955     Method:             ML                  
+No. Groups:        334     Scale:              6992.8863           
+Min. group size:   1       Log-Likelihood:     -5842.1169          
+Max. group size:   3       Converged:          Yes                 
+Mean group size:   2.9                                             
+-------------------------------------------------------------------
+                      Coef.   Std.Err.   z    P&gt;|z|  [0.025  0.975]
+-------------------------------------------------------------------
+Intercept             220.523   19.222 11.472 0.000 182.849 258.198
+block_type[T.Fear]     -1.130    6.690 -0.169 0.866 -14.243  11.983
+block_type[T.Points]   -5.629    6.673 -0.843 0.399 -18.708   7.450
+prolific_age            1.231    0.397  3.098 0.002   0.452   2.009
+Group Var            9276.049   13.870                             
+===================================================================
+</code></pre>
+</div>
+</div>
+<p>
+The assumptions are not violated for this model
+</p>
+<div id="shapiro-wilk-test--sensitivity" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.996929605796315
+p-value 0.06302663951601054</code></pre>
+</div>
+</div>
+<div id="homoskedasticity-test--sensitivity" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">##homoskedasticity of variance </span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co">#White Lagrange Multiplier Test for Heteroscedasticity</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>het_white_res <span class="op">=</span> het_white(results.resid, results.model.exog)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"LM Statistic"</span>, <span class="st">"LM-Test p-value"</span>, <span class="st">"F-Statistic"</span>, <span class="st">"F-Test p-value"</span>]</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, het_white_res)).items():</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>LM Statistic 1.2916633127210986
+LM-Test p-value 0.9721154055677161
+F-Statistic 0.2139886960816659
+F-Test p-value 0.9724366577776193</code></pre>
+</div>
+</div>
+<p>
+And the results are unchanged when the age covariate is dropped
+</p>
+<div id="mixed-effects-model---sensitivity-no-covariate" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>sensitivity_df.reset_index()</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'win_stay_transformed ~ block_type'</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Mixed Linear Model Regression Results
+===================================================================
+Model:             MixedLM Dependent Variable: win_stay_transformed
+No. Observations:  955     Method:             ML                  
+No. Groups:        334     Scale:              7003.2210           
+Min. group size:   1       Log-Likelihood:     -5846.8628          
+Max. group size:   3       Converged:          Yes                 
+Mean group size:   2.9                                             
+-------------------------------------------------------------------
+                      Coef.   Std.Err.   z    P&gt;|z|  [0.025  0.975]
+-------------------------------------------------------------------
+Intercept             275.798    7.160 38.519 0.000 261.765 289.831
+block_type[T.Fear]     -1.305    6.696 -0.195 0.845 -14.428  11.819
+block_type[T.Points]   -5.676    6.679 -0.850 0.395 -18.766   7.414
+Group Var            9579.353   14.266                             
+===================================================================
+</code></pre>
+</div>
+</div>
+<br>
+<p>
+As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null
+</p>
+<p>
+Firstly for disgust vs fear:
+</p>
+<div id="disgust-vs-fear-bayes-factor-sensitivity" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(sensitivity_df, <span class="st">'win_stay_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>15.384615384615383</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+Next for disgust vs points:
+</p>
+<div id="disgust-vs-points-bayes-factor-sensitivity" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(sensitivity_df, <span class="st">'win_stay_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Points'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>11.76470588235294</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+We also look at fear vs points (which is not directly assessed by the model)
+</p>
+<div id="points-vs-fear-bayes-factor-sensitivity" class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(sensitivity_df, <span class="st">'win_stay_transformed'</span>, <span class="st">'Points'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>11.363636363636365</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+<b>Finally, adding video rating values to this model has no effect: </b>
+</p>
+<p>(NB model with the age covariate, again, produced the best fit)</p>
+<div id="mixed-effects-model-w-video-ratings--sensitivity" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>sensitivity_df.reset_index()</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'win_stay_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff + prolific_age'</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Mixed Linear Model Regression Results
+===================================================================
+Model:             MixedLM Dependent Variable: win_stay_transformed
+No. Observations:  955     Method:             ML                  
+No. Groups:        334     Scale:              6993.6163           
+Min. group size:   1       Log-Likelihood:     -5841.5752          
+Max. group size:   3       Converged:          Yes                 
+Mean group size:   2.9                                             
+-------------------------------------------------------------------
+                      Coef.   Std.Err.   z    P&gt;|z|  [0.025  0.975]
+-------------------------------------------------------------------
+Intercept             225.724   19.916 11.334 0.000 186.690 264.758
+block_type[T.Fear]     -1.065    6.691 -0.159 0.874 -14.179  12.050
+block_type[T.Points]   -5.572    6.674 -0.835 0.404 -18.652   7.509
+valence_diff            3.665    3.832  0.957 0.339  -3.845  11.175
+arousal_diff           -2.674    5.169 -0.517 0.605 -12.805   7.458
+valence_habdiff        -1.633    2.957 -0.552 0.581  -7.428   4.162
+prolific_age            1.217    0.401  3.036 0.002   0.431   2.002
+Group Var            9235.265   13.825                             
+===================================================================
+</code></pre>
+</div>
+</div>
+<p>
+The assumptions for this test are not violated:
+</p>
+<div id="shapiro-wilk-test--sensitivity-w-video-ratings" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9968174179331105
+p-value 0.0527714290007855</code></pre>
+</div>
+</div>
+<div id="homoskedasticity-test--sensitivity-w-video-ratings" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">##homoskedasticity of variance </span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="co">#White Lagrange Multiplier Test for Heteroscedasticity</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>het_white_res <span class="op">=</span> het_white(results.resid, results.model.exog)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"LM Statistic"</span>, <span class="st">"LM-Test p-value"</span>, <span class="st">"F-Statistic"</span>, <span class="st">"F-Test p-value"</span>]</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, het_white_res)).items():</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>LM Statistic 16.189293421674396
+LM-Test p-value 0.8811225232117103
+F-Statistic 0.6682232272108647
+F-Test p-value 0.8848727181148472</code></pre>
+</div>
+</div>
+<p>
+And this remains unchanged when the age covariate is removed:
+</p>
+<div id="mixed-effects-model-w-video-ratings--sensitivity-no-covariates" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>sensitivity_df.reset_index()</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'win_stay_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Mixed Linear Model Regression Results
+===================================================================
+Model:             MixedLM Dependent Variable: win_stay_transformed
+No. Observations:  955     Method:             ML                  
+No. Groups:        334     Scale:              7002.9994           
+Min. group size:   1       Log-Likelihood:     -5846.1342          
+Max. group size:   3       Converged:          Yes                 
+Mean group size:   2.9                                             
+-------------------------------------------------------------------
+                      Coef.   Std.Err.   z    P&gt;|z|  [0.025  0.975]
+-------------------------------------------------------------------
+Intercept             280.540    8.438 33.249 0.000 264.003 297.078
+block_type[T.Fear]     -1.246    6.696 -0.186 0.852 -14.370  11.878
+block_type[T.Points]   -5.621    6.679 -0.842 0.400 -18.712   7.469
+valence_diff            4.667    3.866  1.207 0.227  -2.910  12.243
+arousal_diff           -1.314    5.215 -0.252 0.801 -11.535   8.907
+valence_habdiff        -1.330    2.992 -0.445 0.657  -7.194   4.534
+Group Var            9527.405   14.205                             
+===================================================================
+</code></pre>
+</div>
+</div>
+<h4 class="anchored">
+<b>Exploratory analyses</b>
+</h4>
+</li><li>
+Effect of age
+</li><li>
+Points ratings
+</li><li>
+error rates
+<p>
+</p>
+
+</li></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

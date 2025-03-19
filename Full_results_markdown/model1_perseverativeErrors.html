@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Model 1: mean perseverative errors per reversal ~ feedback type</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="model1_perseverativeErrors_files/libs/clipboard/clipboard.min.js"></script>
+<script src="model1_perseverativeErrors_files/libs/quarto-html/quarto.js"></script>
+<script src="model1_perseverativeErrors_files/libs/quarto-html/popper.min.js"></script>
+<script src="model1_perseverativeErrors_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="model1_perseverativeErrors_files/libs/quarto-html/anchor.min.js"></script>
+<link href="model1_perseverativeErrors_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="model1_perseverativeErrors_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="model1_perseverativeErrors_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="model1_perseverativeErrors_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="model1_perseverativeErrors_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Model 1: mean perseverative errors per reversal ~ feedback type</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>
+This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on perseverative errors.
+</p>
+<br> Includes:
+<li>
+data visualisation
+</li><li>
+initial skew assessment (and resulting skew transformation)
+</li><li>
+initial hypothesis testing mixed effects model
+</li><li>
+assessment of assumptions of this model (which was violated)
+</li><li>
+resulting generalized mixed effects model
+</li><li>
+assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
+</li><li>
+sensitivity analysis (including generalized mixed effects models)
+</li><li>
+final conclusions
+<p>
+</p>
+<h3 class="anchored">
+Load in packages and data- in r and then in python
+</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">quietly=</span><span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DHARMa)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>task_summary <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> stats</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jsonlines</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> <span class="bu">reduce</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statistics</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ast</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pingouin <span class="im">as</span> pg</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_rel</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#from statannotations.Annotator import Annotator</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> skew</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.stats.diagnostic <span class="im">import</span> het_white</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PowerTransformer</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statannot</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_ind</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>warnings.simplefilter(action<span class="op">=</span><span class="st">'ignore'</span>, category<span class="op">=</span><span class="pp">FutureWarning</span>)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>pd.options.mode.copy_on_write <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>task_summary<span class="op">=</span>pd.read_csv(<span class="st">"U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<br>
+<h3 class="anchored">
+<b>Visualise the data</b>
+</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>palette <span class="op">=</span> [<span class="st">"#F72585"</span>, <span class="st">"#3A0CA3"</span>, <span class="st">"#4CC9F0"</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">##plot hypothesised results</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">1</span>, sharey<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>sns.stripplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"block_type"</span>, y<span class="op">=</span><span class="st">"mean_perseverative_er"</span>, ax<span class="op">=</span>axes, palette<span class="op">=</span>palette, size<span class="op">=</span><span class="dv">5</span>, jitter<span class="op">=</span><span class="va">True</span>, marker<span class="op">=</span><span class="st">'.'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>sns.violinplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"block_type"</span>, y<span class="op">=</span><span class="st">"mean_perseverative_er"</span>, ax<span class="op">=</span>axes,fill<span class="op">=</span><span class="va">True</span>, inner<span class="op">=</span><span class="st">"quart"</span>, palette<span class="op">=</span>palette, saturation<span class="op">=</span><span class="fl">0.5</span>, cut<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#axes.set_xlabel("Feedback type")</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>axes.set_xlabel(<span class="st">""</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>axes.set_xticklabels(axes.get_xticklabels(), rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>axes.set_ylabel(<span class="st">"Mean perseverative errors per reversal"</span>) </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>axes.set_title(<span class="st">"Perseverative errors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model1_perseverativeErrors_files/figure-html/Visualisation-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<br>
+<h3 class="anchored">
+Assess and correct for skewness in perservative error outcome
+</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pt<span class="op">=</span>PowerTransformer(method<span class="op">=</span><span class="st">'yeo-johnson'</span>, standardize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.fit(pd.DataFrame(task_summary.mean_perseverative_er))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.transform(pd.DataFrame(task_summary.mean_perseverative_er))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>task_summary[<span class="st">'perseverative_er_transformed'</span>] <span class="op">=</span> pt.transform(pd.DataFrame(task_summary.mean_perseverative_er))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">2</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"mean_perseverative_er"</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>]) </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>task_summary[<span class="st">'perseverative_er_transformed'</span>], ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Perseverative error skew: '</span><span class="op">+</span><span class="bu">str</span>(skew(task_summary.mean_perseverative_er)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Perseverative error skew: 2.400818032551747</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model1_perseverativeErrors_files/figure-html/Skewness-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 class="anchored">
+<b>Hypothesis testing</b>
+</h3>
+In this case, the basic model (no random slopes or random intercepts, and no covariates) produced the best fit (indexed by BIC scores).
+<p>
+</p><p>The model shows no effect of feedback type (although disgust vs points comparison is nearing significance).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>task_summary.reset_index()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'perseverative_er_transformed ~ block_type'</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  Mixed Linear Model Regression Results
+==========================================================================
+Model:            MixedLM Dependent Variable: perseverative_er_transformed
+No. Observations: 1020    Method:             ML                          
+No. Groups:       340     Scale:              0.0375                      
+Min. group size:  3       Log-Likelihood:     95.7445                     
+Max. group size:  3       Converged:          Yes                         
+Mean group size:  3.0                                                     
+----------------------------------------------------------------------------
+                        Coef.    Std.Err.     z      P&gt;|z|   [0.025   0.975]
+----------------------------------------------------------------------------
+Intercept                0.405      0.012   32.755   0.000    0.381    0.430
+block_type[T.Fear]      -0.022      0.015   -1.470   0.141   -0.051    0.007
+block_type[T.Points]    -0.028      0.015   -1.873   0.061   -0.057    0.001
+Group Var                0.015      0.013                                   
+==========================================================================</code></pre>
+</div>
+</div>
+<p><b>BUT</b> the residuals of this model are significantly non-normal! So we will need to run a generalized mixed effects model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9931933132269517
+p-value 0.00012825572082599747</code></pre>
+</div>
+</div>
+<h4 class="anchored">
+<b>Run a generalized mixed effects model (done in R)</b>
+</h4>
+Model details:
+</li><li>
+Gamma probability distribution and inverse link function
+</li><li>
+no additional random effects or slopes
+</li><li>
+no additional covariates
+<p>
+This is the specification that produced the best fit (according to BIC)
+</p>
+<p>
+</p><p>Results from this model show a <b>significant effect of block-type</b>: specifically, a difference between disgust and points learning</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>task_summary<span class="sc">$</span>pos_perseverative_er <span class="ot">&lt;-</span> task_summary<span class="sc">$</span>mean_perseverative_er <span class="sc">+</span> <span class="fl">0.01</span> <span class="do">##+0.01 as all values must be positive (i.e., can't have 0s)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>generalized_model <span class="ot">&lt;-</span> <span class="fu">glmer</span>(pos_perseverative_er <span class="sc">~</span> block_type <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>participant_no), <span class="at">data=</span>task_summary, <span class="at">family=</span><span class="fu">Gamma</span>(<span class="at">link=</span><span class="st">"inverse"</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(generalized_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: Gamma  ( inverse )
+Formula: pos_perseverative_er ~ block_type + (1 | participant_no)
+   Data: task_summary
+
+     AIC      BIC   logLik deviance df.resid 
+  1587.3   1611.9   -788.7   1577.3     1015 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.2647 -0.7161 -0.1944  0.5332  3.8144 
+
+Random effects:
+ Groups         Name        Variance Std.Dev.
+ participant_no (Intercept) 0.1441   0.3796  
+ Residual                   0.6133   0.7831  
+Number of obs: 1020, groups:  participant_no, 340
+
+Fixed effects:
+                 Estimate Std. Error t value Pr(&gt;|z|)    
+(Intercept)       1.32174    0.07274  18.172   &lt;2e-16 ***
+block_typeFear    0.13312    0.07953   1.674   0.0942 .  
+block_typePoints  0.18930    0.08252   2.294   0.0218 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) blck_F
+block_typFr -0.503       
+blck_typPnt -0.500  0.409</code></pre>
+</div>
+</div>
+<br>
+<p>
+As this hypothesis test found a no difference between fear and disgust, we will compute a Bayes Factor to test the strength of the evidence for the null
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|code-fold: true</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bayes_factor(df, dependent_var, condition_1_name, condition_2_name):</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df[(df.block_type<span class="op">==</span>condition_1_name)<span class="op">|</span> (df.block_type<span class="op">==</span>condition_2_name)][[dependent_var, <span class="st">'block_type'</span>, <span class="st">'participant_no'</span>]]</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    df.dropna(inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df.pivot(index<span class="op">=</span><span class="st">'participant_no'</span>, columns<span class="op">=</span><span class="st">'block_type'</span>, values<span class="op">=</span>dependent_var).reset_index()</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    ttest<span class="op">=</span>pg.ttest(df[condition_1_name], df[condition_2_name], paired<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    bf_null<span class="op">=</span><span class="dv">1</span><span class="op">/</span><span class="bu">float</span>(ttest.BF10)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bf_null</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'perseverative_er_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>6.369426751592357</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>moderate</b> evidence for the null
+</p>
+<p>
+We also look at fear vs points (which is not directly assessed by the model)
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'perseverative_er_transformed'</span>, <span class="st">'Points'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>14.925373134328357</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<h3 class="anchored">
+<b>Adding video ratings</b>
+</h3>
+Finally, we will test whether this effect remains after video rating differences between fear and disgust have been controlled for.
+<p>
+As before, the mixed effects model violated assumptions, so a generalized mixed effects model is run.
+</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'perseverative_er_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9932531693384103
+p-value 0.0001396501655398863</code></pre>
+</div>
+</div>
+Model details:
+</li><li>
+Gamma probability distribution and inverse link function
+</li><li>
+no additional random effects or slopes
+</li><li>
+no additional covariates
+<p>
+This is the specification that produced the best fit (according to BIC)
+</p>
+<br>
+<p>
+</p><p>This has <b> no effect </b> on the results</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>task_summary<span class="sc">$</span>pos_perseverative_er <span class="ot">&lt;-</span> task_summary<span class="sc">$</span>mean_perseverative_er <span class="sc">+</span> <span class="fl">0.01</span> <span class="do">##+0.01 as all values must be positive (i.e., can't have 0s)</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>generalized_model <span class="ot">&lt;-</span> <span class="fu">glmer</span>(pos_perseverative_er <span class="sc">~</span> block_type <span class="sc">+</span>valence_diff <span class="sc">+</span> arousal_diff <span class="sc">+</span> valence_habdiff <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>participant_no), <span class="at">data=</span>task_summary, <span class="at">family=</span><span class="fu">Gamma</span>(<span class="at">link=</span><span class="st">"inverse"</span>))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(generalized_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: Gamma  ( inverse )
+Formula: pos_perseverative_er ~ block_type + valence_diff + arousal_diff +  
+    valence_habdiff + (1 | participant_no)
+   Data: task_summary
+
+     AIC      BIC   logLik deviance df.resid 
+  1591.1   1630.5   -787.6   1575.1     1012 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.2639 -0.7127 -0.2102  0.5384  3.9164 
+
+Random effects:
+ Groups         Name        Variance Std.Dev.
+ participant_no (Intercept) 0.1426   0.3776  
+ Residual                   0.6140   0.7836  
+Number of obs: 1020, groups:  participant_no, 340
+
+Fixed effects:
+                   Estimate Std. Error t value Pr(&gt;|z|)    
+(Intercept)       1.3221837  0.0794095  16.650   &lt;2e-16 ***
+block_typeFear    0.1331227  0.0795042   1.674   0.0940 .  
+block_typePoints  0.1892452  0.0824777   2.295   0.0218 *  
+valence_diff      0.0189348  0.0284999   0.664   0.5064    
+arousal_diff      0.0436398  0.0372152   1.173   0.2409    
+valence_habdiff  -0.0006996  0.0214278  -0.033   0.9740    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) blck_F blck_P vlnc_d arsl_d
+block_typFr -0.460                            
+blck_typPnt -0.456  0.409                     
+valence_dff  0.382 -0.001 -0.002              
+arousal_dff -0.198 -0.006 -0.007 -0.189       
+valnc_hbdff -0.218  0.000 -0.001 -0.380  0.121</code></pre>
+</div>
+</div>
+<br> <br>
+<h3 class="anchored">
+<b> Sensitivity analysis </b>
+</h3>
+<p>We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.</p>
+<p>
+</p><p>Firstly, exclude outliers from the dataframe (outliers are define as those &gt;1.5 IQRs above or below the upper or lower quartile)</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create outliers df --&gt; removing those &gt;1.5 IQRs above or below UQ and LQ</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> replace_outliers_with_nan(df, column):</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    Q1 <span class="op">=</span> df[column].quantile(<span class="fl">0.25</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    Q3 <span class="op">=</span> df[column].quantile(<span class="fl">0.75</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> Q3 <span class="op">-</span> Q1</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    lower_bound <span class="op">=</span> Q1<span class="op">-</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    upper_bound <span class="op">=</span> Q3 <span class="op">+</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    df[column]<span class="op">=</span>df[column].<span class="bu">apply</span>(<span class="kw">lambda</span> x: np.nan <span class="cf">if</span> x<span class="op">&lt;</span>lower_bound <span class="kw">or</span> x<span class="op">&gt;</span>upper_bound <span class="cf">else</span> x)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>key_outcomes<span class="op">=</span>[<span class="st">'percentage_correct'</span>, <span class="st">'mean_perseverative_er'</span>, <span class="st">'mean_regressive_er'</span>, <span class="st">'median_till_correct'</span>, <span class="st">'win_stay'</span>, <span class="st">'lose_shift'</span>]</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> key_outcomes:</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    task_summary<span class="op">=</span>replace_outliers_with_nan(task_summary, col)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>task_summary.to_csv(<span class="st">'sensitivity_df.csv'</span>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>sensitivity_df<span class="op">=</span>task_summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<br>
+<h3 class="anchored">
+Assess and correct for skewness in perservative error outcome (excluding outliers)
+</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>pt<span class="op">=</span>PowerTransformer(method<span class="op">=</span><span class="st">'yeo-johnson'</span>, standardize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.fit(pd.DataFrame(sensitivity_df.mean_perseverative_er))</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.transform(pd.DataFrame(sensitivity_df.mean_perseverative_er))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>sensitivity_df[<span class="st">'perseverative_er_transformed'</span>] <span class="op">=</span> pt.transform(pd.DataFrame(sensitivity_df.mean_perseverative_er))</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">2</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>sensitivity_df, x<span class="op">=</span><span class="st">"mean_perseverative_er"</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>]) </span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>sensitivity_df[<span class="st">'perseverative_er_transformed'</span>], ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Perseverative error skew: '</span><span class="op">+</span><span class="bu">str</span>(skew(sensitivity_df.mean_perseverative_er.dropna())))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Perseverative error skew: 0.9439083554848277</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model1_perseverativeErrors_files/figure-html/Skewness%20sensitivity-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 class="anchored">
+<b>Outlier-free hypothesis testing</b>
+</h3>
+In this case, the basic model (no random slopes or random intercepts, and no covariates) produced the best fit (indexed by BIC scores).
+<p>
+</p><p>The model shows no effect of feedback type (and this time no effect is approaching significance)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>sensitivity_df.reset_index()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'perseverative_er_transformed ~ block_type'</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  Mixed Linear Model Regression Results
+==========================================================================
+Model:            MixedLM Dependent Variable: perseverative_er_transformed
+No. Observations: 983     Method:             ML                          
+No. Groups:       339     Scale:              0.0425                      
+Min. group size:  1       Log-Likelihood:     45.5258                     
+Max. group size:  3       Converged:          Yes                         
+Mean group size:  2.9                                                     
+----------------------------------------------------------------------------
+                        Coef.    Std.Err.     z      P&gt;|z|   [0.025   0.975]
+----------------------------------------------------------------------------
+Intercept                0.403      0.013   30.442   0.000    0.377    0.429
+block_type[T.Fear]      -0.005      0.016   -0.307   0.759   -0.037    0.027
+block_type[T.Points]    -0.010      0.016   -0.596   0.551   -0.041    0.022
+Group Var                0.014      0.013                                   
+==========================================================================</code></pre>
+</div>
+</div>
+<p><b>BUT, again</b> the residuals of this model are significantly non-normal! So we will need to run a generalized mixed effects model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9901267071073535
+p-value 3.606836892222057e-06</code></pre>
+</div>
+</div>
+<h4 class="anchored">
+Run a generalized mixed effects model (done in R)
+</h4>
+Model details:
+</li><li>
+Gamma probability distribution and inverse link function
+</li><li>
+no additional random effects or slopes
+</li><li>
+no additional covariate
+<p>
+This is the specification that produced the best fit (according to BIC)
+</p>
+<p>
+</p><p>Results from this model show <b>no effect of block-type</b>: suggests that the difference seen before is driven by outliers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sensitivity_df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"sensitivity_df.csv"</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>sensitivity_df<span class="sc">$</span>pos_perseverative_er <span class="ot">&lt;-</span> sensitivity_df<span class="sc">$</span>mean_perseverative_er <span class="sc">+</span> <span class="fl">0.01</span> <span class="do">##+0.01 as all values must be positive (i.e., can't have 0s)</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>generalized_model <span class="ot">&lt;-</span> <span class="fu">glmer</span>(pos_perseverative_er <span class="sc">~</span> block_type <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>participant_no), <span class="at">data=</span>sensitivity_df, <span class="at">family=</span><span class="fu">Gamma</span>(<span class="at">link=</span><span class="st">"inverse"</span>))</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(generalized_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: Gamma  ( inverse )
+Formula: pos_perseverative_er ~ block_type + (1 | participant_no)
+   Data: sensitivity_df
+
+     AIC      BIC   logLik deviance df.resid 
+  1317.7   1342.1   -653.8   1307.7      978 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.2838 -0.7218 -0.1792  0.6114  2.9242 
+
+Random effects:
+ Groups         Name        Variance Std.Dev.
+ participant_no (Intercept) 0.07353  0.2712  
+ Residual                   0.59070  0.7686  
+Number of obs: 983, groups:  participant_no, 339
+
+Fixed effects:
+                 Estimate Std. Error t value Pr(&gt;|z|)    
+(Intercept)      1.467350   0.086799  16.905   &lt;2e-16 ***
+block_typeFear   0.002079   0.101212   0.021    0.984    
+block_typePoints 0.046761   0.102808   0.455    0.649    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) blck_F
+block_typFr -0.591       
+blck_typPnt -0.589  0.501</code></pre>
+</div>
+</div>
+<br>
+<p>
+As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null
+</p>
+<p>
+Firstly for disgust vs fear:
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'perseverative_er_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>13.88888888888889</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+Next for disgust vs points:
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'perseverative_er_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Points'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>12.658227848101266</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+We also look at fear vs points (which is not directly assessed by the model)
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'perseverative_er_transformed'</span>, <span class="st">'Points'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>15.15151515151515</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br> <br>
+<p>
+<b>Finally, adding video rating values to this model has no effect: </b>
+</p>
+<p>
+Again, a generalized mixed effects model must be run because assumptions for original model were violated
+</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'perseverative_er_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.98989938998603
+p-value 2.7648916440248165e-06</code></pre>
+</div>
+</div>
+Generalized mixed effects model details:
+</li><li>
+Gamma probability distribution and inverse link function
+</li><li>
+no additional random effects or slopes
+</li><li>
+no additional covariate
+<p>
+This is the specification that produced the best fit (according to BIC)
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>sensitivity_df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"sensitivity_df.csv"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>sensitivity_df<span class="sc">$</span>pos_perseverative_er <span class="ot">&lt;-</span> sensitivity_df<span class="sc">$</span>mean_perseverative_er <span class="sc">+</span> <span class="fl">0.01</span> <span class="do">##+0.01 as all values must be positive (i.e., can't have 0s)</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>generalized_model <span class="ot">&lt;-</span> <span class="fu">glmer</span>(pos_perseverative_er <span class="sc">~</span> block_type <span class="sc">+</span> valence_diff <span class="sc">+</span> arousal_diff <span class="sc">+</span> valence_habdiff <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>participant_no), <span class="at">data=</span>sensitivity_df, <span class="at">family=</span><span class="fu">Gamma</span>(<span class="at">link=</span><span class="st">"inverse"</span>))</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(generalized_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: Gamma  ( inverse )
+Formula: pos_perseverative_er ~ block_type + valence_diff + arousal_diff +  
+    valence_habdiff + (1 | participant_no)
+   Data: sensitivity_df
+
+     AIC      BIC   logLik deviance df.resid 
+  1320.5   1359.6   -652.3   1304.5      975 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.2794 -0.7259 -0.1786  0.6050  3.0781 
+
+Random effects:
+ Groups         Name        Variance Std.Dev.
+ participant_no (Intercept) 0.06395  0.2529  
+ Residual                   0.59502  0.7714  
+Number of obs: 983, groups:  participant_no, 339
+
+Fixed effects:
+                 Estimate Std. Error t value Pr(&gt;|z|)    
+(Intercept)      1.466766   0.093922  15.617   &lt;2e-16 ***
+block_typeFear   0.001151   0.101617   0.011    0.991    
+block_typePoints 0.046087   0.103220   0.446    0.655    
+valence_diff     0.027701   0.028146   0.984    0.325    
+arousal_diff     0.045818   0.037232   1.231    0.218    
+valence_habdiff  0.002931   0.022500   0.130    0.896    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) blck_F blck_P vlnc_d arsl_d
+block_typFr -0.547                            
+blck_typPnt -0.545  0.501                     
+valence_dff  0.315  0.001  0.002              
+arousal_dff -0.192 -0.008 -0.009 -0.190       
+valnc_hbdff -0.206  0.002  0.001 -0.375  0.111</code></pre>
+</div>
+</div>
+<h4 class="anchored">
+<b>Exploratory analyses</b>
+</h4>
+</li><li>
+Points ratings
+</li><li>
+error rates
+<p>
+</p>
+
+</li></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

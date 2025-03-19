@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Model 2: mean regressive errors per reversal ~ feedback type</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="model2_regressiveErrors_files/libs/clipboard/clipboard.min.js"></script>
+<script src="model2_regressiveErrors_files/libs/quarto-html/quarto.js"></script>
+<script src="model2_regressiveErrors_files/libs/quarto-html/popper.min.js"></script>
+<script src="model2_regressiveErrors_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="model2_regressiveErrors_files/libs/quarto-html/anchor.min.js"></script>
+<link href="model2_regressiveErrors_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="model2_regressiveErrors_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="model2_regressiveErrors_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="model2_regressiveErrors_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="model2_regressiveErrors_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Model 2: mean regressive errors per reversal ~ feedback type</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>
+This file contains all model-agnostic tests run to test the effect of feedback type (fear, disgust, points) on regressive errors.
+</p>
+<br> Includes:
+<li>
+initial skew assessment (and resulting skew transformation)
+</li><li>
+initial hypothesis testing mixed effects model
+</li><li>
+assessment of assumptions of this model (which was violated)
+</li><li>
+resulting generalized mixed effects model
+</li><li>
+assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
+</li><li>
+sensitivity analysis (including generalized mixed effects models)
+</li><li>
+final conclusions
+<p>
+</p>
+<h3 class="anchored">
+Load in packages and data- in r and then in python
+</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">quietly=</span><span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DHARMa)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>task_summary <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> stats</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jsonlines</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> <span class="bu">reduce</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statistics</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ast</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pingouin <span class="im">as</span> pg</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_rel</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#from statannotations.Annotator import Annotator</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> skew</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.stats.diagnostic <span class="im">import</span> het_white</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PowerTransformer</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statannot</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> ttest_ind</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>warnings.simplefilter(action<span class="op">=</span><span class="st">'ignore'</span>, category<span class="op">=</span><span class="pp">FutureWarning</span>)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>pd.options.mode.copy_on_write <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>task_summary<span class="op">=</span>pd.read_csv(<span class="st">"U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<br>
+<h3 class="anchored">
+<b>Visualise the data</b>
+</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>palette <span class="op">=</span> [<span class="st">"#F72585"</span>, <span class="st">"#3A0CA3"</span>, <span class="st">"#4CC9F0"</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">##plot hypothesised results</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">1</span>, sharey<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>sns.stripplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"block_type"</span>, y<span class="op">=</span><span class="st">"mean_regressive_er"</span>, ax<span class="op">=</span>axes, palette<span class="op">=</span>palette, size<span class="op">=</span><span class="dv">5</span>, jitter<span class="op">=</span><span class="va">True</span>, marker<span class="op">=</span><span class="st">'.'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>sns.violinplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"block_type"</span>, y<span class="op">=</span><span class="st">"mean_regressive_er"</span>, ax<span class="op">=</span>axes,fill<span class="op">=</span><span class="va">True</span>, inner<span class="op">=</span><span class="st">"quart"</span>, palette<span class="op">=</span>palette, saturation<span class="op">=</span><span class="fl">0.5</span>, cut<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#axes.set_xlabel("Feedback type")</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>axes.set_xlabel(<span class="st">""</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>axes.set_xticklabels(axes.get_xticklabels(), rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>axes.set_ylabel(<span class="st">"Mean regressive errors per reversal"</span>) </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>axes.set_title(<span class="st">"Regressive errors"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model2_regressiveErrors_files/figure-html/Visualisation-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><br></p>
+<h3 class="anchored">
+Assess and correct for skewness in perservative error outcome
+</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pt<span class="op">=</span>PowerTransformer(method<span class="op">=</span><span class="st">'yeo-johnson'</span>, standardize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.fit(pd.DataFrame(task_summary.mean_regressive_er))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.transform(pd.DataFrame(task_summary.mean_regressive_er))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>task_summary[<span class="st">'regressive_er_transformed'</span>] <span class="op">=</span> pt.transform(pd.DataFrame(task_summary.mean_regressive_er))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>task_summary, x<span class="op">=</span><span class="st">"mean_regressive_er"</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>]) </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>task_summary[<span class="st">'regressive_er_transformed'</span>], ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Regressive error skew: '</span><span class="op">+</span><span class="bu">str</span>(skew(task_summary.mean_regressive_er)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Regressive error skew: 6.465682277497517</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model2_regressiveErrors_files/figure-html/Skewness-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 class="anchored">
+<b>Hypothesis testing</b>
+</h3>
+In this case, the basic model (no random slopes or random intercepts, and no covariates) produced the best fit (indexed by BIC scores).
+<p>
+The model shows <b>no effect of feedback type.</b>
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>task_summary.reset_index()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'regressive_er_transformed ~ block_type'</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 Mixed Linear Model Regression Results
+=======================================================================
+Model:            MixedLM Dependent Variable: regressive_er_transformed
+No. Observations: 1020    Method:             ML                       
+No. Groups:       340     Scale:              0.0602                   
+Min. group size:  3       Log-Likelihood:     -265.2907                
+Max. group size:  3       Converged:          Yes                      
+Mean group size:  3.0                                                  
+------------------------------------------------------------------------
+                         Coef.   Std.Err.    z     P&gt;|z|  [0.025  0.975]
+------------------------------------------------------------------------
+Intercept                 0.933     0.019  48.088  0.000   0.895   0.971
+block_type[T.Fear]        0.006     0.019   0.313  0.755  -0.031   0.043
+block_type[T.Points]     -0.001     0.019  -0.050  0.960  -0.038   0.036
+Group Var                 0.068     0.034                               
+=======================================================================</code></pre>
+</div>
+</div>
+<p><b>BUT</b> the residuals of this model are significantly non-normal! So we will need to run a generalized mixed effects model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.993953373902031
+p-value 0.00038660283099416264</code></pre>
+</div>
+</div>
+<h4 class="anchored">
+Run a generalized mixed effects model (done in R)
+</h4>
+Model details:
+</li><li>
+Gamma probability distribution and inverse link function
+</li><li>
+random intercepts for individually selected feedback videos and by-participant random slopes
+</li><li>
+no additional covariates
+<p>
+This is the specification that produced the best fit (according to BIC)
+</p>
+<p>
+Results from this model show also show <b>no effect of block-type</b> on regressive error rate.
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>task_summary<span class="sc">$</span>pos_regressive_er <span class="ot">&lt;-</span> task_summary<span class="sc">$</span>mean_regressive_er <span class="sc">+</span> <span class="fl">0.01</span> <span class="do">##+0.01 as all values must be positive (i.e., can't have 0s)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>generalized_model <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(<span class="fu">glmer</span>(pos_regressive_er <span class="sc">~</span> block_type <span class="sc">+</span> (block_type<span class="sc">|</span>participant_no) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>feedback_details), <span class="at">data=</span>task_summary, <span class="at">family=</span><span class="fu">Gamma</span>(<span class="at">link=</span><span class="st">"inverse"</span>)))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(generalized_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: Gamma  ( inverse )
+Formula: pos_regressive_er ~ block_type + (block_type | participant_no) +  
+    (1 | feedback_details)
+   Data: task_summary
+
+     AIC      BIC   logLik deviance df.resid 
+  4454.8   4509.0  -2216.4   4432.8     1009 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.6695 -0.4836  0.0461  0.3925  1.9061 
+
+Random effects:
+ Groups           Name             Variance  Std.Dev.  Corr       
+ participant_no   (Intercept)      3.686e-02 1.920e-01            
+                  block_typeFear   2.768e-02 1.664e-01 -0.39      
+                  block_typePoints 2.595e-02 1.611e-01 -0.41  0.51
+ feedback_details (Intercept)      2.668e-09 5.166e-05            
+ Residual                          3.545e-01 5.954e-01            
+Number of obs: 1020, groups:  participant_no, 340; feedback_details, 11
+
+Fixed effects:
+                  Estimate Std. Error t value Pr(&gt;|z|)    
+(Intercept)       0.494004   0.025622  19.280   &lt;2e-16 ***
+block_typeFear   -0.001471   0.028237  -0.052    0.958    
+block_typePoints  0.002548   0.027666   0.092    0.927    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) blck_F
+block_typFr -0.508       
+blck_typPnt -0.550  0.497
+optimizer (Nelder_Mead) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')</code></pre>
+</div>
+</div>
+<br>
+<p>
+As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null
+</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bayes_factor(df, dependent_var, condition_1_name, condition_2_name):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df[(df.block_type<span class="op">==</span>condition_1_name)<span class="op">|</span> (df.block_type<span class="op">==</span>condition_2_name)][[dependent_var, <span class="st">'block_type'</span>, <span class="st">'participant_no'</span>]]</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    df.dropna(inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>df.pivot(index<span class="op">=</span><span class="st">'participant_no'</span>, columns<span class="op">=</span><span class="st">'block_type'</span>, values<span class="op">=</span>dependent_var).reset_index()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    ttest<span class="op">=</span>pg.ttest(df[condition_1_name], df[condition_2_name], paired<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    bf_null<span class="op">=</span><span class="dv">1</span><span class="op">/</span><span class="bu">float</span>(ttest.BF10)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bf_null</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>
+Firstly for disgust vs fear:
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'regressive_er_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>15.625</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+Next for disgust vs points:
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'regressive_er_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Points'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>16.39344262295082</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+We also look at fear vs points (which is not directly assessed by the model)
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(task_summary, <span class="st">'regressive_er_transformed'</span>, <span class="st">'Points'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>15.384615384615383</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<h3 class="anchored">
+Adding video ratings
+</h3>
+Finally, we will test whether this effect remains after video rating differences between fear and disgust have been controlled for.
+<p>
+As before, the mixed effects model violated assumptions, so a generalized mixed effects model is run.
+</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'regressive_er_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9939763341744763
+p-value 0.00040001610559894327</code></pre>
+</div>
+</div>
+<br> Generalized mixed effects model details:
+</li><li>
+Gamma probability distribution and inverse link function
+</li><li>
+random intercepts for fractals used as stimuli
+</li><li>
+no additional covariates
+<p>
+This is the specification that produced the best fit (according to BIC)
+</p>
+<br>
+<p>
+Adding video ratings has <b> no effect </b> on the results (i.e., there remains no effect of block-type on regressive error rate)
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>generalized_model <span class="ot">&lt;-</span> <span class="fu">glmer</span>(pos_regressive_er <span class="sc">~</span> block_type <span class="sc">+</span> valence_diff <span class="sc">+</span> arousal_diff <span class="sc">+</span> valence_habdiff <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>participant_no) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>fractals), <span class="at">data=</span>task_summary, <span class="at">family=</span><span class="fu">Gamma</span>(<span class="at">link=</span><span class="st">"inverse"</span>))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(generalized_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: Gamma  ( inverse )
+Formula: pos_regressive_er ~ block_type + valence_diff + arousal_diff +  
+    valence_habdiff + (1 | participant_no) + (1 | fractals)
+   Data: task_summary
+
+     AIC      BIC   logLik deviance df.resid 
+  4543.8   4588.2  -2262.9   4525.8     1011 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.5083 -0.6452 -0.1718  0.3982  3.4338 
+
+Random effects:
+ Groups         Name        Variance  Std.Dev.
+ participant_no (Intercept) 0.0298333 0.17272 
+ fractals       (Intercept) 0.0003704 0.01925 
+ Residual                   0.4351638 0.65967 
+Number of obs: 1020, groups:  participant_no, 340; fractals, 28
+
+Fixed effects:
+                   Estimate Std. Error t value Pr(&gt;|z|)    
+(Intercept)       0.4319595  0.0215252  20.068   &lt;2e-16 ***
+block_typeFear   -0.0042333  0.0073595  -0.575    0.565    
+block_typePoints  0.0117315  0.0074434   1.576    0.115    
+valence_diff      0.0012770  0.0094170   0.136    0.892    
+arousal_diff     -0.0048141  0.0125399  -0.384    0.701    
+valence_habdiff   0.0004988  0.0071246   0.070    0.944    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) blck_F blck_P vlnc_d arsl_d
+block_typFr -0.190                            
+blck_typPnt -0.161  0.437                     
+valence_dff  0.417  0.002  0.007              
+arousal_dff -0.319  0.013  0.003 -0.179       
+valnc_hbdff -0.255  0.004 -0.002 -0.354  0.132</code></pre>
+</div>
+</div>
+<br> <br>
+<h3 class="anchored">
+<b> Sensitivity analysis </b>
+</h3>
+<p>We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.</p>
+<p>
+</p><p>Firstly, exclude outliers from the dataframe (outliers are define as those &gt;1.5 IQRs above or below the upper or lower quartile)</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#create outliers df --&gt; removing those &gt;1.5 IQRs above or below UQ and LQ</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> replace_outliers_with_nan(df, column):</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    Q1 <span class="op">=</span> df[column].quantile(<span class="fl">0.25</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    Q3 <span class="op">=</span> df[column].quantile(<span class="fl">0.75</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> Q3 <span class="op">-</span> Q1</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    lower_bound <span class="op">=</span> Q1<span class="op">-</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    upper_bound <span class="op">=</span> Q3 <span class="op">+</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    df[column]<span class="op">=</span>df[column].<span class="bu">apply</span>(<span class="kw">lambda</span> x: np.nan <span class="cf">if</span> x<span class="op">&lt;</span>lower_bound <span class="kw">or</span> x<span class="op">&gt;</span>upper_bound <span class="cf">else</span> x)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>key_outcomes<span class="op">=</span>[<span class="st">'percentage_correct'</span>, <span class="st">'mean_perseverative_er'</span>, <span class="st">'mean_regressive_er'</span>, <span class="st">'median_till_correct'</span>, <span class="st">'win_stay'</span>, <span class="st">'lose_shift'</span>]</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> key_outcomes:</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    task_summary<span class="op">=</span>replace_outliers_with_nan(task_summary, col)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>task_summary.to_csv(<span class="st">'sensitivity_df.csv'</span>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>sensitivity_df<span class="op">=</span>task_summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<br>
+<h3 class="anchored">
+Assess and correct for skewness in perservative error outcome (excluding outliers)
+</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pt<span class="op">=</span>PowerTransformer(method<span class="op">=</span><span class="st">'yeo-johnson'</span>, standardize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.fit(pd.DataFrame(sensitivity_df.mean_regressive_er))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>skl_yeojohnson<span class="op">=</span>pt.transform(pd.DataFrame(sensitivity_df.mean_regressive_er))</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>sensitivity_df[<span class="st">'regressive_er_transformed'</span>] <span class="op">=</span> pt.transform(pd.DataFrame(sensitivity_df.mean_regressive_er))</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">2</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>sensitivity_df, x<span class="op">=</span><span class="st">"mean_regressive_er"</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>]) </span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>sns.histplot(data<span class="op">=</span>sensitivity_df[<span class="st">'regressive_er_transformed'</span>], ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'regressive error skew: '</span><span class="op">+</span><span class="bu">str</span>(skew(sensitivity_df.mean_regressive_er.dropna())))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>regressive error skew: 1.1057309176558778</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model2_regressiveErrors_files/figure-html/Skewness%20sensitivity-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 class="anchored">
+<b>Outlier-free hypothesis testing</b>
+</h3>
+In this case, the basic model (no random slopes or random intercepts) with no additional covariates produced the best fit (indexed by BIC scores).
+<p>
+The model shows no effect of feedback type (as with the original analysis)
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>sensitivity_df.reset_index()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'regressive_er_transformed ~ block_type'</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 Mixed Linear Model Regression Results
+=======================================================================
+Model:            MixedLM Dependent Variable: regressive_er_transformed
+No. Observations: 907     Method:             ML                       
+No. Groups:       327     Scale:              0.1368                   
+Min. group size:  1       Log-Likelihood:     -556.8437                
+Max. group size:  3       Converged:          Yes                      
+Mean group size:  2.8                                                  
+------------------------------------------------------------------------
+                         Coef.   Std.Err.    z     P&gt;|z|  [0.025  0.975]
+------------------------------------------------------------------------
+Intercept                 1.150     0.027  42.163  0.000   1.096   1.203
+block_type[T.Fear]       -0.002     0.030  -0.067  0.946  -0.062   0.057
+block_type[T.Points]     -0.001     0.030  -0.035  0.972  -0.060   0.058
+Group Var                 0.093     0.039                               
+=======================================================================</code></pre>
+</div>
+</div>
+<p>
+And this time, the assumptions are not violated
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9988694126723006
+p-value 0.8539183639658268</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">##homoskedasticity of variance </span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co">#White Lagrange Multiplier Test for Heteroscedasticity</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>het_white_res <span class="op">=</span> het_white(results.resid, results.model.exog)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"LM Statistic"</span>, <span class="st">"LM-Test p-value"</span>, <span class="st">"F-Statistic"</span>, <span class="st">"F-Test p-value"</span>]</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, het_white_res)).items():</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>LM Statistic 3.7851740201083066
+LM-Test p-value 0.1506814896455357
+F-Statistic 1.89423225557972
+F-Test p-value 0.1510303973629437</code></pre>
+</div>
+</div>
+<br>
+<p>
+As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null
+</p>
+<p>
+Firstly for disgust vs fear:
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(sensitivity_df, <span class="st">'regressive_er_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>15.15151515151515</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+Next for disgust vs points:
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(sensitivity_df, <span class="st">'regressive_er_transformed'</span>, <span class="st">'Disgust'</span>, <span class="st">'Points'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>15.15151515151515</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+We also look at fear vs points (which is not directly assessed by the model)
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(bayes_factor(sensitivity_df, <span class="st">'regressive_er_transformed'</span>, <span class="st">'Points'</span>, <span class="st">'Fear'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>14.492753623188404</code></pre>
+</div>
+</div>
+<p>
+This means that there is <b>strong</b> evidence for the null
+</p>
+<br>
+<p>
+<b>Finally, adding video rating values to this model has no effect: </b>
+</p>
+<p>(NB model with the digit-span covariate produced the best fit)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>sensitivity_df.reset_index()</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>formula <span class="op">=</span> <span class="st">'regressive_er_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>smf.mixedlm(formula, data, groups<span class="op">=</span>data[<span class="st">'participant_no'</span>], missing<span class="op">=</span><span class="st">'drop'</span>).fit(reml<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.summary())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 Mixed Linear Model Regression Results
+=======================================================================
+Model:            MixedLM Dependent Variable: regressive_er_transformed
+No. Observations: 907     Method:             ML                       
+No. Groups:       327     Scale:              0.1369                   
+Min. group size:  1       Log-Likelihood:     -556.4483                
+Max. group size:  3       Converged:          Yes                      
+Mean group size:  2.8                                                  
+------------------------------------------------------------------------
+                         Coef.   Std.Err.    z     P&gt;|z|  [0.025  0.975]
+------------------------------------------------------------------------
+Intercept                 1.141     0.031  36.353  0.000   1.079   1.202
+block_type[T.Fear]       -0.002     0.030  -0.078  0.938  -0.062   0.057
+block_type[T.Points]     -0.001     0.030  -0.042  0.967  -0.061   0.058
+valence_diff             -0.002     0.013  -0.153  0.878  -0.028   0.024
+arousal_diff              0.016     0.018   0.874  0.382  -0.020   0.052
+valence_habdiff           0.003     0.011   0.317  0.751  -0.017   0.024
+Group Var                 0.093     0.039                               
+=======================================================================</code></pre>
+</div>
+</div>
+<p>
+Model assumptions are not violated:
+</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shapiro-Wilk test of normality of residuals</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"Statistic"</span>, <span class="st">"p-value"</span>]</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>norm_res <span class="op">=</span> stats.shapiro(results.resid)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, norm_res)).items():</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Statistic 0.9988861183674403
+p-value 0.8621665767375177</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co">##homoskedasticity of variance </span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="co">#White Lagrange Multiplier Test for Heteroscedasticity</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>het_white_res <span class="op">=</span> het_white(results.resid, results.model.exog)</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"LM Statistic"</span>, <span class="st">"LM-Test p-value"</span>, <span class="st">"F-Statistic"</span>, <span class="st">"F-Test p-value"</span>]</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, val <span class="kw">in</span> <span class="bu">dict</span>(<span class="bu">zip</span>(labels, het_white_res)).items():</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(key, val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>LM Statistic 13.350445493912835
+LM-Test p-value 0.7124281619582324
+F-Statistic 0.7812343930336153
+F-Test p-value 0.7163175239908735</code></pre>
+</div>
+</div>
+<h4 class="anchored">
+<b>Exploratory analyses</b>
+</h4>
+</li><li>
+Points ratings
+</li><li>
+<p>error rates</p>
+
+</li></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
