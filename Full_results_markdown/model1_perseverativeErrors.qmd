@@ -371,9 +371,3 @@ sensitivity_df$pos_perseverative_er <- sensitivity_df$mean_perseverative_er + 0.
 generalized_model <- glmer(pos_perseverative_er ~ block_type + valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=sensitivity_df, family=Gamma(link="inverse"))
 summary(generalized_model)
 ```
-
-<h4><b>Exploratory analyses</b></h4>
-<p>
-* Points ratings
-* error rates
-</p>

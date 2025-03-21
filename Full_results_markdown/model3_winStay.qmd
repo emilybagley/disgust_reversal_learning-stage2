@@ -401,10 +401,3 @@ results=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop'
 print(results.summary())
 ```
 
-
-<h4><b>Exploratory analyses</b></h4>
-<p>
-* Effect of age
-* Points ratings
-* error rates
-</p>

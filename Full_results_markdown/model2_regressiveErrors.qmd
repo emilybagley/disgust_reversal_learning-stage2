@@ -379,9 +379,3 @@ labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
 for key, val in dict(zip(labels, het_white_res)).items():
     print(key, val)
 ```
-
-<h4><b>Exploratory analyses</b></h4>
-<p>
-* Points ratings
-* error rates
-</p>
