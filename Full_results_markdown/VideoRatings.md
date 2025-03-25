@@ -163,70 +163,7 @@ List of models to run:
 </p>
 
 <br> <br>
-<p>
 
-Before running the models, we can visualise this data:
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-fig, axes = plt.subplots(2,4, sharex='col', sharey='col')
-#title="Ratings of videos used in reversal learning task"
-#plt.suptitle(title, fontsize=30)
-#plt.suptitle(title)
-fig.tight_layout(pad=0.5)
-#fig.set_size_inches(10, 5)
-
-palette = {'fear': 'blue',
-            'disgust': 'green'}
-#sns.stripplot(data=long_chosen_stim_df, ax=axes[0,0], x='Timepoint', y='Valence', hue='trial_type', dodge=True, palette=palette)
-sns.barplot(data=long_chosen_stim_df, ax=axes[0,0], x='Timepoint', y='Valence', hue='trial_type', fill=True, palette=palette, linewidth=1)
-axes[0,0].get_legend().set_visible(False)
-axes[0,0].set_title("Valence rating", fontsize=15) 
-
-sns.pointplot(data=long_chosen_stim_df, ax=axes[1,0], x='Timepoint', y='Valence', hue='trial_type', dodge=True, palette=palette)
-axes[1,0].get_legend().set_visible(False)
-axes[1,0].xaxis.get_label().set_fontsize(15)
-
-#sns.stripplot(data=long_chosen_stim_df, ax=axes[0,1], x='Timepoint', y='Arousal', hue='trial_type', dodge=True, palette=palette)
-sns.barplot(data=long_chosen_stim_df, ax=axes[0,1], x='Timepoint', y='Arousal', hue='trial_type', fill=True, palette=palette, linewidth=1)
-axes[0,1].get_legend().set_visible(False)
-axes[0,1].set_title("Arousal rating", fontsize=15) 
-
-sns.pointplot(data=long_chosen_stim_df, ax=axes[1,1], x='Timepoint', y='Arousal', hue='trial_type', dodge=False, palette=palette)
-axes[1,1].get_legend().set_visible(False)
-axes[1,1].xaxis.get_label().set_fontsize(15)
-
-#sns.stripplot(data=long_chosen_stim_df, ax=axes[0,2], x='Timepoint', y='Fear', hue='trial_type', dodge=True, palette=palette)
-sns.barplot(data=long_chosen_stim_df, ax=axes[0,2], x='Timepoint', y='Fear', hue='trial_type', fill=True, palette=palette, linewidth=1)
-axes[0,2].get_legend().set_visible(False)
-axes[0,2].set_title("Fear rating", fontsize=15) 
-
-sns.pointplot(data=long_chosen_stim_df, ax=axes[1,2], x='Timepoint', y='Fear', hue='trial_type', dodge=False, palette=palette)
-axes[1,2].get_legend().set_visible(False)
-axes[1,2].xaxis.get_label().set_fontsize(15)
-
-#sns.stripplot(data=long_chosen_stim_df, ax=axes[0,3], x='Timepoint', y='Disgust', hue='trial_type', dodge=True, palette=palette)
-sns.barplot(data=long_chosen_stim_df, ax=axes[0,3], x='Timepoint', y='Disgust', hue='trial_type', fill=True, palette=palette, linewidth=1)
-axes[0,3].get_legend().set_visible(False)
-axes[0,3].set_title("Disgust rating", fontsize=15) 
-
-sns.pointplot(data=long_chosen_stim_df, ax=axes[1,3], x='Timepoint', y='Disgust', hue='trial_type', dodge=False, palette=palette)
-axes[1,3].get_legend().set_visible(False)
-axes[1,3].xaxis.get_label().set_fontsize(15)
-
-plt.figlegend(loc='center left', bbox_to_anchor=(0,1),  handles=[mpatches.Patch(facecolor='blue'), mpatches.Patch(facecolor='green')], labels=['Fear stimulus', 'Disgust stimulus'])
-#handles=[mpatches.Patch(facecolor='blue'), mpatches.Patch(facecolor='green')], labels=['Fear stimulus', 'Disgust stimulus'], prop={'size':15})
-plt.show()
-```
-
-</details>
-
-![](VideoRatings_files/figure-commonmark/cell-4-output-1.jpeg)
-
-<br> <br>
 <p>
 
 <b>MODEL A: VALENCE ~ TRIAL_TYPE\*TIMEPOINT</b>
@@ -460,53 +397,6 @@ List of models to run:
 NB there is only timepoint 1 of fear and disgust ratings are included in
 this model (as points rating only has one timepoint).
 </p>
-
-<br> <br>
-<p>
-
-Before running the models, we can visualise this data:
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-data=chosen_stim_df[['participant_no', 'trial_type', 'unpleasant_1', 'arousing_1', 'disgusting_1', 'frightening_1']].sort_values('trial_type')
-fig, axes = plt.subplots(2,2)
-title="Initial ratings of videos fear, disgust and points videos"
-plt.suptitle(title, fontsize=16)
-fig.tight_layout(pad=1.5)
-fig.set_size_inches(5, 5)
-
-order=['fear', 'disgust', 'points']
-palette = {'fear': 'blue',
-            'disgust': 'green',
-            'points': 'purple'}
-sns.barplot(data=data, ax=axes[0,0],   x='trial_type', hue='trial_type', y='unpleasant_1', palette=palette, legend=False, fill=True, linewidth=1, hue_order=order)
-#sns.stripplot(data=data, ax=axes[0,0],  x='trial_type', hue='trial_type', y='unpleasant_1', palette=palette, legend=False, dodge=False, hue_order=order)
-axes[0,0].set_xlabel('')
-axes[0,0].set_ylabel('Valence')
-
-sns.barplot(data=data, ax=axes[0,1], x='trial_type', hue='trial_type', y='arousing_1', palette=palette, legend=False, fill=True, linewidth=1, hue_order=order)
-#sns.stripplot(data=data, ax=axes[0,1], x='trial_type', hue='trial_type', y='arousing_1', palette=palette, legend=False, dodge=False, hue_order=order)
-axes[0,1].set_xlabel('')
-axes[0,1].set_ylabel('Arousal')
-
-sns.barplot(data=data, ax=axes[1,0], x='trial_type', hue='trial_type', y='disgusting_1', palette=palette, legend=False, fill=True, linewidth=1, hue_order=order)
-#sns.stripplot(data=data, ax=axes[1,0], x='trial_type', hue='trial_type', y='disgusting_1', palette=palette, legend=False, dodge=False, hue_order=order)
-axes[1,0].set_xlabel('')
-axes[1,0].set_ylabel('Disgust')
-
-sns.barplot(data=data, ax=axes[1,1], x='trial_type',  hue='trial_type', y='frightening_1', palette=palette, legend=False, fill=True, linewidth=1, hue_order=order)
-#sns.stripplot(data=data, ax=axes[1,1], x='trial_type',  hue='trial_type',  y='frightening_1', palette=palette, legend=False, dodge=False, hue_order=order)
-axes[1,1].set_xlabel('')
-axes[1,1].set_ylabel('Fear')
-plt.show()
-```
-
-</details>
-
-![](VideoRatings_files/figure-commonmark/cell-9-output-1.jpeg)
 
 <br> <br>
 <p>

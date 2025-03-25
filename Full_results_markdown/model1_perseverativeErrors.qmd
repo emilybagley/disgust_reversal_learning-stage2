@@ -25,6 +25,8 @@ library(tidyverse, quietly=TRUE)
 library(lme4)
 library(emmeans)
 library(DHARMa)
+library('readxl')
+library('xlsx')
 
 task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 ```
@@ -67,28 +69,6 @@ pd.options.mode.copy_on_write = True
 task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 ```
 
-<br>
-<h3><b>Visualise the data</b></h3>
-```{python}
-#| label: Visualisation
-#| echo: true
-#| code-fold: true
-
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="mean_perseverative_er", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="mean_perseverative_er", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Mean perseverative errors per reversal") 
-axes.set_title("Perseverative errors")
-```
-
-<br>
 <h3>Assess and correct for skewness in perservative error outcome</h3>
 ```{python}
 #| label: Skewness
@@ -152,12 +132,23 @@ generalized_model <- glmer(pos_perseverative_er ~ block_type + (1|participant_no
 summary(generalized_model)
 ```
 
+```{r}
+#| label: save out pvalue
+#| echo: false
+pvalForPlotting <- suppressMessages(read_excel('pvalsForPlotting.xlsx', col_names=TRUE))
+pvalForPlotting[1,]$block_typeFear=summary(generalized_model)$coefficients["block_typeFear", "Pr(>|z|)"]
+pvalForPlotting[1,]$block_typePoints=summary(generalized_model)$coefficients["block_typePoints", "Pr(>|z|)"]
+rownames(pvalForPlotting)<-NULL
+pvalsForPlotting<-as.data.frame(pvalForPlotting)
+write.xlsx(pvalsForPlotting, file='pvalsForPlotting.xlsx', row.names=FALSE)
+```
+
 <br>
 <p>As this hypothesis test found a no difference between fear and disgust, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
 ```{python}
 #| label: bayes factor function
 #| echo: true
-#|code-fold: true
+#| code-fold: true
 def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
     df=df[(df.block_type==condition_1_name)| (df.block_type==condition_2_name)][[dependent_var, 'block_type', 'participant_no']]
     df.dropna(inplace=True)

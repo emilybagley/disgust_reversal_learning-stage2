@@ -20,9 +20,8 @@ This includes assessing whether:
   differs across the three blocks/feedback types
 - The difference between self-reported points and disgust ratings
   explains the difference between points and disgust learning
-- Disgust learning relates to self-reported disgust in the video ratings
-  task
-- Fear learning relates to self-reported fear in the video ratings task
+- there is anything noteable about the outliers on the perseverative
+  error outcome - explaining why they drive effects
 - Video ratings for *all* videos (not just the ones used in the reversal
   learning task) show similar patterns to those selected for use in the
   reversal learning task.
@@ -42,6 +41,8 @@ library(tidyverse, quietly=TRUE)
 library(lme4)
 library(emmeans)
 library(DHARMa)
+library('readxl')
+library('xlsx')
 
 task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 chosen_stim_df <- read.csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
@@ -87,6 +88,7 @@ pd.options.mode.copy_on_write = True
 task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 chosen_stim_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
 sensitivity_df = pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/sensitivity_df.csv')
+vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
 
 def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
     df=df[(df.block_type==condition_1_name)| (df.block_type==condition_2_name)][[dependent_var, 'block_type', 'participant_no']]
@@ -116,35 +118,7 @@ percentage of trials where participants were correct)
 <br>
 <p>
 
-Firstly, we can plot this variable:
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="percentage_correct", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="percentage_correct", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Percentage correct") 
-axes.set_title("Percentage correct")
-```
-
-</details>
-
-![](exploratory_analyses_files/figure-commonmark/Percentage%20correct-1.jpeg)
-
-<br>
-<p>
-
-We also check for skewness of the variable
+Firstly, check for skewness of the variable
 </p>
 
 ``` python
@@ -154,7 +128,7 @@ print('Percentage correct: '+str(skew(task_summary.percentage_correct)))
 
     Percentage correct: -0.49987154559115393
 
-![](exploratory_analyses_files/figure-commonmark/Skewness%20percentage%20correct-3.jpeg)
+![](exploratory_analyses_files/figure-commonmark/Skewness%20percentage%20correct-1.jpeg)
 
 <br>
 <p>
@@ -222,7 +196,7 @@ summary(generalized_model)
 
 <p>
 
-The results of the outlier-freesensitivity analysis model is similar
+The results of the outlier-free sensitivity analysis model is similar
 (although it is closer to significance)
 </p>
 
@@ -345,9 +319,15 @@ Namely, whether the difference between disgust and points learning
 
 </p>
 
+<p>
+
+NB lose-shift is chosen for this analysis as it is the most robust of
+our findings (relative to the perseverative error finding) so allows
+more firm conclusions
+
 <b>Due to an error in the task code, we don’t have points-ratings values
 for some participants. Given that these analyses pertain to
-points-ratings, we will first exclude all these participants.
+points-ratings, we will first exclude all these participants.</b>
 </p>
 
 ``` python
@@ -502,3 +482,232 @@ print(results.summary())
     points_fear_diff     0.001    0.004  0.174 0.862 -0.007  0.008
     Group Var            0.015    0.021                           
     ==============================================================
+
+<br>
+<h3>
+
+<b>Exploratory analysis 3:</b> running the video ratings analysis with
+<b>all</b> of the fear and disgust videos
+</h3>
+
+<p>
+
+The planned video rating analysis involved just the stimuli selected to
+be used in the reversal learning task (to validate the stimulus
+selection process)
+</p>
+
+<p>
+
+Here, we look at valence and arousal ratings across <b>all 10 fear and
+disgust videos</b>
+</p>
+
+<br>
+<p>
+
+Firstly, create a long-form dataframe to allow for this
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+long_vid_ratings=pd.DataFrame()
+for i in vid_ratings_df.index:
+    row=vid_ratings_df.loc[i]
+    timepoint_1=pd.DataFrame({
+    'participant_no': [row.participant_no],
+    #'age': [row.prolific_age],
+    #'sex': [row. prolific_sex],
+    'Vid': [str(row['Vid'])],
+    'trial_type': [row.trial_type],
+    'Valence': [row.unpleasant_1],
+    'Arousal': [row.arousing_1],
+    'Fear': [row.frightening_1],
+    'Disgust': [row.disgusting_1],
+    'Timepoint': 1.0
+    })
+    timepoint_2=pd.DataFrame({
+        'participant_no': [row.participant_no],
+        #'age': [row.prolific_age],
+        #'sex': [row. prolific_sex],
+        'Vid': [str(row['Vid'])],
+        'trial_type': [row.trial_type],
+        'Valence': [row.unpleasant_2],
+        'Arousal': [row.arousing_2],
+        'Fear': [row.frightening_2],
+        'Disgust': [row.disgusting_2],
+        'Timepoint': 2.0
+    })
+    long_vid_ratings_row=pd.concat([timepoint_1, timepoint_2])
+    long_vid_ratings=pd.concat([long_vid_ratings_row, long_vid_ratings])
+    long_vid_ratings=long_vid_ratings[long_vid_ratings.trial_type!="points"]
+
+long_vid_ratings=pd.merge(long_vid_ratings, task_summary[['participant_no', 'prolific_age', 'prolific_sex']].drop_duplicates(), on='participant_no', how='outer')
+```
+
+</details>
+
+<p>
+
+<b>Models A and B show that differences in valence and arousal are
+larger when looking across all videos (rather than just looking at the
+‘chosen’ videos)</b>
+</p>
+
+<br>
+<p>
+
+Valence
+</p>
+
+``` python
+data=long_vid_ratings.reset_index()
+data.replace(['disgust', 'fear'], [1.0,2.0], inplace=True)
+
+formula = 'Valence ~ trial_type*Timepoint + prolific_age'
+
+model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'Vid': '0+Vid'}, re_formula='~trial_type')
+results=model.fit(reml=False)
+print(results.summary())
+```
+
+                  Mixed Linear Model Regression Results
+    ==================================================================
+    Model:               MixedLM    Dependent Variable:    Valence    
+    No. Observations:    6800       Method:                ML         
+    No. Groups:          340        Scale:                 1.8274     
+    Min. group size:     20         Log-Likelihood:        -13945.4510
+    Max. group size:     20         Converged:             Yes        
+    Mean group size:     20.0                                         
+    ------------------------------------------------------------------
+                           Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+    ------------------------------------------------------------------
+    Intercept               5.968    0.323  18.493 0.000  5.335  6.600
+    trial_type             -1.300    0.129 -10.057 0.000 -1.553 -1.047
+    Timepoint               0.312    0.104   3.007 0.003  0.109  0.515
+    trial_type:Timepoint   -0.022    0.066  -0.341 0.733 -0.151  0.106
+    prolific_age           -0.010    0.005  -1.863 0.062 -0.020  0.001
+    Group Var               5.177    0.450                            
+    Group x trial_type Cov -2.116    0.231                            
+    trial_type Var          1.378    0.139                            
+    Vid Var                 1.622    0.068                            
+    ==================================================================
+
+<p>
+
+Arousal
+</p>
+
+``` python
+data=long_vid_ratings.reset_index()
+data.replace(['disgust', 'fear'], [1.0,2.0], inplace=True)
+
+formula = 'Arousal ~ trial_type*Timepoint + prolific_age'
+
+model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'Vid': '0+Vid'}, re_formula='~trial_type')
+results=model.fit(reml=False)
+print(results.summary())
+```
+
+                  Mixed Linear Model Regression Results
+    =================================================================
+    Model:                MixedLM   Dependent Variable:   Arousal    
+    No. Observations:     6800      Method:               ML         
+    No. Groups:           340       Scale:                1.6158     
+    Min. group size:      20        Log-Likelihood:       -12712.9704
+    Max. group size:      20        Converged:            Yes        
+    Mean group size:      20.0                                       
+    -----------------------------------------------------------------
+                           Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+    -----------------------------------------------------------------
+    Intercept               2.579    0.273  9.457 0.000  2.044  3.113
+    trial_type              0.736    0.107  6.858 0.000  0.526  0.946
+    Timepoint               0.262    0.097  2.691 0.007  0.071  0.453
+    trial_type:Timepoint   -0.212    0.062 -3.434 0.001 -0.333 -0.091
+    prolific_age            0.012    0.005  2.651 0.008  0.003  0.021
+    Group Var               2.490    0.242                           
+    Group x trial_type Cov -0.700    0.109                           
+    trial_type Var          0.451    0.062                           
+    Vid Var                 0.582    0.040                           
+    =================================================================
+
+<p>
+
+<b>And similar results are found when looking just at T1 in comparison
+to the points/loss feedback</b>
+</p>
+
+<br>
+<p>
+
+Valence
+</p>
+
+``` python
+T1_and_points_data=pd.concat([vid_ratings_df,chosen_stim_df[chosen_stim_df.trial_type=='points']]).reset_index()
+T1_and_points_data=T1_and_points_data[['participant_no', 'trial_type', 'unpleasant_1', 'arousing_1', 'disgusting_1', 'frightening_1', 'Vid']].sort_values('trial_type')
+T1_and_points_data=pd.merge(T1_and_points_data, task_summary[['participant_no', 'prolific_age', 'prolific_sex']].drop_duplicates(), on='participant_no', how='outer')
+
+data=T1_and_points_data
+data.replace(['points'],['apoints'], inplace=True) ##makes comparison condition points
+formula = 'unpleasant_1 ~ trial_type + prolific_age'
+
+model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop')
+results=model.fit(reml=False)
+print(results.summary())
+```
+
+                  Mixed Linear Model Regression Results
+    =================================================================
+    Model:               MixedLM   Dependent Variable:   unpleasant_1
+    No. Observations:    3658      Method:               ML          
+    No. Groups:          340       Scale:                3.9104      
+    Min. group size:     10        Log-Likelihood:       -7966.4546  
+    Max. group size:     11        Converged:            Yes         
+    Mean group size:     10.8                                        
+    -----------------------------------------------------------------
+                          Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+    -----------------------------------------------------------------
+    Intercept              5.210    0.266  19.590 0.000  4.689  5.731
+    trial_type[T.disgust] -0.204    0.133  -1.533 0.125 -0.465  0.057
+    trial_type[T.fear]    -1.527    0.133 -11.458 0.000 -1.788 -1.265
+    prolific_age          -0.011    0.005  -2.209 0.027 -0.021 -0.001
+    Group Var              1.546    0.078                            
+    =================================================================
+
+<p>
+
+Arousal
+</p>
+
+``` python
+formula = 'arousing_1 ~ trial_type + prolific_age'
+model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~trial_type')
+results=model.fit(reml=False)
+print(results.summary())
+```
+
+                              Mixed Linear Model Regression Results
+    =========================================================================================
+    Model:                       MixedLM            Dependent Variable:            arousing_1
+    No. Observations:            3658               Method:                        ML        
+    No. Groups:                  340                Scale:                         2.2275    
+    Min. group size:             10                 Log-Likelihood:                -7100.7929
+    Max. group size:             11                 Converged:                     Yes       
+    Mean group size:             10.8                                                        
+    -----------------------------------------------------------------------------------------
+                                                   Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+    -----------------------------------------------------------------------------------------
+    Intercept                                       4.333    0.226 19.136 0.000  3.889  4.777
+    trial_type[T.disgust]                          -0.887    0.131 -6.771 0.000 -1.144 -0.630
+    trial_type[T.fear]                             -0.363    0.134 -2.715 0.007 -0.625 -0.101
+    prolific_age                                    0.010    0.004  2.473 0.013  0.002  0.018
+    Group Var                                       1.769    0.248                           
+    Group x trial_type[T.disgust] Cov              -1.150    0.236                           
+    trial_type[T.disgust] Var                       1.931    0.285                           
+    Group x trial_type[T.fear] Cov                 -1.359    0.246                           
+    trial_type[T.disgust] x trial_type[T.fear] Cov  1.860    0.270                           
+    trial_type[T.fear] Var                          2.170    0.298                           
+    =========================================================================================

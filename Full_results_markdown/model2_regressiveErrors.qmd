@@ -25,6 +25,8 @@ library(tidyverse, quietly=TRUE)
 library(lme4)
 library(emmeans)
 library(DHARMa)
+library('xlsx')
+library('readxl')
 
 task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 ```
@@ -66,28 +68,6 @@ pd.options.mode.copy_on_write = True
 
 task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 ```
-
-<br>
-<h3><b>Visualise the data</b></h3>
-```{python}
-#| label: Visualisation
-#| echo: true
-#| code-fold: true
-
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="mean_regressive_er", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="mean_regressive_er", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Mean regressive errors per reversal") 
-axes.set_title("Regressive errors")
-```
-<br>
 
 <h3>Assess and correct for skewness in perservative error outcome</h3>
 ```{python}
@@ -146,6 +126,17 @@ Model details:
 task_summary$pos_regressive_er <- task_summary$mean_regressive_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
 generalized_model <- suppressMessages(glmer(pos_regressive_er ~ block_type + (block_type|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="inverse")))
 summary(generalized_model)
+```
+
+```{r}
+#| label: save out pvalue
+#| echo: false
+pvalForPlotting <- suppressMessages(read_excel('pvalsForPlotting.xlsx', col_names=TRUE))
+pvalForPlotting[2,]$block_typeFear=summary(generalized_model)$coefficients["block_typeFear", "Pr(>|z|)"]
+pvalForPlotting[2,]$block_typePoints=summary(generalized_model)$coefficients["block_typePoints", "Pr(>|z|)"]
+rownames(pvalForPlotting)<-NULL
+pvalsForPlotting<-as.data.frame(pvalForPlotting)
+write.xlsx(pvalsForPlotting, file='pvalsForPlotting.xlsx', row.names=FALSE)
 ```
 
 

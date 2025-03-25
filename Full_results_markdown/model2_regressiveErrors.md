@@ -34,6 +34,8 @@ library(tidyverse, quietly=TRUE)
 library(lme4)
 library(emmeans)
 library(DHARMa)
+library('xlsx')
+library('readxl')
 
 task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 ```
@@ -79,36 +81,6 @@ task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_r
 
 </details>
 
-<br>
-<h3>
-
-<b>Visualise the data</b>
-</h3>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="mean_regressive_er", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="mean_regressive_er", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Mean regressive errors per reversal") 
-axes.set_title("Regressive errors")
-```
-
-</details>
-
-![](model2_regressiveErrors_files/figure-commonmark/Visualisation-1.jpeg)
-
-<br>
-
 <h3>
 
 Assess and correct for skewness in perservative error outcome
@@ -133,7 +105,7 @@ print('Regressive error skew: '+str(skew(task_summary.mean_regressive_er)))
 
     Regressive error skew: 6.465682277497517
 
-![](model2_regressiveErrors_files/figure-commonmark/Skewness-3.jpeg)
+![](model2_regressiveErrors_files/figure-commonmark/Skewness-1.jpeg)
 
 <h3>
 
@@ -691,15 +663,3 @@ for key, val in dict(zip(labels, het_white_res)).items():
     LM-Test p-value 0.7124281619582324
     F-Statistic 0.7812343930336153
     F-Test p-value 0.7163175239908735
-
-<h4>
-
-<b>Exploratory analyses</b>
-</h4>
-
-<p>
-
-- Points ratings
-- error rates
-
-</p>

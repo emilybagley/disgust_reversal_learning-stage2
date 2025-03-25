@@ -67,43 +67,6 @@ task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_r
 <br>
 <h3>
 
-<b>Visualise the data</b>
-</h3>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="win_stay", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="win_stay", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Win-stay probability") 
-axes.set_title("Win-stay")
-```
-
-</details>
-
-    C:\Users\eb08\AppData\Local\Temp\ipykernel_16824\2893565744.py:10: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
-      axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-
-    Text(0.5, 1.0, 'Win-stay')
-
-<img
-src="model3_winStay_files/figure-commonmark/visualisation-output-3.jpeg"
-id="visualisation-2" />
-
-<br>
-
-<br>
-<h3>
-
 Assess and correct for skewness in win-stay outcome
 </h3>
 
@@ -726,16 +689,3 @@ print(results.summary())
     valence_habdiff        -1.330    2.992 -0.445 0.657  -7.194   4.534
     Group Var            9527.405   14.205                             
     ===================================================================
-
-<h4>
-
-<b>Exploratory analyses</b>
-</h4>
-
-<p>
-
-- Effect of age
-- Points ratings
-- error rates
-
-</p>

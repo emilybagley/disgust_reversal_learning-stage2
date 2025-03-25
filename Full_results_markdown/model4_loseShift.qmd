@@ -66,28 +66,6 @@ task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_r
 ```
 
 <br>
-<h3><b>Visualise the data</b></h3>
-```{python}
-#| label: Visualisation
-#| echo: true
-#| code-fold: true
-
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="lose_shift", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="lose_shift", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Lose-shift probability") 
-axes.set_title("Lose-shift")
-```
-
-
-<br>
 <h3>The lose-shift variable is not skewed</h3>
 <p>So no skewness transformation is required.</p>
 ```{python}
@@ -136,6 +114,18 @@ labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
 for key, val in dict(zip(labels, het_white_res)).items():
     print(key, val)
 ```
+
+```{python}
+#| label: save out pvalue
+#| echo: false
+warnings.simplefilter(action='ignore', category=UserWarning)
+pvalForPlotting = pd.read_excel('pvalsForPlotting.xlsx')
+pvalForPlotting.loc[3, 'block_typeFear']=results.pvalues['block_type[T.Fear]']
+pvalForPlotting.loc[3, 'block_typePoints']=results.pvalues['block_type[T.Points]']
+pvalForPlotting.to_excel('pvalsForPlotting.xlsx', index=False)
+```
+
+
 
 <p>And the results remain unchanged when the age covariate is dropped:</p>
 ```{python}

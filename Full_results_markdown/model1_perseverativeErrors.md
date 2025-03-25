@@ -35,6 +35,8 @@ library(tidyverse, quietly=TRUE)
 library(lme4)
 library(emmeans)
 library(DHARMa)
+library('readxl')
+library('xlsx')
 
 task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 ```
@@ -80,35 +82,6 @@ task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_r
 
 </details>
 
-<br>
-<h3>
-
-<b>Visualise the data</b>
-</h3>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="mean_perseverative_er", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="mean_perseverative_er", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Mean perseverative errors per reversal") 
-axes.set_title("Perseverative errors")
-```
-
-</details>
-
-![](model1_perseverativeErrors_files/figure-commonmark/Visualisation-1.jpeg)
-
-<br>
 <h3>
 
 Assess and correct for skewness in perservative error outcome
@@ -134,7 +107,7 @@ print('Perseverative error skew: '+str(skew(task_summary.mean_perseverative_er))
 
     Perseverative error skew: 2.400818032551747
 
-![](model1_perseverativeErrors_files/figure-commonmark/Skewness-3.jpeg)
+![](model1_perseverativeErrors_files/figure-commonmark/Skewness-1.jpeg)
 
 <h3>
 
@@ -256,8 +229,10 @@ we will compute a Bayes Factor to test the strength of the evidence for
 the null
 </p>
 
+<details class="code-fold">
+<summary>Code</summary>
+
 ``` python
-#|code-fold: true
 def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
     df=df[(df.block_type==condition_1_name)| (df.block_type==condition_2_name)][[dependent_var, 'block_type', 'participant_no']]
     df.dropna(inplace=True)
@@ -266,6 +241,8 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
     bf_null=1/float(ttest.BF10)
     return bf_null
 ```
+
+</details>
 
 ``` python
 print(bayes_factor(task_summary, 'perseverative_er_transformed', 'Disgust', 'Fear'))
@@ -721,15 +698,3 @@ summary(generalized_model)
     valence_dff  0.315  0.001  0.002              
     arousal_dff -0.192 -0.008 -0.009 -0.190       
     valnc_hbdff -0.206  0.002  0.001 -0.375  0.111
-
-<h4>
-
-<b>Exploratory analyses</b>
-</h4>
-
-<p>
-
-- Points ratings
-- error rates
-
-</p>

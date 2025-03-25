@@ -81,34 +81,6 @@ task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_r
 <br>
 <h3>
 
-<b>Visualise the data</b>
-</h3>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="lose_shift", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="lose_shift", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Lose-shift probability") 
-axes.set_title("Lose-shift")
-```
-
-</details>
-
-![](model4_loseShift_files/figure-commonmark/Visualisation-1.jpeg)
-
-<br>
-<h3>
-
 The lose-shift variable is not skewed
 </h3>
 
@@ -129,7 +101,7 @@ print('lose-shift  skew: '+str(skew(task_summary.lose_shift, nan_policy='omit'))
 
     lose-shift  skew: 0.16189569452640257
 
-![](model4_loseShift_files/figure-commonmark/Skewness-3.jpeg)
+![](model4_loseShift_files/figure-commonmark/Skewness-1.jpeg)
 
 <h3>
 

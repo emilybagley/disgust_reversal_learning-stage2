@@ -54,28 +54,6 @@ task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_r
 ```
 
 <br>
-<h3><b>Visualise the data</b></h3>
-```{python}
-#| label: Visualisation
-#| echo: true
-#| code-fold: true
-
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="win_stay", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="win_stay", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5, cut=0)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Win-stay probability") 
-axes.set_title("Win-stay")
-```
-<br>
-
-<br>
 <h3>Assess and correct for skewness in win-stay outcome</h3>
 ```{python}
 #| label: Skewness
@@ -139,6 +117,15 @@ results=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop'
 print(results.summary())
 ```
 
+```{python}
+#| label: save out pvalue
+#| echo: false
+warnings.simplefilter(action='ignore', category=UserWarning)
+pvalForPlotting = pd.read_excel('pvalsForPlotting.xlsx')
+pvalForPlotting.loc[2, 'block_typeFear']=results.pvalues['block_type[T.Fear]']
+pvalForPlotting.loc[2, 'block_typePoints']=results.pvalues['block_type[T.Points]']
+pvalForPlotting.to_excel('pvalsForPlotting.xlsx', index=False)
+```
 
 <br>
 <p>As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>

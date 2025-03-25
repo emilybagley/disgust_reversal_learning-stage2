@@ -25,6 +25,8 @@ library(tidyverse, quietly=TRUE)
 library(lme4)
 library(emmeans)
 library(DHARMa)
+library('readxl')
+library('xlsx')
 
 task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 chosen_stim_df <- read.csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
@@ -68,6 +70,7 @@ pd.options.mode.copy_on_write = True
 task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 chosen_stim_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
 sensitivity_df = pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/sensitivity_df.csv')
+vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
 
 def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
     df=df[(df.block_type==condition_1_name)| (df.block_type==condition_2_name)][[dependent_var, 'block_type', 'participant_no']]
@@ -81,33 +84,12 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 <h3><b>Exploratory analysis 1: </b> </h3>
 <p>Hypothesis testing analyses showed a difference in perseverative error rate and lose-shift probability between fear and points learning. To better understand this change, we tested whether this difference is mirrored by a difference in overall task performance (indexed by percentage of trials where participants were correct)</p>
 <br>
-<p>Firstly, we can plot this variable:</p>
-```{python}
-#| label: Percentage correct
-#| echo: true
-#| code-fold: true
-palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
-
-##plot hypothesised results
-fig, axes = plt.subplots(1,1, sharey=False)
-
-sns.stripplot(data=task_summary, x="block_type", y="percentage_correct", ax=axes, palette=palette, size=5, jitter=True, marker='.')
-sns.violinplot(data=task_summary, x="block_type", y="percentage_correct", ax=axes,fill=True, inner="quart", palette=palette, saturation=0.5)
-#axes.set_xlabel("Feedback type")
-axes.set_xlabel("")
-axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
-axes.set_ylabel("Percentage correct") 
-axes.set_title("Percentage correct")
-```
-
-<br>
-<p>We also check for skewness of the variable</p>
+<p>Firstly, check for skewness of the variable</p>
 ```{python}
 #| label: Skewness percentage correct
 
 sns.histplot(data=task_summary, x="percentage_correct") 
 print('Percentage correct: '+str(skew(task_summary.percentage_correct)))
-
 ```
 
 <br>
@@ -128,7 +110,18 @@ generalized_model <- glmer(percentage_correct ~ block_type +(1|participant_no) +
 summary(generalized_model)
 ```
 
-<p>The results of the outlier-freesensitivity analysis model is similar (although it is closer to significance)</p>
+```{r}
+#| label: save out pvalue
+#| echo: false
+pvalForPlotting <- suppressMessages(read_excel('pvalsForPlotting.xlsx', col_names=TRUE))
+pvalForPlotting[5,]$block_typeFear=summary(generalized_model)$coefficients["block_typeFear", "Pr(>|z|)"]
+pvalForPlotting[5,]$block_typePoints=summary(generalized_model)$coefficients["block_typePoints", "Pr(>|z|)"]
+rownames(pvalForPlotting)<-NULL
+pvalsForPlotting<-as.data.frame(pvalForPlotting)
+write.xlsx(pvalsForPlotting, file='pvalsForPlotting.xlsx', row.names=FALSE)
+```
+
+<p>The results of the outlier-free sensitivity analysis model is similar (although it is closer to significance)</p>
 ```{r}
 #| label: generalized mixed effects model - percentage correct sensitivity
 
@@ -170,7 +163,7 @@ print(bayes_factor(sensitivity_df, 'percentage_correct', 'Disgust', 'Points'))
 </p>
 <p>NB lose-shift is chosen for this analysis as it is the most robust of our findings (relative to the perseverative error finding) so allows more firm conclusions
 
-<b>Due to an error in the task code, we don't have points-ratings values for some participants. Given that these analyses pertain to points-ratings, we will first exclude all these participants.</p>
+<b>Due to an error in the task code, we don't have points-ratings values for some participants. Given that these analyses pertain to points-ratings, we will first exclude all these participants.</b></p>
 ```{python}
 #| label: remove participants with no points ratings
 participants_to_remove=list(set(chosen_stim_df[chosen_stim_df.unpleasant_1.isna()].participant_no))
@@ -237,5 +230,94 @@ print(results.summary())
 ```
 
 <br>
-<h3><b>Exploratory analysis 3:</b> testing whether self-reported valence, arousal, fear and disgust relates to performance on the reversal learning task</h3>
-<p>
+<h3><b>Exploratory analysis 3:</b> running the video ratings analysis with <b>all</b> of the fear and disgust videos</h3>
+<p>The planned video rating analysis involved just the stimuli selected to be used in the reversal learning task (to validate the stimulus selection process)</p>
+<p>Here, we look at valence and arousal ratings across <b>all 10 fear and disgust videos</b></p>
+<br>
+<p>Firstly, create a long-form dataframe to allow for this</p>
+```{python}
+#| code-fold: true
+long_vid_ratings=pd.DataFrame()
+for i in vid_ratings_df.index:
+    row=vid_ratings_df.loc[i]
+    timepoint_1=pd.DataFrame({
+    'participant_no': [row.participant_no],
+    #'age': [row.prolific_age],
+    #'sex': [row. prolific_sex],
+    'Vid': [str(row['Vid'])],
+    'trial_type': [row.trial_type],
+    'Valence': [row.unpleasant_1],
+    'Arousal': [row.arousing_1],
+    'Fear': [row.frightening_1],
+    'Disgust': [row.disgusting_1],
+    'Timepoint': 1.0
+    })
+    timepoint_2=pd.DataFrame({
+        'participant_no': [row.participant_no],
+        #'age': [row.prolific_age],
+        #'sex': [row. prolific_sex],
+        'Vid': [str(row['Vid'])],
+        'trial_type': [row.trial_type],
+        'Valence': [row.unpleasant_2],
+        'Arousal': [row.arousing_2],
+        'Fear': [row.frightening_2],
+        'Disgust': [row.disgusting_2],
+        'Timepoint': 2.0
+    })
+    long_vid_ratings_row=pd.concat([timepoint_1, timepoint_2])
+    long_vid_ratings=pd.concat([long_vid_ratings_row, long_vid_ratings])
+    long_vid_ratings=long_vid_ratings[long_vid_ratings.trial_type!="points"]
+
+long_vid_ratings=pd.merge(long_vid_ratings, task_summary[['participant_no', 'prolific_age', 'prolific_sex']].drop_duplicates(), on='participant_no', how='outer')
+```
+
+<p><b>Models A and B show that differences in valence and arousal are larger when looking across all videos (rather than just looking at the 'chosen' videos)</b></p>
+<br>
+<p>Valence</p>
+```{python}
+data=long_vid_ratings.reset_index()
+data.replace(['disgust', 'fear'], [1.0,2.0], inplace=True)
+
+formula = 'Valence ~ trial_type*Timepoint + prolific_age'
+
+model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'Vid': '0+Vid'}, re_formula='~trial_type')
+results=model.fit(reml=False)
+print(results.summary())
+```
+
+<p>Arousal</p>
+```{python}
+data=long_vid_ratings.reset_index()
+data.replace(['disgust', 'fear'], [1.0,2.0], inplace=True)
+
+formula = 'Arousal ~ trial_type*Timepoint + prolific_age'
+
+model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'Vid': '0+Vid'}, re_formula='~trial_type')
+results=model.fit(reml=False)
+print(results.summary())
+```
+
+<p><b>And similar results are found when looking just at T1 in comparison to the points/loss feedback</b></p>
+<br>
+<p>Valence</p>
+```{python}
+T1_and_points_data=pd.concat([vid_ratings_df,chosen_stim_df[chosen_stim_df.trial_type=='points']]).reset_index()
+T1_and_points_data=T1_and_points_data[['participant_no', 'trial_type', 'unpleasant_1', 'arousing_1', 'disgusting_1', 'frightening_1', 'Vid']].sort_values('trial_type')
+T1_and_points_data=pd.merge(T1_and_points_data, task_summary[['participant_no', 'prolific_age', 'prolific_sex']].drop_duplicates(), on='participant_no', how='outer')
+
+data=T1_and_points_data
+data.replace(['points'],['apoints'], inplace=True) ##makes comparison condition points
+formula = 'unpleasant_1 ~ trial_type + prolific_age'
+
+model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop')
+results=model.fit(reml=False)
+print(results.summary())
+```
+
+<p>Arousal</p>
+```{python}
+formula = 'arousing_1 ~ trial_type + prolific_age'
+model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~trial_type')
+results=model.fit(reml=False)
+print(results.summary())
+```
