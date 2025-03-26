@@ -285,6 +285,12 @@ results=model.fit(reml=False)
 print(results.summary())
 ```
 
+```{python}
+#| echo: false
+expl_FDpvals=pd.DataFrame(columns=['Condition','trial_type', 'Timepoint', 'trial_type:Timepoint'])
+expl_FDpvals.loc[0]=['Valence', results.pvalues['trial_type'], results.pvalues['Timepoint'], results.pvalues['trial_type:Timepoint']]
+```
+
 <p>Arousal</p>
 ```{python}
 data=long_vid_ratings.reset_index()
@@ -295,6 +301,12 @@ formula = 'Arousal ~ trial_type*Timepoint + prolific_age'
 model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'Vid': '0+Vid'}, re_formula='~trial_type')
 results=model.fit(reml=False)
 print(results.summary())
+```
+
+```{python}
+#| echo: false
+expl_FDpvals.loc[1]=['Arousal', results.pvalues['trial_type'], results.pvalues['Timepoint'], results.pvalues['trial_type:Timepoint']]
+expl_FDpvals.to_csv('exploratory_videoRating_pvals_fearDisgust.csv')
 ```
 
 <p><b>And similar results are found when looking just at T1 in comparison to the points/loss feedback</b></p>
@@ -314,10 +326,23 @@ results=model.fit(reml=False)
 print(results.summary())
 ```
 
+```{python}
+#| echo: false
+expl_FDPpvals=pd.DataFrame(columns=['Condition','trial_type[T.disgust]', 'trial_type[T.fear]'])
+expl_FDPpvals.loc[0]=['Valence', results.pvalues['trial_type[T.disgust]'], results.pvalues['trial_type[T.fear]']]
+```
+
+
 <p>Arousal</p>
 ```{python}
 formula = 'arousing_1 ~ trial_type + prolific_age'
 model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~trial_type')
 results=model.fit(reml=False)
 print(results.summary())
+```
+
+```{python}
+#| echo: false
+expl_FDPpvals.loc[1]=['Arousal', results.pvalues['trial_type[T.disgust]'], results.pvalues['trial_type[T.fear]']]
+expl_FDPpvals.to_csv('exploratory_videoRating_pvals_points.csv')
 ```
