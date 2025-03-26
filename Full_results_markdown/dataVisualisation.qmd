@@ -1,7 +1,7 @@
 ---
 title: "Data visualisations"
 format: gfm
-fig-format: png
+fig-format: jpeg
 ---
 
 ```{python}

@@ -166,7 +166,7 @@ plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patc
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-4-output-1.png)
+![](dataVisualisation_files/figure-commonmark/cell-4-output-1.jpeg)
 
 <p>
 
@@ -301,7 +301,7 @@ axes[1,1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-5-output-1.png)
+![](dataVisualisation_files/figure-commonmark/cell-5-output-1.jpeg)
 
 <p>
 
@@ -502,7 +502,7 @@ plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patc
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-6-output-1.png)
+![](dataVisualisation_files/figure-commonmark/cell-6-output-1.jpeg)
 
 <br>
 <p>
@@ -663,7 +663,7 @@ plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patc
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-7-output-1.png)
+![](dataVisualisation_files/figure-commonmark/cell-7-output-1.jpeg)
 
 <h3>
 
@@ -736,7 +736,7 @@ if points_annot != 'NonSig':
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-8-output-1.png)
+![](dataVisualisation_files/figure-commonmark/cell-8-output-1.jpeg)
 
 <p>
 
@@ -808,7 +808,7 @@ axes[1].set_ylim(top=y+h+0.05)
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-9-output-1.png)
+![](dataVisualisation_files/figure-commonmark/cell-9-output-1.jpeg)
 
 <p>
 
@@ -840,7 +840,7 @@ axes.set_title("Percentage correct")
 
     Text(0.5, 1.0, 'Percentage correct')
 
-![](dataVisualisation_files/figure-commonmark/cell-10-output-2.png)
+![](dataVisualisation_files/figure-commonmark/cell-10-output-2.jpeg)
 
 <h3>
 
@@ -909,7 +909,7 @@ print("Number of outliers ="+str(len(outliers)))
 
     Number of outliers =47
 
-![](dataVisualisation_files/figure-commonmark/cell-12-output-2.png)
+![](dataVisualisation_files/figure-commonmark/cell-12-output-2.jpeg)
 
 <p>
 
@@ -999,7 +999,7 @@ axes[1,1].set_xlabel('Lose-shift')
 
     Text(0.5, 77.16666666666664, 'Lose-shift')
 
-![](dataVisualisation_files/figure-commonmark/cell-13-output-2.png)
+![](dataVisualisation_files/figure-commonmark/cell-13-output-2.jpeg)
 
 <p>
 
@@ -1089,4 +1089,4 @@ axes[1,1].set_xlabel('Valence and arousal for points', fontsize=8)
 
     Text(0.5, 77.16666666666664, 'Valence and arousal for points')
 
-![](dataVisualisation_files/figure-commonmark/cell-14-output-2.png)
+![](dataVisualisation_files/figure-commonmark/cell-14-output-2.jpeg)
