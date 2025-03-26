@@ -1,7 +1,7 @@
 ---
 title: "Data visualisations"
 format: gfm
-fig-format: jpeg
+fig-format: png
 ---
 
 ```{python}
@@ -372,7 +372,6 @@ if interaction_annot != 'NonSig':
 for ax in axes.flatten():
     ax.get_legend().set_visible(False)
 plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patch(facecolor="#5E2E9D"), mpatches.Patch(facecolor="#2487B8")], labels=['Disgust stimulus', 'Fear stimulus'], prop={'size':10})
-plt.show()
 plt.savefig('figures/VidRating_FearDisgust.jpeg', dpi=300, bbox_inches='tight')
 ```
 
@@ -689,7 +688,6 @@ if interaction_annot != 'NonSig':
 for ax in axes.flatten():
     ax.get_legend().set_visible(False)
 plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patch(facecolor="#5E2E9D"), mpatches.Patch(facecolor="#2487B8")], labels=['Disgust stimulus', 'Fear stimulus'], prop={'size':10})
-plt.show()
 plt.savefig('figures/Exploratory_VidRating_FearDisgust.jpeg', dpi=300, bbox_inches='tight')
 ```
 

@@ -160,15 +160,12 @@ if interaction_annot != 'NonSig':
 for ax in axes.flatten():
     ax.get_legend().set_visible(False)
 plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patch(facecolor="#5E2E9D"), mpatches.Patch(facecolor="#2487B8")], labels=['Disgust stimulus', 'Fear stimulus'], prop={'size':10})
-plt.show()
 plt.savefig('figures/VidRating_FearDisgust.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-4-output-1.jpeg)
-
-    <Figure size 2100x1500 with 0 Axes>
+![](dataVisualisation_files/figure-commonmark/cell-4-output-1.png)
 
 <p>
 
@@ -303,7 +300,7 @@ plt.savefig('figures/VidRating_Points.jpeg', dpi=300, bbox_inches='tight')
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-5-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-5-output-1.png)
 
 <p>
 
@@ -499,15 +496,12 @@ if interaction_annot != 'NonSig':
 for ax in axes.flatten():
     ax.get_legend().set_visible(False)
 plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patch(facecolor="#5E2E9D"), mpatches.Patch(facecolor="#2487B8")], labels=['Disgust stimulus', 'Fear stimulus'], prop={'size':10})
-plt.show()
 plt.savefig('figures/Exploratory_VidRating_FearDisgust.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-6-output-1.jpeg)
-
-    <Figure size 2100x1500 with 0 Axes>
+![](dataVisualisation_files/figure-commonmark/cell-6-output-1.png)
 
 <br>
 <p>
@@ -668,7 +662,7 @@ plt.savefig('figures/Exploratory_VidRating_Points.jpeg', dpi=300, bbox_inches='t
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-7-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-7-output-1.png)
 
 <h3>
 
@@ -741,7 +735,7 @@ plt.savefig('figures/ReversaLearning_PerseverativeRegressive.jpeg', dpi=300, bbo
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-8-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-8-output-1.png)
 
 <p>
 
@@ -813,7 +807,7 @@ plt.savefig('figures/ReversaLearning_winStayLoseShift.jpeg', dpi=300, bbox_inche
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-9-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-9-output-1.png)
 
 <p>
 
@@ -843,7 +837,7 @@ plt.savefig('figures/exploratory_ReversaLearning_PercentageCorrect.jpeg', dpi=30
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-10-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-10-output-1.png)
 
 <h3>
 
@@ -912,7 +906,7 @@ plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers.jpeg', dp
 
     Number of outliers =47
 
-![](dataVisualisation_files/figure-commonmark/cell-12-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-12-output-2.png)
 
 <p>
 
@@ -1000,7 +994,7 @@ plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers_keyOutcom
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-13-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-13-output-1.png)
 
 <p>
 
@@ -1088,4 +1082,4 @@ plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers_vidRating
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-14-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-14-output-1.png)
