@@ -2,3 +2,6 @@
 *.pdf
 *.csv
 data/
+Full_results_markdown/*
+!Full_results_markdown/*.md 
+!Full_results_markdown/figures/ 
