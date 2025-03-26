@@ -58,11 +58,12 @@ if timepoint_annot != 'NonSig':
 
 sns.pointplot(data=long_chosen_stim_df, ax=axes[1,0], x='Timepoint', y='Valence', hue='trial_type', palette=palette, scale=0.75, marker='')
 axes[1,0].xaxis.get_label().set_fontsize(12)
-axes[1,0].set_ylabel('')
+axes[1,0].yaxis.label.set_visible(False)
 if interaction_annot != 'NonSig': 
     x= 0.5
     y= 4.75
     axes[1,0].text(x, y, interaction_annot, ha='center', va='bottom', color='black', fontsize=15)
+
 
 ###AROUSAL
 trial_type_annot, timepoint_annot, interaction_annot = FD_pVal_annot('Arousal')
@@ -160,7 +161,7 @@ if interaction_annot != 'NonSig':
 for ax in axes.flatten():
     ax.get_legend().set_visible(False)
 plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patch(facecolor="#5E2E9D"), mpatches.Patch(facecolor="#2487B8")], labels=['Disgust stimulus', 'Fear stimulus'], prop={'size':10})
-plt.savefig('figures/VidRating_FearDisgust.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/VidRating_FearDisgust.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -295,7 +296,7 @@ axes[1,0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)
 axes[1,1].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col)
 axes[1,1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
 
-plt.savefig('figures/VidRating_Points.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/VidRating_Points.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -496,7 +497,7 @@ if interaction_annot != 'NonSig':
 for ax in axes.flatten():
     ax.get_legend().set_visible(False)
 plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patch(facecolor="#5E2E9D"), mpatches.Patch(facecolor="#2487B8")], labels=['Disgust stimulus', 'Fear stimulus'], prop={'size':10})
-plt.savefig('figures/Exploratory_VidRating_FearDisgust.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/Exploratory_VidRating_FearDisgust.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -657,7 +658,7 @@ axes[3].set_yticklabels(range(0, 11,2))
 axes[3].margins(x=0.15)
 
 plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patch(facecolor="#9B0F47"), mpatches.Patch(facecolor="#5E2E9D"), mpatches.Patch(facecolor="#2487B8")], labels=['Points stimulus', 'Disgust stimulus', 'Fear stimulus'], prop={'size':10})
-plt.savefig('figures/Exploratory_VidRating_Points.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/Exploratory_VidRating_Points.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -730,7 +731,7 @@ if points_annot != 'NonSig':
     y, h, col = task_summary["mean_regressive_er"].max() + 0.075, 0.05, 'black'  
     axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
     axes[1].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col) 
-plt.savefig('figures/ReversaLearning_PerseverativeRegressive.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/ReversaLearning_PerseverativeRegressive.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -802,7 +803,7 @@ if points_annot != 'NonSig':
     axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
     axes[1].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=15) 
 axes[1].set_ylim(top=y+h+0.05)
-plt.savefig('figures/ReversaLearning_winStayLoseShift.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/ReversaLearning_winStayLoseShift.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -832,12 +833,14 @@ axes.set_xlabel("")
 axes.set_xticklabels(axes.get_xticklabels(), rotation=0)
 axes.set_ylabel("Percentage correct") 
 axes.set_title("Percentage correct")
-plt.savefig('figures/exploratory_ReversaLearning_PercentageCorrect.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/exploratory_ReversaLearning_PercentageCorrect.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-10-output-1.png)
+    Text(0.5, 1.0, 'Percentage correct')
+
+![](dataVisualisation_files/figure-commonmark/cell-10-output-2.png)
 
 <h3>
 
@@ -899,7 +902,7 @@ axes.axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label
 axes.axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
 axes.set_xlabel('Mean perseverative errors per reversal')
 print("Number of outliers ="+str(len(outliers)))
-plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -989,12 +992,14 @@ sns.histplot(data=outliers, x="lose_shift", bins=bins, color=colorA, ax=axes[1,1
 axes[1,1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5,  label='Lower Bound')
 axes[1,1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
 axes[1,1].set_xlabel('Lose-shift')
-plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers_keyOutcomes.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers_keyOutcomes.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-13-output-1.png)
+    Text(0.5, 77.16666666666664, 'Lose-shift')
+
+![](dataVisualisation_files/figure-commonmark/cell-13-output-2.png)
 
 <p>
 
@@ -1077,9 +1082,11 @@ axes[1,1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, 
 axes[1,1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5,label='Upper Bound')
 axes[1,1].set_xlabel('Valence and arousal for points', fontsize=8)
 #axes[1,1].set_xlabel('')
-plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers_vidRatings.jpeg', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/Exploratory_ReversaLearning_PerseverativeOutliers_vidRatings.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-14-output-1.png)
+    Text(0.5, 77.16666666666664, 'Valence and arousal for points')
+
+![](dataVisualisation_files/figure-commonmark/cell-14-output-2.png)
