@@ -7,7 +7,7 @@
 <br>
 <b><h3>The clearest way to see all analysis is in the markdown scripts found in the Full_results_markdown folder:</h3></b>
 
-These files contain all analyses reported in the paper (which are duplicated in the original notebooks found in the other folders of this repository) in a clearer more intelligible way (e.g., with markdown explanations and confusing extra steps)
+These files contain all analyses reported in the paper (which are duplicated in the original notebooks found in the other folders of this repository) in a clearer more intelligible way (e.g., with markdown explanations and without confusing extra steps)
 <br>
 <br>
 
