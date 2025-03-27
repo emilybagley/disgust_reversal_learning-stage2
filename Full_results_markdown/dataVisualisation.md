@@ -179,123 +179,124 @@ taken once)
 
 ``` python
 data=chosen_stim_df[['participant_no', 'trial_type', 'unpleasant_1', 'arousing_1', 'disgusting_1', 'frightening_1']].sort_values('trial_type')
-fig, axes = plt.subplots(2,2, sharey='row')
+fig, axes = plt.subplots(1,4, sharey='row')
 title="Initial ratings of videos fear, disgust and points videos"
 #plt.suptitle(title, fontsize=16)
-fig.tight_layout(pad=1.5)
+fig.tight_layout(pad=1)
 fig.set_size_inches(8.3, 5.8)
 
 order=['points', 'disgust', 'fear']
 palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
 dark_palette = ["#9B0F47", "#5E2E9D", "#2487B8"]
 
-sns.boxplot(data=data, ax=axes[0,0],   x='trial_type', hue='trial_type', y='unpleasant_1', legend=False, fill=False, order=order, palette=dark_palette, hue_order=order, notch=True)
-sns.pointplot(data=data, ax=axes[0,0],   x='trial_type', hue='trial_type', y='unpleasant_1', legend=False, order=order, palette=palette, hue_order=order, errorbar=None, marker='D', markersize=3.5)
+sns.boxplot(data=data, ax=axes[0],   x='trial_type', hue='trial_type', y='unpleasant_1', legend=False, fill=False, order=order, palette=dark_palette, hue_order=order, notch=True)
+sns.pointplot(data=data, ax=axes[0],   x='trial_type', hue='trial_type', y='unpleasant_1', legend=False, order=order, palette=palette, hue_order=order, errorbar=None, marker='D', markersize=3.5)
 
 fear_annot, disgust_annot=points_pVal_annot('Valence')
 if fear_annot != 'NonSig':
     x1, x2 = 0, 2  
-    y, h, col = data["unpleasant_1"].max() + 1, 0.5, 'black'  
-    axes[0,0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[0,0].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
+    y, h, col = 9, 0.25, 'black'  
+    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[0].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
 if disgust_annot != 'NonSig':
     x1, x2 = 0, 0.9  
-    y, h, col = data["unpleasant_1"].max() + 1, 0.5, 'black'  
-    axes[0,0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[0,0].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col) 
+    y, h, col = 8.5, 0.25, 'black'  
+    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[0].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col) 
 
-axes[0,0].set_xlabel('')
-axes[0,0].set_ylabel('')
-axes[0,0].set_title('Valence ratings', fontsize=12)
-axes[0,0].set_xticklabels(['Points', 'Disgust', 'Fear'])
-axes[0,0].set_ylim(top=12)
-axes[0,0].set_yticks(range(0, 11,2)) 
-axes[0,0].set_yticklabels(range(0, 11,2))
+axes[0].set_xlabel('')
+axes[0].set_ylabel('')
+axes[0].set_title('Valence ratings', fontsize=12)
+axes[0].set_xticklabels(['Points', 'Disgust', 'Fear'], rotation=45)
+axes[0].set_ylim(top=10)
+axes[0].set_yticks(range(0, 11,2)) 
+axes[0].set_yticklabels(range(0, 11,2))
 
 ##AROUSAL
-sns.boxplot(data=data, ax=axes[0,1], x='trial_type', hue='trial_type', y='arousing_1', palette=dark_palette, legend=False, fill=False, order=order, hue_order=order, notch=True)
-sns.pointplot(data=data, ax=axes[0,1], x='trial_type', hue='trial_type', y='arousing_1', palette=palette, legend=False, order=order, hue_order=order, errorbar=None, marker='D', markersize=3.5)
+sns.boxplot(data=data, ax=axes[1], x='trial_type', hue='trial_type', y='arousing_1', palette=dark_palette, legend=False, fill=False, order=order, hue_order=order, notch=True)
+sns.pointplot(data=data, ax=axes[1], x='trial_type', hue='trial_type', y='arousing_1', palette=palette, legend=False, order=order, hue_order=order, errorbar=None, marker='D', markersize=3.5)
 fear_annot, disgust_annot=points_pVal_annot('Arousal')
 if fear_annot != 'NonSig':
     x1, x2 = 0, 2  
-    y, h, col = data["arousing_1"].max() + 2.5, 0.5, 'black'  
-    axes[0,1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[0,1].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
+    y, h, col = 9.2, 0.25, 'black'  
+    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[1].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
 if disgust_annot != 'NonSig':
-    x1, x2 = 0, 0.9  
-    y, h, col = data["arousing_1"].max() + 1, 0.5, 'black'  
-    axes[0,1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[0,1].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col) 
+    x1, x2 = 0, 1  
+    y, h, col = 8.5, 0.25, 'black'  
+    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[1].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col) 
 
-axes[0,1].set_xlabel('')
-axes[0,1].set_ylabel('')
-axes[0,1].set_title('Arousal ratings', fontsize=12)
-axes[0,1].set_xticklabels(['Points', 'Disgust', 'Fear'])
+axes[1].set_xlabel('')
+axes[1].set_ylabel('')
+axes[1].set_title('Arousal ratings', fontsize=12)
+axes[1].set_xticklabels(['Points', 'Disgust', 'Fear'], rotation=45)
 
 
 ##DISGUST
-sns.boxplot(data=data, ax=axes[1,0], x='trial_type', hue='trial_type', y='disgusting_1', palette=dark_palette, legend=False, fill=False, order=order, hue_order=order, notch=True)
-sns.pointplot(data=data, ax=axes[1,0], x='trial_type', hue='trial_type', y='disgusting_1', palette=palette, legend=False, order=order, hue_order=order, errorbar=None, marker='D', markersize=3.5)
+sns.boxplot(data=data, ax=axes[2], x='trial_type', hue='trial_type', y='disgusting_1', palette=dark_palette, legend=False, fill=False, order=order, hue_order=order, notch=True)
+sns.pointplot(data=data, ax=axes[2], x='trial_type', hue='trial_type', y='disgusting_1', palette=palette, legend=False, order=order, hue_order=order, errorbar=None, marker='D', markersize=3.5)
 
 fear_annot, disgust_annot=points_pVal_annot('Disgust')
 if fear_annot != 'NonSig':
     x1, x2 = 0, 2  
-    y, h, col = data["disgusting_1"].max() + 2.5, 0.5, 'black'  
-    axes[1,0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[1,0].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
+    y, h, col = 9.2, 0.25, 'black'  
+    axes[2].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[2].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
 if disgust_annot != 'NonSig':
     x1, x2 = 0, 0.9  
-    y, h, col = data["disgusting_1"].max() + 1, 0.5, 'black'  
-    axes[1,0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[1,0].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col) 
+    y, h, col = 8.5, 0.25, 'black'  
+    axes[2].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[2].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col) 
 
-axes[1,0].set_xlabel('')
-axes[1,0].set_ylabel('')
-axes[1,0].set_title('Disgust ratings', fontsize=12)
-axes[1,0].set_xticklabels(['Points', 'Disgust', 'Fear'])
-axes[1,0].set_ylim(top=12)
-axes[1,0].set_yticks(range(0, 11,2)) 
-axes[1,0].set_yticklabels(range(0, 11,2))
+axes[2].set_xlabel('')
+axes[2].set_ylabel('')
+axes[2].set_title('Disgust ratings', fontsize=12)
+axes[2].set_xticklabels(['Points', 'Disgust', 'Fear'], rotation=45)
+axes[2].set_ylim(top=10)
+axes[2].set_yticks(range(0, 11,2)) 
+axes[2].set_yticklabels(range(0, 11,2))
 
 
 ##FEAR
-sns.boxplot(data=data, ax=axes[1,1], x='trial_type',  hue='trial_type', y='frightening_1', palette=dark_palette, legend=False, fill=False, order=order, hue_order=order, notch=True)
-sns.pointplot(data=data, ax=axes[1,1], x='trial_type', hue='trial_type', y='frightening_1', palette=palette, legend=False, order=order, hue_order=order, errorbar=None, marker='D', markersize=3.5)
+sns.boxplot(data=data, ax=axes[3], x='trial_type',  hue='trial_type', y='frightening_1', palette=dark_palette, legend=False, fill=False, order=order, hue_order=order, notch=True)
+sns.pointplot(data=data, ax=axes[3], x='trial_type', hue='trial_type', y='frightening_1', palette=palette, legend=False, order=order, hue_order=order, errorbar=None, marker='D', markersize=3.5)
 
 fear_annot, disgust_annot=points_pVal_annot('Fear')
 if fear_annot != 'NonSig':
     x1, x2 = 0, 2  
-    y, h, col = data["frightening_1"].max() + 2.5, 0.5, 'black'  
-    axes[1,1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[1,1].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
+    y, h, col = 9.2, 0.25, 'black'  
+    axes[3].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[3].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
 if disgust_annot != 'NonSig':
     x1, x2 = 0, 0.9  
-    y, h, col = data["frightening_1"].max() + 1, 0.5, 'black'  
-    axes[1,1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[1,1].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col) 
-axes[1,1].set_xticklabels(['Points', 'Disgust', 'Fear'])
-axes[1,1].set_xlabel('')
-axes[1,1].set_ylabel('')
-axes[1,1].set_title('Fear ratings', fontsize=12)
+    y, h, col = 8.5, 0.25, 'black'  
+    axes[3].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[3].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col) 
+axes[3].set_xticklabels(['Points', 'Disgust', 'Fear'], rotation=45)
+axes[3].set_xlabel('')
+axes[3].set_ylabel('')
+axes[3].set_title('Fear ratings', fontsize=12)
 
 ##add that fear and disgust were different by all metrics (shown by models A-D)
 x1, x2 = 1.1, 2  
-y, h, col = 8 + 1, 0.5, '#5A5A5A'  
+y, h, col = 8.5, 0.25, '#5A5A5A'  
 
 valence_annot, timepoint_annot, interaction_annot = FD_pVal_annot('Valence')
 arousal_annot, timepoint_annot, interaction_annot = FD_pVal_annot('Arousal')
 fear_annot, timepoint_annot, interaction_annot = FD_pVal_annot('Fear')
 disgust_annot, timepoint_annot, interaction_annot = FD_pVal_annot('Disgust')
 
-axes[0,0].text((x1+x2)*.5, y+h, valence_annot, ha='center', va='bottom', color=col)
-axes[0,0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
-axes[0,1].text((x1+x2)*.5, y+h, arousal_annot, ha='center', va='bottom', color=col)
-axes[0,1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
-axes[1,0].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)
-axes[1,0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
-axes[1,1].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col)
-axes[1,1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
+axes[0].text((x1+x2)*.5, y+h, valence_annot, ha='center', va='bottom', color=col)
+axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
+axes[1].text((x1+x2)*.5, y+h, arousal_annot, ha='center', va='bottom', color=col)
+axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
+axes[2].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)
+axes[2].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
+axes[3].text((x1+x2)*.5, y+h, disgust_annot, ha='center', va='bottom', color=col)
+axes[3].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col) 
 
+plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patch(facecolor="#9B0F47"), mpatches.Patch(facecolor="#5E2E9D"), mpatches.Patch(facecolor="#2487B8")], labels=['Points stimulus', 'Disgust stimulus', 'Fear stimulus'], prop={'size':10})
 #plt.savefig('figures/VidRating_Points.jpeg', dpi=300, bbox_inches='tight')
 ```
 
@@ -667,14 +668,43 @@ plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patc
 
 <h3>
 
-2.  Hypothesis testing plots
+2.  Reversal learning task
     </h3>
 
     <p>
 
-    <b>Firstly, we plot models 1 and 2 (regressive and perseverative
-    errors)</b>
+    Firstly, we can use data from a randomly selected participant to
+    show performance on the task
     </p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+complete_task=pd.read_csv(r"U:\Documents\Disgust learning project\github\disgust_reversal_learning-final\csvs\complete_task_excluded.csv")
+sub_df=complete_task[complete_task.participant_no==56]
+block_df=sub_df[sub_df.block_no==0].reset_index()
+plt.plot(block_df.correct_stim, color="#4CC9F0")
+plt.plot(block_df.stim_selected, 'o', color="#3A0CA3", markersize=3.5)
+plt.xlabel('Trial number')
+plt.yticks([0,1], ['Fractal A', 'Fractal B'])
+#plt.savefig('figures/individual_RL_plot.png', dpi=300, bbox_inches='tight')
+```
+
+</details>
+
+    ([<matplotlib.axis.YTick at 0x246140272f0>,
+      <matplotlib.axis.YTick at 0x2460a3f5100>],
+     [Text(0, 0, 'Fractal A'), Text(0, 1, 'Fractal B')])
+
+![](dataVisualisation_files/figure-commonmark/cell-8-output-2.jpeg)
+
+<b>Now, we can make hypothesis testing plots</b>
+<p>
+
+<b>Firstly, we plot models 1 and 2 (regressive and perseverative
+errors)</b>
+</p>
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -736,7 +766,7 @@ if points_annot != 'NonSig':
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-8-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-9-output-1.jpeg)
 
 <p>
 
@@ -808,7 +838,7 @@ axes[1].set_ylim(top=y+h+0.05)
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-9-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-10-output-1.jpeg)
 
 <p>
 
@@ -840,7 +870,7 @@ axes.set_title("Percentage correct")
 
     Text(0.5, 1.0, 'Percentage correct')
 
-![](dataVisualisation_files/figure-commonmark/cell-10-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-11-output-2.jpeg)
 
 <h3>
 
@@ -909,7 +939,7 @@ print("Number of outliers ="+str(len(outliers)))
 
     Number of outliers =47
 
-![](dataVisualisation_files/figure-commonmark/cell-12-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-13-output-2.jpeg)
 
 <p>
 
@@ -999,7 +1029,7 @@ axes[1,1].set_xlabel('Lose-shift')
 
     Text(0.5, 77.16666666666664, 'Lose-shift')
 
-![](dataVisualisation_files/figure-commonmark/cell-13-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-14-output-2.jpeg)
 
 <p>
 
@@ -1089,4 +1119,4 @@ axes[1,1].set_xlabel('Valence and arousal for points', fontsize=8)
 
     Text(0.5, 77.16666666666664, 'Valence and arousal for points')
 
-![](dataVisualisation_files/figure-commonmark/cell-14-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-15-output-2.jpeg)
