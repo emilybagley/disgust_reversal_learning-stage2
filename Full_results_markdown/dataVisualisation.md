@@ -688,13 +688,13 @@ plt.plot(block_df.correct_stim, color="#4CC9F0")
 plt.plot(block_df.stim_selected, 'o', color="#3A0CA3", markersize=3.5)
 plt.xlabel('Trial number')
 plt.yticks([0,1], ['Fractal A', 'Fractal B'])
-#plt.savefig('figures/individual_RL_plot.png', dpi=300, bbox_inches='tight')
+#plt.savefig('figures/ReversalLearning_individual_plot.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
 
-    ([<matplotlib.axis.YTick at 0x246140272f0>,
-      <matplotlib.axis.YTick at 0x2460a3f5100>],
+    ([<matplotlib.axis.YTick at 0x2462904b920>,
+      <matplotlib.axis.YTick at 0x2462e5a3830>],
      [Text(0, 0, 'Fractal A'), Text(0, 1, 'Fractal B')])
 
 ![](dataVisualisation_files/figure-commonmark/cell-8-output-2.jpeg)
