@@ -3,12 +3,165 @@
 
 <p>
 
-This file contains the code for the graphs included in the paper
+This file contains the code for the graphs included in the paper (and
+supplement)
 </p>
 
 <h3>
 
-1.  Video ratings task plots
+1.  Checking sample demographics
+    </h3>
+
+<p>
+
+During data collection, exclusions (due to failed attention checks) were
+made on a rolling basis in order to best match the final sample with the
+target demographics (in terms of age, sex and psychiatric diagnosis).
+</p>
+
+<p>
+
+We ran a series of checks to ensure that this was adequately done
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+##check demographic numbers for included participants
+age_categories=[]
+for participant in set(task_summary.participant_no):
+    sub_df=task_summary[task_summary.participant_no==participant]
+    age=sub_df.self_report_age.iloc[0]
+    if 18<=age<=24:
+        age_cat='18-24'
+    elif 25<=age<=34:
+        age_cat='25-34'
+    elif 35<=age<=44:
+        age_cat='35-44'
+    elif 45<=age<=54:
+        age_cat='45-54'
+    elif age>=55:
+        age_cat='55+'
+    else:
+        age_cat='error'
+    age_categories.append({
+        'participant_no': participant,
+        'age_category': age_cat
+    })
+category_demographics=excluded_demographics.merge(pd.DataFrame(age_categories), on='participant_no', how='left')
+
+##add target numbers
+rep_sample_df=category_demographics.groupby(['age_category', 'prolific_sex', 'cleaned_diagnosis']).size().reset_index(name='count')
+for i in range(20):
+    old_row=rep_sample_df.iloc[i]
+    if old_row.age_category=='18-24' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'Yes':
+        dem_cat='18-24 female with a psychiatric diagnosis'
+        target=4
+        target_percentage=0.013
+    if old_row.age_category=='18-24' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'No':
+        dem_cat='18-24 female without a psychiatric diagnosis'
+        target=15
+        target_percentage=0.046
+    if old_row.age_category=='18-24' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'Yes':
+        dem_cat='18-24 male with a psychiatric diagnosis'
+        target=3
+        target_percentage=0.008
+    if old_row.age_category=='18-24' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'No':
+        dem_cat='18-24 male without a psychiatric diagnosis'
+        target=17
+        target_percentage=0.052
+    if old_row.age_category=='25-34' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'Yes':
+        dem_cat='25-34 female with a psychiatric diagnosis'
+        target=10
+        target_percentage=0.03
+    if old_row.age_category=='25-34' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'No':
+            dem_cat='25-34 female without a psychiatric diagnosis'
+            target=18
+            target_percentage=0.056
+    if old_row.age_category=='25-34' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'Yes':
+            dem_cat='25-34 male with a psychiatric diagnosis'
+            target=5
+            target_percentage=0.016
+    if old_row.age_category=='25-34' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'No':
+            dem_cat='25-34 male without a psychiatric diagnosis'
+            target=23
+            target_percentage=0.07
+    if old_row.age_category=='35-44' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'Yes':
+        dem_cat='35-44 female with a psychiatric diagnosis'
+        target=11
+        target_percentage=0.033
+    if old_row.age_category=='35-44' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'No':
+            dem_cat='35-44 female without a psychiatric diagnosis'
+            target=18
+            target_percentage=0.057
+    if old_row.age_category=='35-44' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'Yes':
+            dem_cat='25-44 male with a psychiatric diagnosis'
+            target=6
+            target_percentage=0.02
+    if old_row.age_category=='35-44' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'No':
+            dem_cat='25-44 male without a psychiatric diagnosis'
+            target=22
+            target_percentage=0.068
+    if old_row.age_category=='45-54' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'Yes':
+        dem_cat='45-54 female with a psychiatric diagnosis'
+        target=10
+        target_percentage=0.032
+    if old_row.age_category=='45-54' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'No':
+            dem_cat='45-54 female without a psychiatric diagnosis'
+            target=18
+            target_percentage=0.056
+    if old_row.age_category=='45-54' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'Yes':
+            dem_cat='45-54 male with a psychiatric diagnosis'
+            target=6
+            target_percentage=0.02
+    if old_row.age_category=='45-54' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'No':
+            dem_cat='45-54 male without a psychiatric diagnosis'
+            target=22
+            target_percentage=0.067
+    if old_row.age_category=='55+' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'Yes':
+        dem_cat='55+ female with a psychiatric diagnosis'
+        target=25
+        target_percentage=0.078
+    if old_row.age_category=='55+' and old_row.prolific_sex =='Female' and old_row.cleaned_diagnosis == 'No':
+            dem_cat='55+ female without a psychiatric diagnosis'
+            target=37
+            target_percentage=0.113
+    if old_row.age_category=='55+' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'Yes':
+            dem_cat='55+ male with a psychiatric diagnosis'
+            target=13
+            target_percentage=0.041
+    if old_row.age_category=='55+' and old_row.prolific_sex =='Male' and old_row.cleaned_diagnosis == 'No':
+            dem_cat='55+ male without a psychiatric diagnosis'
+            target=40
+            target_percentage=0.124
+    
+    rep_sample_df.loc[i,'target']=target
+    rep_sample_df.loc[i,'target_percentage']=target_percentage*100
+    rep_sample_df.loc[i, 'dem_cat']=dem_cat
+rep_sample_df['abs_difference']=rep_sample_df['target']- rep_sample_df['count']
+rep_sample_df['actual_percentage']=(rep_sample_df['count']/340)*100
+rep_sample_df['percentage_difference']=rep_sample_df['target_percentage']-rep_sample_df['actual_percentage']
+
+##plot hypothesised results
+fig, axes = plt.subplots(1,1, sharey=False)
+sns.barplot(data=rep_sample_df, x='percentage_difference', y='dem_cat', palette='husl', ax=axes)
+plt.xlim(-10, 10)
+plt.xlabel('Difference between target percentage in each category and actual percentage')
+plt.xticks([-10, -7.5, -5, -2.5, 0, 2.5, 5, 7.5, 10], ['-10%', '-7.5%', '-5%', '-2.5%', '0%', '2.5%', '5%', '7.5%', '10%'])
+plt.ylabel('Demographic category')
+plt.title('Comparison between final sample and target representative sample', weight='bold')
+
+plt.savefig('figures/checking_exclusions_demographics.jpeg', dpi=300, bbox_inches='tight')
+```
+
+</details>
+
+![](dataVisualisation_files/figure-commonmark/cell-3-output-1.jpeg)
+
+<h3>
+
+2.  Video ratings task plots
     </h3>
 
 <br>
@@ -166,7 +319,7 @@ plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patc
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-4-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-5-output-1.jpeg)
 
 <p>
 
@@ -302,7 +455,7 @@ plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patc
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-5-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-6-output-1.jpeg)
 
 <p>
 
@@ -503,7 +656,7 @@ plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patc
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-6-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-7-output-1.jpeg)
 
 <br>
 <p>
@@ -664,11 +817,11 @@ plt.figlegend(loc='center left', bbox_to_anchor=(1,0.5),  handles=[mpatches.Patc
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-7-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-8-output-1.jpeg)
 
 <h3>
 
-2.  Reversal learning task
+3.  Reversal learning task
     </h3>
 
     <p>
@@ -693,11 +846,11 @@ plt.yticks([0,1], ['Fractal A', 'Fractal B'])
 
 </details>
 
-    ([<matplotlib.axis.YTick at 0x2462904b920>,
-      <matplotlib.axis.YTick at 0x2462e5a3830>],
+    ([<matplotlib.axis.YTick at 0x1ca42f515b0>,
+      <matplotlib.axis.YTick at 0x1ca42c8dbb0>],
      [Text(0, 0, 'Fractal A'), Text(0, 1, 'Fractal B')])
 
-![](dataVisualisation_files/figure-commonmark/cell-8-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-9-output-2.jpeg)
 
 <b>Now, we can make hypothesis testing plots</b>
 <p>
@@ -766,7 +919,7 @@ if points_annot != 'NonSig':
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-9-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-10-output-1.jpeg)
 
 <p>
 
@@ -838,11 +991,177 @@ axes[1].set_ylim(top=y+h+0.05)
 
 </details>
 
-![](dataVisualisation_files/figure-commonmark/cell-10-output-1.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-11-output-1.jpeg)
 
 <p>
 
-<b>And finally, for the exploratory percentage correct outcome</b>
+We also tested whether the effects of feedback-type in perseverative
+error and lose-shift analyses are better explained by a difference
+between disgust and other types or learning or a more general difference
+between emotional (fear/disgust) and non-emotional learning
+</p>
+
+<p>
+
+For perseverative errors:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+task_summary.loc[task_summary['block_type']=='Disgust', 'disgustOrNot']='Disgust'
+task_summary.loc[task_summary['block_type']!='Disgust', 'disgustOrNot']='Not'
+task_summary.loc[task_summary['block_type']=='Points', 'emotionOrNot']='Not'
+task_summary.loc[task_summary['block_type']!='Points', 'emotionOrNot']='Emotion'
+
+emotionDisgust_pvals=pd.read_csv("disgustEmotion_regEr_pvalsForPlotting.csv")
+disgustOrNot_pval=float(emotionDisgust_pvals[emotionDisgust_pvals.model=='disgustOrNot'].pvals)
+if disgustOrNot_pval < 0.001:
+    disgustOrNot_annot='***'
+elif disgustOrNot_pval <0.01:
+    disgustOrNot_annot='**'
+elif disgustOrNot_pval <0.05:
+    disgustOrNot_annot='*'
+else:
+    disgustOrNot_annot='NonSig'
+
+emotionOrNot_pval=float(emotionDisgust_pvals[emotionDisgust_pvals.model=='emotionOrNot'].pvals)
+if emotionOrNot_pval < 0.001:
+    emotionOrNot_annot='***'
+elif emotionOrNot_pval <0.01:
+    emotionOrNott_annot='**'
+elif emotionOrNot_pval <0.05:
+    emotionOrNot_annot='*'
+else:
+    emotionOrNot_annot='NonSig'
+        
+
+fig, axes = plt.subplots(1,2, sharey=False)
+fig.tight_layout(pad=3)
+fig.set_size_inches(8.3, 5.8)
+disgust_not_palette=["#5E2E9D", "#00008B"]
+emotion_not_palette=["#4361EE", "#9B0F47"]
+
+disgust_not_light=["#3A0CA3", "#00008B"]
+emotion_not_light=["#4361EE", "#F72585"]
+
+sns.stripplot(data=task_summary, x="disgustOrNot", y="mean_perseverative_er", ax=axes[0], palette=disgust_not_light, alpha=.5, jitter=True, marker='.', zorder=1)
+sns.boxplot(data=task_summary, x="disgustOrNot", y="mean_perseverative_er", ax=axes[0], palette=disgust_not_palette, fill=False, showfliers=False, notch=True, zorder=2)
+sns.pointplot(data=task_summary, x="disgustOrNot", y="mean_perseverative_er", ax=axes[0], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, zorder=3)
+axes[0].set_xlabel("Disgust learning or Not")
+axes[0].set_xticklabels(['Disgust', 'Not Disgust'])
+axes[0].set_ylabel("Perseverative errors per reversal (log-scale)", labelpad=5) 
+axes[0].set_title("Disgust-learning vs non-disgust learning", fontsize=12)
+axes[0].set_yscale('log')
+
+sns.stripplot(data=task_summary, x="emotionOrNot", y="mean_perseverative_er", ax=axes[1], palette=emotion_not_light, alpha=.5, jitter=True, marker='.', zorder=1)
+sns.boxplot(data=task_summary, x="emotionOrNot", y="mean_perseverative_er", ax=axes[1],palette=emotion_not_palette, fill=False, showfliers=False, notch=True, zorder=2)
+sns.pointplot(data=task_summary, x="emotionOrNot", y="mean_perseverative_er", ax=axes[1],marker="D", color='black', errorbar=None, linestyle='none', markersize=4, zorder=3)
+axes[1].set_xlabel("Emotion learning or Not")
+axes[1].set_xticklabels(['Emotion', 'Points-based'])
+axes[1].set_ylabel("Perseverative errors per reversal (log-scale)", labelpad=5) 
+axes[1].set_title("Emotion-learning vs points-based learning", fontsize=12)
+axes[1].set_yscale('log')
+
+if disgustOrNot_annot != 'NonSig':
+    x1, x2 = 0, 1  
+    y, h, col = task_summary["mean_perseverative_er"].max() +1.5, 1.5, 'black'  
+    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[0].text((x1+x2)*.5, y+h, disgustOrNot_annot, ha='center', va='bottom', color=col) 
+if emotionOrNot_annot != 'NonSig':
+    x1, x2 = 0, 1  
+    y, h, col = task_summary["mean_perseverative_er"].max() +1.5, 1.5, 'black'  
+    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[1].text((x1+x2)*.5, y+h, emotionOrNot_annot, ha='center', va='bottom', color=col) 
+plt.savefig('figures/ReversaLearning_DisgustNotEmotionNot_persEr.jpeg', dpi=300, bbox_inches='tight')
+```
+
+</details>
+
+![](dataVisualisation_files/figure-commonmark/cell-12-output-1.jpeg)
+
+<p>
+
+For lose-shift probability:
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+emotionDisgust_pvals=pd.read_csv("disgustEmotion_loseShift_pvalsForPlotting.csv")
+disgustOrNot_pval=float(emotionDisgust_pvals[emotionDisgust_pvals.model=='disgustOrNot'].pvals)
+emotionOrNot_pval=float(emotionDisgust_pvals[emotionDisgust_pvals.model=='emotionOrNot'].pvals)
+
+if disgustOrNot_pval < 0.001:
+    disgustOrNot_annot='***'
+elif disgustOrNot_pval <0.01:
+    disgustOrNot_annot='**'
+elif disgustOrNot_pval <0.05:
+    disgustOrNot_annot='*'
+else:
+    disgustOrNot_annot='NonSig'
+
+
+if emotionOrNot_pval < 0.001:
+    emotionOrNot_annot='***'
+elif emotionOrNot_pval <0.01:
+    emotionOrNott_annot='**'
+elif emotionOrNot_pval <0.05:
+    emotionOrNot_annot='*'
+else:
+    emotionOrNot_annot='NonSig'
+        
+
+fig, axes = plt.subplots(1,2, sharey=False)
+fig.tight_layout(pad=3)
+fig.set_size_inches(8.3, 5.8)
+
+disgust_not_palette=["#5E2E9D", "#00008B"]
+emotion_not_palette=["#4361EE", "#9B0F47"]
+
+disgust_not_light=["#3A0CA3", "#00008B"]
+emotion_not_light=["#4361EE", "#F72585"]
+
+sns.stripplot(data=task_summary, x="disgustOrNot", y="lose_shift", ax=axes[0], palette=disgust_not_light, alpha=.5, jitter=True, marker='.', zorder=1)
+sns.boxplot(data=task_summary, x="disgustOrNot", y="lose_shift", ax=axes[0], palette=disgust_not_palette, fill=False, showfliers=False, notch=True, zorder=2)
+sns.pointplot(data=task_summary, x="disgustOrNot", y="lose_shift", ax=axes[0], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, zorder=3)
+axes[0].set_xlabel("Disgust learning or Not")
+axes[0].set_xticklabels(['Disgust', 'Not Disgust'])
+axes[0].set_ylabel("Lose-shift probability", labelpad=5) 
+axes[0].set_title("Disgust-learning vs non-disgust learning", fontsize=12)
+
+sns.stripplot(data=task_summary, x="emotionOrNot", y="lose_shift", ax=axes[1], palette=emotion_not_light, alpha=.5, jitter=True, marker='.', zorder=1)
+sns.boxplot(data=task_summary, x="emotionOrNot", y="lose_shift", ax=axes[1],palette=emotion_not_palette, fill=False, showfliers=False, notch=True, zorder=2)
+sns.pointplot(data=task_summary, x="emotionOrNot", y="lose_shift", ax=axes[1],marker="D", color='black', errorbar=None, linestyle='none', markersize=4, zorder=3)
+axes[1].set_xlabel("Emotion learning or Not")
+axes[1].set_xticklabels(['Emotion', 'Points-based'])
+axes[1].set_ylabel("Lose-shift probability", labelpad=5) 
+axes[1].set_title("Emotion-learning vs points-based learning", fontsize=12)
+
+if disgustOrNot_annot != 'NonSig':
+    x1, x2 = 0, 1  
+    y, h, col = task_summary["lose_shift"].max() +0.05, 0.025, 'black'  
+    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[0].text((x1+x2)*.5, y+h, disgustOrNot_annot, ha='center', va='bottom', color=col) 
+if emotionOrNot_annot != 'NonSig':
+    x1, x2 = 0, 1  
+    y, h, col = task_summary["lose_shift"].max() +0.05, 0.025, 'black'  
+    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[1].text((x1+x2)*.5, y+h, emotionOrNot_annot, ha='center', va='bottom', color=col) 
+plt.savefig('figures/ReversaLearning_DisgustNotEmotionNot_loseShift.jpeg', dpi=300, bbox_inches='tight')
+```
+
+</details>
+
+<img
+src="dataVisualisation_files/figure-commonmark/lose-shift-emotionornot-disgustornot-plot-output-1.jpeg"
+id="lose-shift-emotionornot-disgustornot-plot" />
+
+<p>
+
+<b>And finally, an exploratory test effected the effect of block-type on
+accuracy(percentage correct)</b>
 </p>
 
 <details class="code-fold">
@@ -854,7 +1173,7 @@ dark_palette = ["#9B0F47", "#5E2E9D", "#2487B8"]
 
 ##plot hypothesised results
 fig, axes = plt.subplots(1,1, sharey=False)
-fig.set_size_inches(4.15, 5.8)
+fig.set_size_inches(4.15/2, 5.8/2)
 
 sns.stripplot(data=task_summary, x="block_type", y="percentage_correct", ax=axes, palette=palette, alpha=.5, jitter=True, marker='.', order=['Points', 'Disgust', 'Fear'], zorder=1)
 sns.boxplot(data=task_summary, x="block_type", y="percentage_correct",  ax=axes, palette=dark_palette, fill=False, showfliers=False, notch=True, order=['Points', 'Disgust', 'Fear'], zorder=2)
@@ -870,11 +1189,11 @@ axes.set_title("Percentage correct")
 
     Text(0.5, 1.0, 'Percentage correct')
 
-![](dataVisualisation_files/figure-commonmark/cell-11-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-14-output-2.jpeg)
 
 <h3>
 
-3.  Examining the nature of outliers in the perseverative error outcome
+4.  Examining the nature of outliers in the perseverative error outcome
     </h3>
 
     <p>
@@ -939,7 +1258,7 @@ print("Number of outliers ="+str(len(outliers)))
 
     Number of outliers =47
 
-![](dataVisualisation_files/figure-commonmark/cell-13-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-16-output-2.jpeg)
 
 <p>
 
@@ -1029,7 +1348,7 @@ axes[1,1].set_xlabel('Lose-shift')
 
     Text(0.5, 77.16666666666664, 'Lose-shift')
 
-![](dataVisualisation_files/figure-commonmark/cell-14-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-17-output-2.jpeg)
 
 <p>
 
@@ -1119,4 +1438,4 @@ axes[1,1].set_xlabel('Valence and arousal for points', fontsize=8)
 
     Text(0.5, 77.16666666666664, 'Valence and arousal for points')
 
-![](dataVisualisation_files/figure-commonmark/cell-15-output-2.jpeg)
+![](dataVisualisation_files/figure-commonmark/cell-18-output-2.jpeg)

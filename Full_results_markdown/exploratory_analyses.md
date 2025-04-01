@@ -486,7 +486,422 @@ print(results.summary())
 <br>
 <h3>
 
-<b>Exploratory analysis 3:</b> running the video ratings analysis with
+<b>Exploratory analysis 3: </b> assessing the nature of outliers in the
+perseverative error outcome
+</h3>
+
+<p>
+
+The perseverative error outcome in the hypothesis testing model seemed
+to be quite dependent on outliers. Therefore, here we assess the nature
+of those outliers:
+<p>
+
+a- to determine whether they are ‘true’ outliers (i.e., due to
+inattention etc.) resulting in alterations in task performance across
+all metrics
+</p>
+
+<p>
+
+b- to determine whether these outliers performed differently on the
+video rating task (e.g., were they more disgusted, leading to their
+altered task performance?)
+<p>
+
+c- to determine whether these outliers differed from the general sample
+in terms of psychiatric diagnosis <br>
+<p>
+
+Points a and b were assessed using a series of histograms which can be
+seen in the datavisualisation markdown file. <b> Whether the outliers
+differed from the general sample in terms of psychiatric diagnosis is
+assessed here using a chi-squared test.</b>
+</p>
+
+<p>
+
+Firstly, we look at the raw proprtions in the outliers and no outliers
+dataframes
+</p>
+
+``` python
+#create outliers dataframe
+Q1 = task_summary['mean_perseverative_er'].quantile(0.25)
+Q3 = task_summary['mean_perseverative_er'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1- 1.5 *  IQR
+upper_bound = Q3 + 1.5 *  IQR
+if lower_bound < min(task_summary.mean_perseverative_er):
+    lower_bound = min(task_summary.mean_perseverative_er)
+outliers=task_summary[(task_summary['mean_perseverative_er']<lower_bound) | (task_summary['mean_perseverative_er']>upper_bound )]
+
+outliers_dem=outliers[['participant_no', 'cleaned_diagnosis', 'prolific_age', 'prolific_sex']].drop_duplicates()
+no_outliers_dem=task_summary[~task_summary['participant_no'].isin(list(outliers_dem.participant_no))][['participant_no', 'cleaned_diagnosis', 'prolific_age', 'prolific_sex']].drop_duplicates()
+
+
+print(outliers_dem['cleaned_diagnosis'].value_counts(normalize=True))
+```
+
+    cleaned_diagnosis
+    No     0.677419
+    Yes    0.322581
+    Name: proportion, dtype: float64
+
+``` python
+print(no_outliers_dem['cleaned_diagnosis'].value_counts(normalize=True))
+```
+
+    cleaned_diagnosis
+    No     0.702265
+    Yes    0.297735
+    Name: proportion, dtype: float64
+
+<p>
+
+There is a small absolute difference in proportions (with the outliers
+have more people with a diagnosis)- use a chi-squared test to assess
+whether this difference is significant.
+</p>
+
+``` python
+outliers_MH=outliers_dem['cleaned_diagnosis'].value_counts()['Yes']
+outliers_noMH=outliers_dem['cleaned_diagnosis'].value_counts()['No']
+no_outliers_MH=no_outliers_dem['cleaned_diagnosis'].value_counts()['Yes']
+no_outliers_noMH=no_outliers_dem['cleaned_diagnosis'].value_counts()['No']
+
+observed=np.array([[outliers_MH, outliers_noMH], 
+                [no_outliers_MH, no_outliers_noMH]])
+chi2, p, dof, expected = stats.chi2_contingency(observed)
+print("chi-squared value: "+str(chi2)), print("p value: "+str(p))
+```
+
+    chi-squared value: 0.006760821042061202
+    p value: 0.9344684202258998
+    (None, None)
+
+<p>
+
+Results of this test show that there is no significant different in
+diagnosis between the two samples.
+</p>
+
+<br>
+<h3>
+
+<b>Exploratory analysis 4:</b> probing whether effect of feedback-type
+on perseverative error rate and lose-shift probability is better
+explained by a difference between emotional (fear/disgust) and
+non-emotional (points) learning, or between disgust-based and other
+types (fear and points) of learning
+</h3>
+
+<p>
+
+The main hypothesis testing analyses found a difference in learning
+(indexed by perseverative errors and lose-shift probability) between the
+points/loss-based feedback and disgust feedback.
+</p>
+
+<p>
+
+However, no difference was found between <b>either</b> fear and points
+OR fear and disgust. This makes interpretation difficult as we cannot
+determine whether the result is better explained by a difference in
+learning between the two emotional conditions and points-based learning
+OR a distinct feature of disgust learning
+</p>
+
+<p>
+
+To assess this, we run two competing models for both hypothesis tests:
+<p>
+
+- One assessing the presence of a difference between emotional learning
+  (combining the fear and disgust block) and non-emotional learning (the
+  points block)
+- Another assessing the presence of a difference between disgust-based
+  learning and learning which is not about digsust (combining the fear
+  and points blocks)
+  <p>
+
+  We will use a) the presence/absence of significant results and b) the
+  model fit (as indexed by BIC - as before) to guide interpretation of
+  these competing models
+  </p>
+
+<p>
+
+Firstly, add columns to the data-frame splitting conditions into
+‘disgust or not’ (disgust vs fear and points) and ‘emotion or not’
+(points vs disgust and fear)
+</p>
+
+<p>
+
+Do in R and Python
+</p>
+
+``` r
+task_summary <- task_summary %>%
+  mutate(
+    disgustOrNot = ifelse(block_type == "Disgust", "Disgust", "Not"),
+    emotionOrNot = ifelse(block_type == "Points", "Not", "Emotion")
+  )
+```
+
+``` python
+task_summary.loc[task_summary['block_type']=='Disgust', 'disgustOrNot']='Disgust'
+task_summary.loc[task_summary['block_type']!='Disgust', 'disgustOrNot']='Not'
+task_summary.loc[task_summary['block_type']=='Points', 'emotionOrNot']='Not'
+task_summary.loc[task_summary['block_type']!='Points', 'emotionOrNot']='Emotion'
+```
+
+<br>
+<p>
+
+<b>We will start with the perseverative error outcome</b>
+</p>
+
+<p>
+
+Run the hypothesis test for ‘disgust or not’ (using the same model
+specification as used for the hypothesis testing analysis).
+</p>
+
+<p>
+
+In this case, a generalized mixed effects model with:
+</p>
+
+<p>
+
+- Gamma probability distribution and inverse link function
+- no additional random effects or slopes
+- no additional covariates
+
+</p>
+
+``` r
+task_summary$pos_perseverative_er <- task_summary$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
+disgustOrNot <- glmer(pos_perseverative_er ~ disgustOrNot + (1|participant_no), data=task_summary, family=Gamma(link="inverse"))
+summary(disgustOrNot)
+```
+
+    Generalized linear mixed model fit by maximum likelihood (Laplace
+      Approximation) [glmerMod]
+     Family: Gamma  ( inverse )
+    Formula: pos_perseverative_er ~ disgustOrNot + (1 | participant_no)
+       Data: task_summary
+
+         AIC      BIC   logLik deviance df.resid 
+      1585.7   1605.4   -788.9   1577.7     1016 
+
+    Scaled residuals: 
+        Min      1Q  Median      3Q     Max 
+    -1.2631 -0.7119 -0.2032  0.5198  3.9830 
+
+    Random effects:
+     Groups         Name        Variance Std.Dev.
+     participant_no (Intercept) 0.1445   0.3801  
+     Residual                   0.6149   0.7841  
+    Number of obs: 1020, groups:  participant_no, 340
+
+    Fixed effects:
+                    Estimate Std. Error t value Pr(>|z|)    
+    (Intercept)      1.32188    0.07276  18.167   <2e-16 ***
+    disgustOrNotNot  0.16036    0.06799   2.358   0.0184 *  
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    Correlation of Fixed Effects:
+                (Intr)
+    dsgstOrNtNt -0.597
+
+<p>
+
+And then again for ‘emotion or ’not’:
+<p>
+
+``` r
+task_summary$pos_perseverative_er <- task_summary$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
+emotionOrNot <- glmer(pos_perseverative_er ~ emotionOrNot + (1|participant_no), data=task_summary, family=Gamma(link="inverse"))
+summary(emotionOrNot)
+```
+
+    Generalized linear mixed model fit by maximum likelihood (Laplace
+      Approximation) [glmerMod]
+     Family: Gamma  ( inverse )
+    Formula: pos_perseverative_er ~ emotionOrNot + (1 | participant_no)
+       Data: task_summary
+
+         AIC      BIC   logLik deviance df.resid 
+      1588.2   1607.9   -790.1   1580.2     1016 
+
+    Scaled residuals: 
+        Min      1Q  Median      3Q     Max 
+    -1.2593 -0.7077 -0.1818  0.4985  3.8923 
+
+    Random effects:
+     Groups         Name        Variance Std.Dev.
+     participant_no (Intercept) 0.1460   0.3821  
+     Residual                   0.6178   0.7860  
+    Number of obs: 1020, groups:  participant_no, 340
+
+    Fixed effects:
+                    Estimate Std. Error t value Pr(>|z|)    
+    (Intercept)      1.38443    0.06292  22.001   <2e-16 ***
+    emotionOrNotNot  0.12797    0.07535   1.698   0.0894 .  
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    Correlation of Fixed Effects:
+                (Intr)
+    emotnOrNtNt -0.371
+
+<p>
+
+Only the ‘disgust or not’ model finds a significant effect, suggesting
+that the difference between disgust and other types of learning (both
+fear and points learning) is the key driver of effects
+<p>
+
+<p>
+
+BIC values also show that this model is the better fitting model,
+further supporting the hypothesis
+</p>
+
+``` r
+bic_values <- c(
+    BIC(disgustOrNot),
+    BIC(emotionOrNot)
+)
+model_names <- c("Disgust or not", "Emotion or not")
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+bic_df <- bic_df[order(bic_df$BIC), ]
+
+print(bic_df)
+```
+
+               Model      BIC
+    1 Disgust or not 1605.429
+    2 Emotion or not 1607.863
+
+<p>
+
+Overall, this shows that the difference in perseverative error
+identified in the planned hypothesis testing analyses is <b>better
+explained</b> by a uniqueness of disgust-based learning (rather than a
+more general difference between emotional and non-emotional learning
+conditions)
+</p>
+
+<br>
+<p>
+
+<b>Now, we will run the same tests using for the lose-shift outcome</b>
+</p>
+
+<p>
+
+Run the hypothesis test for ‘disgust or not’ (using the same model
+specification as used for the hypothesis testing analysis).
+</p>
+
+``` python
+data=task_summary
+formula = 'lose_shift ~ disgustOrNot + prolific_age'
+disgustOrNot=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+print(disgustOrNot.summary())
+```
+
+                Mixed Linear Model Regression Results
+    =============================================================
+    Model:               MixedLM  Dependent Variable:  lose_shift
+    No. Observations:    1020     Method:              ML        
+    No. Groups:          340      Scale:               0.0089    
+    Min. group size:     3        Log-Likelihood:      662.4706  
+    Max. group size:     3        Converged:           Yes       
+    Mean group size:     3.0                                     
+    -------------------------------------------------------------
+                        Coef. Std.Err.   z    P>|z| [0.025 0.975]
+    -------------------------------------------------------------
+    Intercept           0.578    0.023 25.519 0.000  0.533  0.622
+    disgustOrNot[T.Not] 0.019    0.006  2.996 0.003  0.007  0.031
+    prolific_age        0.001    0.000  2.736 0.006  0.000  0.002
+    Group Var           0.014    0.017                           
+    =============================================================
+
+<p>
+
+And then again for ‘emotion or not’
+</p>
+
+``` python
+data=task_summary
+formula = 'lose_shift ~ emotionOrNot + prolific_age'
+emotionOrNot=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+print(emotionOrNot.summary())
+```
+
+                Mixed Linear Model Regression Results
+    =============================================================
+    Model:               MixedLM  Dependent Variable:  lose_shift
+    No. Observations:    1020     Method:              ML        
+    No. Groups:          340      Scale:               0.0089    
+    Min. group size:     3        Log-Likelihood:      663.9764  
+    Max. group size:     3        Converged:           Yes       
+    Mean group size:     3.0                                     
+    -------------------------------------------------------------
+                        Coef. Std.Err.   z    P>|z| [0.025 0.975]
+    -------------------------------------------------------------
+    Intercept           0.583    0.022 26.090 0.000  0.539  0.627
+    emotionOrNot[T.Not] 0.022    0.006  3.469 0.001  0.009  0.034
+    prolific_age        0.001    0.000  2.736 0.006  0.000  0.002
+    Group Var           0.014    0.017                           
+    =============================================================
+
+<p>
+
+Both show a significant effect - i.e., whether learning is disgusting or
+not AND whether learning is emotional or not predicts lose shift.
+</p>
+
+<p>
+
+But we can test which explains the data better by comparing the fit of
+the data (using BIC - as done before)
+</p>
+
+``` python
+bic=pd.DataFrame({'disgustOrNot': [disgustOrNot.bic],
+                    'emotionOrNot': [emotionOrNot.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
+
+       emotionOrNot  disgustOrNot
+    0   -1293.31501  -1290.303362
+
+<p>
+
+This shows that emotionOrNot is the better fitting model (although only
+marginally as the difference in BIC is small).
+</p>
+
+<p>
+
+Although there is a difference between <b>both</b> disgust-based
+learning vs other learning and emotion-based vs points-based learning,
+the model with a difference in emotional learning relative to points
+learning (compared to disgust learning relative to other types of
+learning) is slightly more parsimonious
+</p>
+
+<br>
+<h3>
+
+<b>Exploratory analysis 5:</b> running the video ratings analysis with
 <b>all</b> of the fear and disgust videos
 </h3>
 
