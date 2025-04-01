@@ -40,6 +40,8 @@ model4_loseShift.md: contains all analyses regarding the lose-shift hypothesis (
  00_data_checks.ipynb: used to make rolling exclusions. Look at data from one participant and determine if they passed the exclusion criteria (1 version for 1 example participant is included here).
  
  0_data_cleaning.ipynb: Used to create useable dataframes for subsequent analysis. Excludes using pre-registered exclusion criteria and calculates key task-outcomes.
+
+ checking_exclusions.ipynb: Checks that after exclusions from failed attention checks the sample remains broadly representative in terms of sex, age and psychiatric diagnosis. 
  
 
 
