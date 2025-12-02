@@ -1,0 +1,73 @@
+Sys.info()["nodename"]
+print("Check Model and extract params")
+args <- commandArgs()
+modelName = args[6]
+print(modelName)
+stanFile=args[7]
+dataFile=args[8]
+chains=args[9]
+parallel_chains=args[10]
+iter_warmup=args[11]
+iter_sampling=args[12]
+thin=args[13]
+save_warmup=args[14]
+output_dir=args[15]
+
+set.seed(41)
+library(dplyr)
+library(ggplot2)
+library(hBayesDM)
+library(pheatmap)
+library(truncnorm)
+library(rstan)
+library(cmdstanr)
+library(bayesplot)
+library(posterior)
+library(loo)
+library(rstanarm)
+options(device = "png")
+
+print("Load model fit")
+outputFolder = paste0("modelOutputs", "/", modelName, "/")
+csvspaths<-readRDS(paste0(outputFolder, 'csvpaths_', modelName, '.rds'))
+fit <- as_cmdstan_fit(csvspaths)
+
+##########################################################
+#extract draws
+print("extract draws")
+draws <- posterior::as_draws_matrix(fit$draws(c('alpha','beta')))
+mean_draws <- posterior::as_draws_matrix(fit$draws(c('mu_alpha', 'mu_beta')))
+loglik <- posterior::as_draws_matrix(fit$draws(c('log_lik')))
+
+#check model outputs
+print("check model")
+theme_set(theme_bw())
+neff <- mcmc_neff(neff_ratio(fit))
+trace <- mcmc_trace(mean_draws)
+rhat <- mcmc_rhat(summarise_draws(draws)$rhat)
+
+#extract model parameters
+print("extract model params")
+indiv_params <-summarise_draws(draws, mean)
+alpha <- posterior::as_draws_matrix(fit$draws(c('alpha')))
+indiv_alpha <-data.frame(summarise_draws(alpha, mean))
+beta <- posterior::as_draws_matrix(fit$draws(c('beta')))
+indiv_beta <-data.frame(summarise_draws(beta, mean))
+indiv_alpha$subjID <- as.integer(gsub("alpha\\[|\\]", "", indiv_alpha$variable))
+indiv_beta$subjID <- as.integer(gsub("beta\\[|\\]", "", indiv_beta$variable))
+names(indiv_alpha)[names(indiv_alpha) == "mean"] <- "alpha"
+names(indiv_beta)[names(indiv_beta) == "mean"] <- "beta"
+model_params <- Reduce(function(x, y) merge(x, y, by = "subjID"), 
+                    list(indiv_alpha[, c("subjID", "alpha")],
+                         indiv_beta[, c("subjID", "beta")]))
+
+#save outputs
+print("saving")
+ggsave(paste0(outputFolder, "neffplot_", modelName, ".png"), neff)
+ggsave(paste0(outputFolder, "traceplot_", modelName, ".png"), trace)
+ggsave(paste0(outputFolder, "rhat_", modelName, ".png"), rhat)
+
+saveRDS(model_params, paste0(outputFolder, "modelPars_", modelName, ".rds"))
+saveRDS(draws, paste0(outputFolder, "draws_", modelName, ".rds"))
+saveRDS(rhat, paste0(outputFolder, "rhat_", modelName, ".rds"))
+saveRDS(loglik, paste0(outputFolder, "loglik_", modelName, ".rds"))

@@ -1,0 +1,561 @@
+# Data visualisations
+
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+set.seed(41)
+library(dplyr)
+library(ggplot2)
+library(hBayesDM)
+library(pheatmap)
+library(truncnorm)
+library(rstan)
+library(cmdstanr)
+library(bayesplot)
+library(posterior)
+library(loo)
+library(rstanarm)
+library(magick)
+library(cowplot)
+```
+
+</details>
+
+<p>
+
+This file contains the code for the graphs included in the paper (and
+the supplement) regarding computational modeling
+</p>
+
+<h3>
+
+Model comparison
+</h3>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+folder <- "//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelOutputs"
+loglik_list <- list()
+waic_list <- list()
+modelname_list <-list()
+for (filename in list.dirs(folder, recursive=FALSE)){
+  #print(filename)
+  if (grepl("OUTdir", filename)) {
+    next   # skip this file
+    }
+    modelname<-basename(filename)
+    #print(modelname)
+    loglik <- readRDS(list.files(filename, pattern="^loglik", full.names=TRUE))
+    waic <- waic(loglik)
+    loglik_list[[modelname]]<- loglik
+    waic_list[[modelname]] <- waic
+    modelname_list <- append(modelname_list, modelname)
+}
+
+df <- data.frame(
+  model = names(waic_list),
+  waic = c(
+    waic_list[[modelname_list[[1]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[2]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[3]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[4]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[5]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[6]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[7]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[8]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[9]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[10]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[11]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[12]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[13]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[14]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[15]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[16]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[17]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[18]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[19]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[20]]]]$estimates["waic", "Estimate"],
+    waic_list[[modelname_list[[21]]]]$estimates["waic", "Estimate"]
+    ),
+  se = c(
+    waic_list[[modelname_list[[1]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[2]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[3]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[4]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[5]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[6]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[7]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[8]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[9]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[10]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[11]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[12]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[13]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[14]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[15]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[16]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[17]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[18]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[19]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[20]]]]$estimates["waic", "SE"],
+    waic_list[[modelname_list[[21]]]]$estimates["waic", "SE"]
+    )
+)
+df <- df[order(df$waic), ] 
+df$model <- factor(df$model, levels = df$model[order(df$waic)])
+df <- df[!grepl("hybrid", df$model, ignore.case = TRUE), ]
+
+theme_set(theme_bw())
+df <- df[!grepl("random", df$model, ignore.case = TRUE), ]
+
+brack_x <- max(df$waic) + max(df$se)
+custom_labels <- c("seperate parameters",
+                "seperate parameters",
+                "Em Vs Not parameters",
+                "Em Vs Not parameters",
+                "shared parameters",
+                "shared parameters",
+                "seperate parameters",
+                "seperate parameters",
+                "Em Vs Not parameters",
+                "Em Vs Not parameters",
+                "shared parameters",
+                "shared parameters"
+                )
+
+ggplot(df, aes(x = model, y = waic, color= model, shape = model)) +
+  geom_point(size =4) +
+  geom_errorbar(aes(ymin = waic - se, ymax = waic + se), width = 0.5, size =1) +
+
+  #coord_flip()+
+  labs(y = "WAIC", x="") +
+  scale_color_manual(values=c("#9B0F47", "#9B0F47",  
+     "#3A0CA3", "#3A0CA3", "#2487B8", "#2487B8",
+     "#E78FB4", "#E78FB4",  
+     "#A781F6", "#A781F6", "#9FD6F3", "#9FD6F3" ), guide='none') +
+  #scale_x_discrete(labels = custom_labels) +
+  scale_shape_manual(values=c(8,1,8,1,8,1,8,1,8,1,8,1), guide='none') +
+  theme_minimal(base_size=18) +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    #axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+    axis.text.x = element_blank(),
+    legend.position = 'bottom',
+    plot.margin = margin(t = 20, r = 20, b = 30, l = 50)) +
+    guides(
+    color='none', shape='none',
+    custom_color = guide_legend(
+      title = "Model complexity",
+      override.aes = list(
+        color = c("#9B0F47", "#3A0CA3", "#2487B8"),  
+        shape = 16                       
+      ),
+      labels = c("Seperate parameters", 
+                "Em vs Not parameter split",
+                "Shared parameters")
+    ),
+    custom_shape = guide_legend(
+      title = "Learning rate type",
+      override.aes = list(
+        shape = c(8, 1),   # circle for single, triangle for dual
+        color = "#000000"    # neutral color for shape legend
+      ),
+      labels = c("Single learning rate", "Dual learning rate")
+    )
+    ) + 
+    geom_segment(aes(x = 1, xend = 6, y = brack_x + 500, yend = brack_x + 500), inherit.aes = FALSE) +
+    geom_segment(aes(x = 1, xend = 1, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
+    geom_segment(aes(x = 6, xend = 6, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
+    annotate("text", x = 3.5, y = brack_x + 1000, label = "Stickiness models") +
+    geom_segment(aes(x = 7, xend = 12, y = brack_x + 500, yend = brack_x + 500), inherit.aes = FALSE) +
+    geom_segment(aes(x = 7, xend = 7, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
+    geom_segment(aes(x = 12, xend = 12, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
+    annotate("text", x = 9.5, y = brack_x + 1000, label = "No Stickiness models")
+```
+
+</details>
+
+![](CompModeling_plots_files/figure-commonmark/WAIC%20model%20comparison%20plot-1.jpeg)
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+# Legend-only plot
+
+# Empty plot
+plot(NULL, xaxt='n', yaxt='n', bty='n', ylab='', xlab='', xlim=0:1, ylim=0:1)
+
+# Color legend for Model complexity
+legend('topleft',
+       legend = c("Separate parameters", "Em vs Not parameters", "Shared parameters"),
+       pch = 16,        # solid circles
+       pt.cex = 3,      # size of points
+       cex = 1.5,       # size of text
+       bty = 'n',       # no box
+       col = c("#9B0F47", "#3A0CA3", "#2487B8"))
+
+# Shape legend for Learning rate type
+legend('topright',
+       legend = c("Single learning rate", "Dual learning rate"),
+       pch = c(8, 1),  # shapes
+       pt.cex = 3,
+       cex = 1.5,
+       bty = 'n',
+       col = "black")
+```
+
+</details>
+
+![](CompModeling_plots_files/figure-commonmark/WAIC%20legend-1.jpeg)
+
+<h3>
+
+Parameter recovery
+</h3>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+simul_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/simParams.rds")
+model_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/modelOutput/modelPars_1lr_stick1_blk3_allparamsep.rds")
+
+param_recov <- merge(simul_pars, model_pars, by ='subjID')
+param_cors = cor(param_recov)
+param_cors <- param_cors[-c(1), -c(1)]
+param_cors <- param_cors[-c(1,2,3,4,5,6,7,8,9), -c(10,11,12,13,14,15,16,17,18) ]
+param_cors <- param_cors[c('p_alpha', 'f_alpha', 'd_alpha', 
+                            'p_beta', 'f_beta', 'd_beta',
+                            'p_omega', 'f_omega', 'd_omega'),
+                             c('pointsLearningRate', 'fearLearningRate', 'disgustLearningRate', 
+                                'pointsInverseTemp', 'fearInverseTemp', 'disgustInverseTemp',
+                                    'pointsStickiness', 'fearStickiness', 'disgustStickiness')]
+
+rownames(param_cors) <- c("LR-p", "LR-f", "LR-d",
+                          "invTemp-p", "invTemp-f", "invTemp-d",
+                          "stick-p", "stick-f", "stick-d")
+
+colnames(param_cors) <- c("LR-p", "LR-f", "LR-d",
+                          "invTemp-p", "invTemp-f", "invTemp-d",
+                          "stick-p", "stick-f", "stick-d")
+
+pheatmap(param_cors, 
+         cluster_rows = FALSE, cluster_cols = FALSE,
+         display_numbers = TRUE, number_format = "%.2f", fontsize=16)
+```
+
+</details>
+
+![](CompModeling_plots_files/figure-commonmark/paramater%20recovery-1.jpeg)
+
+<h3>
+
+Posterior predictive checks
+</h3>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+postpred_alltrials <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/PPCs/postpred_alltrials_1lr_stick1_blk3_allparamsep.rds")
+in_range_df <- readRDS("../modelFitting/modelDiagnostics/PPCs/in_range_df.rds")
+        #created by PPCs.R script
+
+lq<-as.numeric(quantile(in_range_df$in_range_prob, probs=0.25))
+q_index <- which.min(abs(in_range_df$in_range_prob - lq))
+participant_no <- in_range_df[q_index, c('subject')]
+block_no <- in_range_df[q_index, c('block')]
+
+subj_df = postpred_alltrials[postpred_alltrials$subject==participant_no,]
+block_df = subj_df[subj_df$block==block_no,]
+p1 <- ggplot(block_df, aes(x=trial)) +
+  geom_line(aes(y=observed), color="black") +
+  geom_line(aes(y=pred_median), color="red", linetype="dashed") +
+  geom_ribbon(aes(ymin=pred_lower, ymax=pred_upper), fill="red", alpha=0.2) +
+  labs(title=paste0("Lower quartile (", round(lq,2), ")"),
+        y="Choice") +
+  theme_minimal()
+
+med<-as.numeric(quantile(in_range_df$in_range_prob, probs=0.5))
+q_index <- which.min(abs(in_range_df$in_range_prob - med))
+participant_no <- in_range_df[q_index, c('subject')]
+block_no <- in_range_df[q_index, c('block')]
+
+subj_df = postpred_alltrials[postpred_alltrials$subject==participant_no,]
+block_df = subj_df[subj_df$block==block_no,]
+p2 <- ggplot(block_df, aes(x=trial)) +
+  geom_line(aes(y=observed), color="black") +
+  geom_line(aes(y=pred_median), color="red", linetype="dashed") +
+  geom_ribbon(aes(ymin=pred_lower, ymax=pred_upper), fill="red", alpha=0.2) +
+  labs(title=paste0("Median (", round(med,2), ")"),, x="Trial") +
+  theme_minimal()
+
+uq<-as.numeric(quantile(in_range_df$in_range_prob, probs=0.75))
+q_index <- which.min(abs(in_range_df$in_range_prob - uq))
+participant_no <- in_range_df[q_index, c('subject')]
+block_no <- in_range_df[q_index, c('block')]
+
+subj_df = postpred_alltrials[postpred_alltrials$subject==participant_no,]
+
+block_df = subj_df[subj_df$block==block_no,]
+p3 <- ggplot(block_df, aes(x=trial)) +
+  geom_line(aes(y=observed), color="black") +
+  geom_line(aes(y=pred_median), color="red", linetype="dashed") +
+  geom_ribbon(aes(ymin=pred_lower, ymax=pred_upper), fill="red", alpha=0.2) + 
+       labs(title=paste0("Upper quartile (", round(uq,2), ")"), x="Trial") +
+  theme_minimal()
+
+
+final_plot<-plot_grid(p1, p2, p3, ncol=3, align='v', axis='l')
+final_plot
+```
+
+</details>
+
+![](CompModeling_plots_files/figure-commonmark/PPC-1.jpeg)
+
+<h3>
+
+Model params
+</h3>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+fig, axes = plt.subplots(1,3, sharey=False)
+fig.tight_layout(pad=3)
+fig.set_size_inches(7.5, 3.4)
+
+##plot hypothesised results
+palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
+dark_palette = ["#9B0F47", "#5E2E9D", "#2487B8"]
+
+sns.stripplot(data=df, x="block_type", y="LR", ax=axes[0], palette=palette, alpha=.5, jitter=True, marker='.', order=['Points', 'Disgust', 'Fear'], zorder=1)
+sns.boxplot(data=df, x="block_type", y="LR",  ax=axes[0], palette=dark_palette, fill=False, showfliers=False, notch=True, order=['Points', 'Disgust', 'Fear'], zorder=2)
+sns.pointplot(data=df, x="block_type", y="LR",  ax=axes[0], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, order=['Points', 'Disgust', 'Fear'], zorder=3)
+
+#fear_annot, points_annot, pointsFear_annot = pVal_annot('LR')
+fear_annot, points_annot, pointsFear_annot = pVal_annot('LR_explSensitivity')
+if fear_annot != 'NonSig':
+    x1, x2 = 1, 2  
+    y, h, col = df["LR"].max() + 0.02, 0.02, 'lightgrey'  
+    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[0].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
+if points_annot != 'NonSig':
+    x1, x2 = 0, 1  
+    y, h, col = df["LR"].max() + 0.02, 0.02, 'lightgrey'  
+    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[0].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=12) 
+if pointsFear_annot != 'NonSig':
+    x1, x2 = 0, 2  
+    y, h, col = df["LR"].max() + 0.02, 0.02, 'lightgrey'  
+    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[0].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=12) 
+
+axes[0].set_xlabel("")
+axes[0].set_ylabel("Learning rate") 
+axes[0].set_title("Learning rate")
+#axes[0].set_ylim(top=y+h+3.5)
+
+sns.stripplot(data=df, x="block_type", y="invTemp", ax=axes[1], palette=palette, alpha=.5, jitter=True, marker='.', order=['Points', 'Disgust', 'Fear'], zorder=1)
+sns.boxplot(data=df, x="block_type", y="invTemp",  ax=axes[1], palette=dark_palette, fill=False, showfliers=False, notch=True, order=['Points', 'Disgust', 'Fear'], zorder=2)
+sns.pointplot(data=df, x="block_type", y="invTemp",  ax=axes[1], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, order=['Points', 'Disgust', 'Fear'], zorder=3)
+
+fear_annot, points_annot, pointsFear_annot = pVal_annot('invTemp')
+if fear_annot != 'NonSig':
+    x1, x2 = 1, 2  
+    y, h, col = df["invTemp"].max() + 15, 10, 'black'  
+    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[1].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
+if points_annot != 'NonSig':
+    x1, x2 = 0, 1  
+    y, h, col = df["invTemp"].max() + 1.5, 1.5, 'black'  
+    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[1].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=15) 
+if pointsFear_annot != 'NonSig':
+    x1, x2 = 0, 2  
+    y, h, col = df["LR"].max() + 1.5, 1.5, 'black'  
+    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[1].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=15) 
+
+axes[1].set_xlabel("")
+axes[1].set_ylabel("Inverse temperature") 
+axes[1].set_title("Inverse temperature")
+#axes[1].set_ylim(top=y+h+3.5)
+
+sns.stripplot(data=df, x="block_type", y="stickiness", ax=axes[2], palette=palette, alpha=.5, jitter=True, marker='.', order=['Points', 'Disgust', 'Fear'], zorder=1)
+sns.boxplot(data=df, x="block_type", y="stickiness",  ax=axes[2], palette=dark_palette, fill=False, showfliers=False, notch=True, order=['Points', 'Disgust', 'Fear'], zorder=2)
+sns.pointplot(data=df, x="block_type", y="stickiness",  ax=axes[2], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, order=['Points', 'Disgust', 'Fear'], zorder=3)
+
+fear_annot, points_annot, pointsFear_annot = pVal_annot('stickiness')
+if fear_annot != 'NonSig':
+    x1, x2 = 1, 1.9 
+    y, h, col = df["stickiness"].max() + 0.01, 0.02, 'black'  
+    axes[2].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[2].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
+if points_annot != 'NonSig':
+    x1, x2 = 0, 0.9  
+    y, h, col = df["stickiness"].max() + 0.01, 0.02, 'black'  
+    axes[2].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[2].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col) 
+if pointsFear_annot != 'NonSig':
+    x1, x2 = 0, 2  
+    y, h, col = df["LR"].max() + 0.3, 0.02, 'black'  
+    axes[2].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[2].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col) 
+
+axes[2].set_xlabel("")
+axes[2].set_ylabel("Stickiness") 
+axes[2].set_title("Stickiness")
+axes[2].set_ylim(top=y+h+0.3)
+```
+
+</details>
+
+    (-0.878459164, 1.599616442)
+
+![](CompModeling_plots_files/figure-commonmark/unnamed-chunk-7-1.jpeg)
+
+<p>
+
+Learning rate outliers
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+fig, axes = plt.subplots(2,1, sharex=False, gridspec_kw={'height_ratios': [1.5, 1]})
+fig.tight_layout(pad=1)
+#fig.set_size_inches(8.3, 5.8)
+fig.set_size_inches(3.7, 3.25)
+plt.rcParams['font.size'] = 12   
+
+colorA="#9B0F47" #dark pink
+colorB="#3A0CA3" #darker purple
+colorC="#CBC3E3" #light purple
+
+#load in all files
+filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1lr_stick1_blk3_allparamsep_params.csv"
+params = pd.read_csv(filepath)
+
+#params = pd.read_csv("../csvs/winningModelOutput.csv")
+
+task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
+task_summary.sort_values(by=['participant_no', 'block_type'], inplace=True)
+params['participant_no']=list(set(task_summary.participant_no))
+
+#convert to long df
+long_params=pd.DataFrame()
+for subj in set(params['participant_no']):
+    subj_params= params[params['participant_no']==subj]
+    disgust_row=pd.DataFrame({
+        'participant_no': [float(subj_params['participant_no'])],
+        'LR':  [float(subj_params['d_alpha'])],
+        'invTemp': [float(subj_params['d_beta'])],
+        'stickiness': [float(subj_params['d_omega'])],
+        'block_type': ['Disgust']
+    })
+    fear_row=pd.DataFrame({
+        'participant_no': [float(subj_params['participant_no'])],
+        'LR':  [float(subj_params['f_alpha'])],
+        'invTemp': [float(subj_params['f_beta'])],
+        'stickiness': [float(subj_params['f_omega'])],
+        'block_type': ['Fear']
+    })
+    points_row=pd.DataFrame({
+        'participant_no': [float(subj_params['participant_no'])],
+        'LR':  [float(subj_params['p_alpha'])],
+        'invTemp': [float(subj_params['p_beta'])],
+        'stickiness': [float(subj_params['p_omega'])],
+        'block_type': ['Points']
+    })
+    long_params=pd.concat([long_params, disgust_row, fear_row, points_row])
+
+##combine with task_summary_df
+df=pd.merge(task_summary, long_params, on=['participant_no', 'block_type'], how='inner')
+
+#identify the outliers in the LR error outcome
+Q1 = df['LR'].quantile(0.25)
+Q3 = df['LR'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1- 1.5 *  IQR
+upper_bound = 1
+if lower_bound < min(df.LR):
+    lower_bound = min(df.LR)
+outliers=df[(df['LR']<lower_bound) | (df['LR']>upper_bound )]
+
+bin_width=0.015
+bins=np.arange(min(df.LR), max(df.LR) + bin_width, bin_width)
+sns.histplot(data=df, bins=bins, x="LR", color=colorC, ax=axes[0] )
+sns.histplot(data=outliers, bins=bins,
+x="LR", color=colorA, ax=axes[0] ) 
+axes[0].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=2, label='Lower Bound')
+axes[0].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=2, label='Upper Bound')
+
+axes[0].set_xlabel('')
+axes[0].set_ylabel('')
+axes[0].set_title('Learning Rate', fontsize=12)
+axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+axes[0].set_yticks([])
+```
+
+</details>
+
+    []
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+#axes[0].set_ylim(top=100)
+
+#percentage correct
+Q1 = df['percentage_correct'].quantile(0.25)
+Q3 = df['percentage_correct'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1- 1.5 *  IQR
+upper_bound = Q3 + 1.5 *  IQR
+bin_width=0.01
+bins=np.arange(min(df.percentage_correct), max(df.percentage_correct) + bin_width, bin_width)
+sns.histplot(data=df, x="percentage_correct", color=colorC, bins=bins, ax=axes[1]) 
+sns.histplot(data=outliers, x="percentage_correct", color=colorA, bins=bins, ax=axes[1]) 
+axes[1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=2, label='Lower Bound')
+axes[1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=2, label='Upper Bound')
+axes[1].set_xlabel('Percentage correct')
+
+axes[1].set_xlabel('')
+axes[1].set_ylabel('')
+axes[1].set_title('Percentage correct', fontsize=12)
+axes[1].set_ylim(top=50)
+```
+
+</details>
+
+    (0.0, 50.0)
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+axes[1].set_yticks([])
+```
+
+</details>
+
+    []
+
+![](CompModeling_plots_files/figure-commonmark/outliers-3.jpeg)
+
+<p>
+
+Disgust vs not and em vs not
+</p>
