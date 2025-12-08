@@ -127,7 +127,7 @@ custom_labels <- c("seperate parameters",
                 "shared parameters"
                 )
 
-ggplot(df, aes(x = model, y = waic, color= model, shape = model)) +
+plot <- ggplot(df, aes(x = model, y = waic, color= model, shape = model)) +
   geom_point(size =4) +
   geom_errorbar(aes(ymin = waic - se, ymax = waic + se), width = 0.5, size =1) +
 
@@ -176,6 +176,10 @@ ggplot(df, aes(x = model, y = waic, color= model, shape = model)) +
     geom_segment(aes(x = 7, xend = 7, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
     geom_segment(aes(x = 12, xend = 12, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
     annotate("text", x = 9.5, y = brack_x + 1000, label = "No Stickiness models")
+
+
+ggsave("ModelComp_plot.png", plot, width = 6, height = 4, dpi = 300, bg='white', units='in')
+plot
 ```
 
 </details>
@@ -245,14 +249,121 @@ colnames(param_cors) <- c("LR-p", "LR-f", "LR-d",
                           "invTemp-p", "invTemp-f", "invTemp-d",
                           "stick-p", "stick-f", "stick-d")
 
-pheatmap(param_cors, 
-         cluster_rows = FALSE, cluster_cols = FALSE,
+plot <- pheatmap(param_cors, 
+         cluster_rows = FALSE, cluster_cols = FALSE, legend=FALSE,
          display_numbers = TRUE, number_format = "%.2f", fontsize=16)
+
+ggsave("ParamRecovHeatmap_plot.png", plot, width = 6, height = 4, dpi = 300, bg='white', units='in')
+plot
 ```
 
 </details>
 
 ![](CompModeling_plots_files/figure-commonmark/paramater%20recovery-1.jpeg)
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+learning_rate_long <- tibble(
+  LearningRate = c(param_recov$pointsLearningRate, param_recov$fearLearningRate, param_recov$disgustLearningRate),
+  alpha = c(param_recov$p_alpha, param_recov$f_alpha, param_recov$d_alpha),
+  domain = factor(c(
+    rep("points", nrow(param_recov)),
+    rep("fear", nrow(param_recov)),
+    rep("disgust", nrow(param_recov))
+  ))
+)
+
+inv_temp_long <- tibble(
+  InverseTemp = c(param_recov$pointsInverseTemp, param_recov$fearInverseTemp, param_recov$disgustInverseTemp),
+  beta = c(param_recov$p_beta, param_recov$f_beta, param_recov$d_beta),
+  domain = factor(c(
+    rep("points", nrow(param_recov)),
+    rep("fear", nrow(param_recov)),
+    rep("disgust", nrow(param_recov))
+  ))
+)
+
+stickiness_long <- tibble(
+  Stickiness = c(param_recov$pointsStickiness, param_recov$fearStickiness, param_recov$disgustStickiness),
+  omega = c(param_recov$p_omega, param_recov$f_omega, param_recov$d_omega),
+  domain = factor(c(
+    rep("points", nrow(param_recov)),
+    rep("fear", nrow(param_recov)),
+    rep("disgust", nrow(param_recov))
+  ))
+)
+
+long_param_recov <- bind_rows(
+  learning_rate_long,
+  inv_temp_long,
+  stickiness_long
+)
+
+my_palette <- c("#F72585", "#3A0CA3", "#4CC9F0")
+
+# Plot
+p1 <- ggplot(long_param_recov, aes(x = LearningRate, y = alpha, color = domain)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  scale_color_manual(values = my_palette) +
+  theme_minimal() +
+  labs(
+    title = "Learning rate",
+    x = "Simulated",
+    y = "Recovered"
+  )
+
+p2 <- ggplot(long_param_recov, aes(x = InverseTemp, y = beta, color = domain)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  scale_color_manual(values = my_palette) +
+  theme_minimal() +
+  labs(
+    title = "Inverse Temperature",
+    x = "Simulated",
+    y = "Recovered"
+  )
+
+p3 <- ggplot(long_param_recov, aes(x = Stickiness, y = omega, color = domain)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  scale_color_manual(values = my_palette) +
+  theme_minimal() +
+  labs(
+    title = "Stickiness",
+    x = "Simulated",
+    y = "Recovered"
+  )
+
+p1_clean <- p1 + theme(legend.position = "none")
+p2_clean <- p2 + theme(legend.position = "none")
+p3_clean <- p3 + theme(legend.position = "none")
+
+final_plot<-plot_grid(p1_clean, p2_clean, p3_clean, ncol=3, align='v', axis='l')
+```
+
+</details>
+
+    Warning: Removed 600 rows containing missing values or values outside the scale range
+    (`geom_point()`).
+    Removed 600 rows containing missing values or values outside the scale range
+    (`geom_point()`).
+    Removed 600 rows containing missing values or values outside the scale range
+    (`geom_point()`).
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+ggsave("paramRecovCorr_plot.png", final_plot, width = 12, height = 4, dpi = 300, bg='white', units='in')
+final_plot
+```
+
+</details>
+
+![](CompModeling_plots_files/figure-commonmark/unnamed-chunk-6-1.jpeg)
 
 <h3>
 
@@ -313,6 +424,7 @@ p3 <- ggplot(block_df, aes(x=trial)) +
 
 
 final_plot<-plot_grid(p1, p2, p3, ncol=3, align='v', axis='l')
+ggsave("PPC_plot.png", final_plot, width = 12, height = 4, dpi = 300, bg='white', units='in')
 final_plot
 ```
 
@@ -345,25 +457,35 @@ sns.pointplot(data=df, x="block_type", y="LR",  ax=axes[0], marker="D", color='b
 fear_annot, points_annot, pointsFear_annot = pVal_annot('LR_explSensitivity')
 if fear_annot != 'NonSig':
     x1, x2 = 1, 2  
-    y, h, col = df["LR"].max() + 0.02, 0.02, 'lightgrey'  
+    y, h, col = df["LR"].max() + 0.02, 0.02, 'grey'  
     axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
     axes[0].text((x1+x2)*.5, y+h, fear_annot, ha='center', va='bottom', color=col)  
 if points_annot != 'NonSig':
     x1, x2 = 0, 1  
-    y, h, col = df["LR"].max() + 0.02, 0.02, 'lightgrey'  
+    y, h, col = df["LR"].max() + 0.02, 0.02, 'grey'  
     axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
     axes[0].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=12) 
 if pointsFear_annot != 'NonSig':
     x1, x2 = 0, 2  
-    y, h, col = df["LR"].max() + 0.02, 0.02, 'lightgrey'  
+    y, h, col = df["LR"].max() + 0.02, 0.02, 'grey'  
     axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
     axes[0].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=12) 
 
 axes[0].set_xlabel("")
 axes[0].set_ylabel("Learning rate") 
 axes[0].set_title("Learning rate")
-#axes[0].set_ylim(top=y+h+3.5)
+axes[0].set_xticklabels(axes[0].get_xticklabels(), rotation=45)
+axes[0].set_ylim(top=y+h+0.075)
+```
 
+</details>
+
+    (0.447481087825, 1.094616442)
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 sns.stripplot(data=df, x="block_type", y="invTemp", ax=axes[1], palette=palette, alpha=.5, jitter=True, marker='.', order=['Points', 'Disgust', 'Fear'], zorder=1)
 sns.boxplot(data=df, x="block_type", y="invTemp",  ax=axes[1], palette=dark_palette, fill=False, showfliers=False, notch=True, order=['Points', 'Disgust', 'Fear'], zorder=2)
 sns.pointplot(data=df, x="block_type", y="invTemp",  ax=axes[1], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, order=['Points', 'Disgust', 'Fear'], zorder=3)
@@ -388,6 +510,7 @@ if pointsFear_annot != 'NonSig':
 axes[1].set_xlabel("")
 axes[1].set_ylabel("Inverse temperature") 
 axes[1].set_title("Inverse temperature")
+axes[1].set_xticklabels(axes[0].get_xticklabels(), rotation=45)
 #axes[1].set_ylim(top=y+h+3.5)
 
 sns.stripplot(data=df, x="block_type", y="stickiness", ax=axes[2], palette=palette, alpha=.5, jitter=True, marker='.', order=['Points', 'Disgust', 'Fear'], zorder=1)
@@ -414,14 +537,25 @@ if pointsFear_annot != 'NonSig':
 axes[2].set_xlabel("")
 axes[2].set_ylabel("Stickiness") 
 axes[2].set_title("Stickiness")
-axes[2].set_ylim(top=y+h+0.3)
+axes[2].set_xticklabels(axes[0].get_xticklabels(), rotation=45)
+axes[2].set_ylim(top=y+h+0.15)
 ```
 
 </details>
 
-    (-0.878459164, 1.599616442)
+    (-0.878459164, 1.449616442)
 
-![](CompModeling_plots_files/figure-commonmark/unnamed-chunk-7-1.jpeg)
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+
+plt.savefig('ModelParams_hypothesisTesting.jpeg', dpi=300, bbox_inches='tight')
+```
+
+</details>
+
+![](CompModeling_plots_files/figure-commonmark/unnamed-chunk-8-1.jpeg)
 
 <p>
 
@@ -504,17 +638,7 @@ axes[0].set_xlabel('')
 axes[0].set_ylabel('')
 axes[0].set_title('Learning Rate', fontsize=12)
 axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-axes[0].set_yticks([])
-```
-
-</details>
-
-    []
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
+#axes[0].set_yticks([])
 #axes[0].set_ylim(top=100)
 
 #percentage correct
@@ -546,16 +670,122 @@ axes[1].set_ylim(top=50)
 
 ``` python
 axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-axes[1].set_yticks([])
+#axes[1].set_yticks([])
+
+plt.savefig('LROutliers.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
 
-    []
-
 ![](CompModeling_plots_files/figure-commonmark/outliers-3.jpeg)
+
+<h3>
+
+Learning rate exploratory analysis: Disgust vs not and em vs not
+</h3>
 
 <p>
 
-Disgust vs not and em vs not
+NB within sensitivity analysis
 </p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+task_summary = pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/csvs/winningModelOutput.csv")
+
+Q1 = task_summary["percentage_correct"].quantile(0.25)
+Q3 = task_summary["percentage_correct"].quantile(0.75)
+
+IQR_value = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR_value
+upper_bound = Q3 + 1.5 * IQR_value
+
+task_summary = task_summary[task_summary["percentage_correct"] >= lower_bound]
+
+task_summary.loc[task_summary['block_type']=='Disgust', 'disgustOrNot']='Disgust'
+task_summary.loc[task_summary['block_type']!='Disgust', 'disgustOrNot']='Not'
+task_summary.loc[task_summary['block_type']=='Points', 'emotionOrNot']='Not'
+task_summary.loc[task_summary['block_type']!='Points', 'emotionOrNot']='Emotion'
+
+
+fig, axes = plt.subplots(1,2, sharey=True)
+fig.tight_layout(pad=3)
+fig.set_size_inches(3.7, 2.7)
+plt.rcParams['font.size'] = 12 
+
+disgust_not_palette=["#5E2E9D", "#00008B"]
+emotion_not_palette=["#4361EE", "#9B0F47"]
+
+disgust_not_light=["#3A0CA3", "#00008B"]
+emotion_not_light=["#4361EE", "#F72585"]
+
+sns.stripplot(data=task_summary, x="disgustOrNot", y="LR", ax=axes[0], palette=disgust_not_light, alpha=.5, jitter=True, marker='.', zorder=1)
+sns.boxplot(data=task_summary, x="disgustOrNot", y="LR", ax=axes[0], palette=disgust_not_palette, fill=False, showfliers=False, notch=True, zorder=2)
+#sns.pointplot(data=task_summary, x="disgustOrNot", y="LR", ax=axes[0], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, zorder=3)
+axes[0].set_xlabel("")
+axes[0].set_xticklabels(['Disgust', 'Not Disgust'], rotation=45)
+axes[0].set_ylabel("Learning Rate") 
+axes[0].set_title("Disgust vs Not", fontsize=12)
+
+sns.stripplot(data=task_summary, x="emotionOrNot", y="LR", ax=axes[1], palette=emotion_not_light, alpha=.5, jitter=True, marker='.', zorder=1)
+sns.boxplot(data=task_summary, x="emotionOrNot", y="LR", ax=axes[1],palette=emotion_not_palette, fill=False, showfliers=False, notch=True, zorder=2)
+#sns.pointplot(data=task_summary, x="emotionOrNot", y="LR", ax=axes[1], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, zorder=3)
+
+
+emotionDisgust_pvals=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/pvals/disgustEmotion_LR_pvalsForPlotting.csv")
+
+disgustOrNot_pval=float(emotionDisgust_pvals[emotionDisgust_pvals.model=='disgustOrNot'].pvals)
+if disgustOrNot_pval < 0.001:
+    disgustOrNot_annot='***'
+elif disgustOrNot_pval <0.01:
+    disgustOrNot_annot='**'
+elif disgustOrNot_pval <0.05:
+    disgustOrNot_annot='*'
+else:
+    disgustOrNot_annot='NonSig'
+
+emotionOrNot_pval=float(emotionDisgust_pvals[emotionDisgust_pvals.model=='emotionOrNot'].pvals)
+if emotionOrNot_pval < 0.001:
+    emotionOrNot_annot='***'
+elif emotionOrNot_pval <0.01:
+    emotionOrNot_annot='**'
+elif emotionOrNot_pval <0.05:
+    emotionOrNot_annot='*'
+else:
+    emotionOrNot_annot='NonSig'
+
+
+if disgustOrNot_annot != 'NonSig':
+    x1, x2 = 0, 1  
+    y, h, col = task_summary["LR"].max() + 0.02, 0.02, 'grey'  
+    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[0].text((x1+x2)*.5, y+h, disgustOrNot_annot, ha='center', va='bottom', color=col) 
+if emotionOrNot_annot != 'NonSig':
+    x1, x2 = 0, 1  
+    y, h, col = task_summary["LR"].max() +0.02, 0.02, 'grey'  
+    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
+    axes[1].text((x1+x2)*.5, y+h, emotionOrNot_annot, ha='center', va='bottom', color=col) 
+
+axes[1].set_xlabel("")
+axes[1].set_xticklabels(['Emotion', 'Points-based'], rotation=45)
+axes[1].set_ylabel("") 
+axes[1].set_title("Emotion vs points", fontsize=12)
+axes[0].set_ylim(top=y+h+0.075)
+```
+
+</details>
+
+    (0.447481087825, 1.094616442)
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+plt.savefig('DisgustNotEmotionNot_LRsensitivity.jpeg', dpi=300, bbox_inches='tight')
+```
+
+</details>
+
+![](CompModeling_plots_files/figure-commonmark/alternative%20outlier%20exclusion-5.jpeg)
