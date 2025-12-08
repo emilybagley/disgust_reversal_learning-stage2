@@ -162,7 +162,6 @@ results=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop'
 print(results.summary())
 ```
 
-
 <p>And the results remain unchanged when the age covariate is dropped:</p>
 ```{python}
 #| label: Mixed effects model - no covariate
@@ -362,7 +361,185 @@ print(results.summary())
 <br>
 <br>
 <h3> <b> Sensitivity analysis </b></h3>
+
 We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.
+
+<p>The originally planned outlier criteria is not fit for purpose due to the large skew of the regressive error outcome. Instead, we run a sensitivity analysis excluding data-points that are outliers in terms of accuracy</p>
+
+<p>Exclude outliers according to this definition</p>
+```{python}
+#| code-fold: true
+Q1 = task_summary["percentage_correct"].quantile(0.25)
+Q3 = task_summary["percentage_correct"].quantile(0.75)
+
+IQR_value = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR_value
+upper_bound = Q3 + 1.5 * IQR_value
+
+explore_df = task_summary[task_summary["percentage_correct"] >= lower_bound]
+```
+
+```{python}
+#| label: Skewness alt outlier
+#| echo: true
+#| code-fold: true
+
+pt=PowerTransformer(method='yeo-johnson', standardize=False)
+skl_yeojohnson=pt.fit(pd.DataFrame(explore_df.win_stay))
+skl_yeojohnson=pt.transform(pd.DataFrame(explore_df.win_stay))
+explore_df['win_stay_transformed'] = pt.transform(pd.DataFrame(explore_df.win_stay))
+
+fig, axes = plt.subplots(1,2, sharey=True)
+sns.histplot(data=explore_df, x="win_stay", ax=axes[0]) 
+sns.histplot(data=explore_df['win_stay_transformed'], ax=axes[1])
+print('Win-stay skew: '+str(skew(explore_df.win_stay)))
+
+```
+
+<p>Select the winning mixed effects model </p>
+```{python}
+#| label: Mixed effects model - model selection alt outlier
+#| echo: true
+#| code-fold: true
+data=explore_df
+formula = 'win_stay_transformed ~ block_type'
+basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+
+#feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
+#fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
+feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+        #had to comment out because it does not converge and errors out
+
+randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+#feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) FAILED TO CONVERGE
+
+
+bic=pd.DataFrame({'basic_model': [basic_model.bic], 
+                    #'feedback_randint': ['CONVERGENCE WARNING'], 
+                   # 'fractals_randint': ['CONVERGENCE WARNING'],
+                    'feedback_fractals_randint': [feedback_fractals_randint.bic], 
+                    'randslope': [randslope.bic],
+                    'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                   # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
+                    })
+win1=bic.sort_values(by=0, axis=1).columns[0]
+
+
+no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_covariate=smf.mixedlm(formula+str('+prolific_sex'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+age_covariate=smf.mixedlm(formula+str('+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+digit_span_covariate=smf.mixedlm(formula+str('+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_age_covariate=smf.mixedlm(formula+str('+prolific_sex+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_digit_span_covariate=smf.mixedlm(formula+str('+prolific_sex+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+digit_span_age_covariate=smf.mixedlm(formula+str('+digit_span+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_age_digit_span_covariate=smf.mixedlm(formula+str('+prolific_sex+prolific_age+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+
+bic=pd.DataFrame({'no_covariate': [no_covariate.bic], 
+                    'sex_covariate': [sex_covariate.bic], 
+                    'age_covariate': [age_covariate.bic],
+                    'digit_span_covariate': [digit_span_covariate.bic],
+                    'sex_age_covariate': [sex_age_covariate.bic],
+                    'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
+                    'digit_span_age_covariate': [digit_span_age_covariate.bic],
+                    'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+win2=bic.sort_values(by=0, axis=1).columns[0]
+print("Winning models: "+ win1 +" "+ win2)
+
+```
+
+<p>Model assumptions are not violated</p>
+<p>Shapiro-Wilk</p>
+```{python}
+#| label: Mixed effects model -shapiro-wilk alt outlier
+#| echo: true
+#| code-fold: true
+
+results = age_covariate
+#shapiro-Wilk test of normality of residuals
+labels = ["Statistic", "p-value"]
+norm_res = stats.shapiro(results.resid)
+for key, val in dict(zip(labels, norm_res)).items():
+    print(key, val)
+
+```
+
+<p>White Lagrange</p>
+```{python}
+#| label: Mixed effects model -white lagrange alt outlier
+#| echo: true
+#| code-fold: true
+
+het_white_res = het_white(results.resid, results.model.exog)
+
+labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
+
+for key, val in dict(zip(labels, het_white_res)).items():
+    print(key, val)
+
+```
+
+<p>Results of this winning model</p>
+```{python}
+print(results.summary())
+```
+
+<p>And once age is excluded</p>
+```{python}
+print(no_covariate.summary())
+```
+
+<p>With Bayesian t-tests</p>
+<p>Firstly for disgust vs fear:</p>
+
+```{python}
+#| label: disgust vs fear bayes factor alt outlier
+#| echo: true
+#| code-fold: true
+
+ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Disgust', 'Fear')
+#print("Disgust vs Fear BF01: " + bf_null)
+
+print(f"Disgust vs Fear: BF01 = {bf_null}")
+```
+
+<br>
+<p>Next for disgust vs points:</p>
+
+```{python}
+#| label: disgust vs points bayes factor alt outlier
+#| echo: true
+#| code-fold: true
+
+ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Disgust', 'Points')
+#print("Disgust vs Points BF01: " + bf_null)
+
+print(f"Disgust vs Points: BF01 = {bf_null}")
+```
+
+<br>
+<p>We also look at fear vs points (which is not directly assessed by the model)</p>
+```{python}
+#| label: points vs fear ttest alt outlier
+#| echo: true
+#| code-fold: true
+ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Points', 'Fear')
+
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+```
+
+<p>And because the result is null, also get a Bayes factor: </p>
+```{python}
+#| label: points vs fear bayes factor alt outlier
+#| echo: true
+#| code-fold: true
+print(f"Points vs Fear: BF01 = {bf_null}")
+```
+
+<br>
+<h3> We also include the original outlier-free analysis for completeness </h3>
+In this case, the basic model (no random slopes or random intercepts) with just the age covariate produced the best fit (indexed by BIC scores).
+
 
 <p>Firstly, exclude outliers from the dataframe (outliers are define as those >1.5 IQRs above or below the upper or lower quartile)
 
@@ -386,8 +563,8 @@ for col in key_outcomes:
 task_summary.to_csv('sensitivity_df.csv')
 sensitivity_df=task_summary
 ```
-<br>
-<h3>Assess and correct for skewness in win-stay outcome (excluding outliers)</h3>
+
+<p>Assess and correct for skewness in win-stay outcome (excluding outliers)</p>
 
 ```{python}
 #| echo: true
@@ -401,12 +578,7 @@ fig, axes = plt.subplots(1,2, sharey=True)
 sns.histplot(data=sensitivity_df['win_stay'], ax=axes[0])
 sns.histplot(data=sensitivity_df['win_stay_transformed'], ax=axes[1])
 print('Win-stay skew: '+str(skew(sensitivity_df.win_stay.dropna())))
-
 ```
-
-
-<h3><b>Outlier-free hypothesis testing</b></h3>
-In this case, the basic model (no random slopes or random intercepts) with just the age covariate produced the best fit (indexed by BIC scores).
 
 ```{python}
 #| label: Mixed effects model sensitivity - model selection

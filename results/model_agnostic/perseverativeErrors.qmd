@@ -1166,7 +1166,6 @@ axes[1,1].set_xlabel('Lose-shift')
 <p> Together, these results suggest that the definition of outliers specified in the stage-1 registered report is not a good metric. Perhaps a better metric is excluding blocks where the accuracy score (percentage correct) is defined as an outlier: as the histogram shows, there are a minority of the perseverative error 'outliers' that fit this definition. </p>
 <p>Therefore, as a final exploratory analysis, we re-run the generalised mixed effects model excluding only the values that are outliers on the percentage correct outcome (have unusually low accuracy)</p>
 
-
 ```{R}
 #| label: alternative outlier exclusion
 task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")

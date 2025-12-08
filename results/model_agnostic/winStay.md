@@ -548,6 +548,311 @@ assess whether outliers are driving this effect.
 
 <p>
 
+The originally planned outlier criteria is not fit for purpose due to
+the large skew of the regressive error outcome. Instead, we run a
+sensitivity analysis excluding data-points that are outliers in terms of
+accuracy
+</p>
+
+<p>
+
+Exclude outliers according to this definition
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+Q1 = task_summary["percentage_correct"].quantile(0.25)
+Q3 = task_summary["percentage_correct"].quantile(0.75)
+
+IQR_value = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR_value
+upper_bound = Q3 + 1.5 * IQR_value
+
+explore_df = task_summary[task_summary["percentage_correct"] >= lower_bound]
+```
+
+</details>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+pt=PowerTransformer(method='yeo-johnson', standardize=False)
+skl_yeojohnson=pt.fit(pd.DataFrame(explore_df.win_stay))
+skl_yeojohnson=pt.transform(pd.DataFrame(explore_df.win_stay))
+explore_df['win_stay_transformed'] = pt.transform(pd.DataFrame(explore_df.win_stay))
+
+fig, axes = plt.subplots(1,2, sharey=True)
+sns.histplot(data=explore_df, x="win_stay", ax=axes[0]) 
+sns.histplot(data=explore_df['win_stay_transformed'], ax=axes[1])
+print('Win-stay skew: '+str(skew(explore_df.win_stay)))
+```
+
+</details>
+
+    Win-stay skew: -1.4420662466626153
+
+<img
+src="winStay_files/figure-commonmark/skewness-alt-outlier-output-2.jpeg"
+id="skewness-alt-outlier" />
+
+<p>
+
+Select the winning mixed effects model
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+data=explore_df
+formula = 'win_stay_transformed ~ block_type'
+basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+
+#feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
+#fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
+feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+        #had to comment out because it does not converge and errors out
+
+randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+#feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) FAILED TO CONVERGE
+
+
+bic=pd.DataFrame({'basic_model': [basic_model.bic], 
+                    #'feedback_randint': ['CONVERGENCE WARNING'], 
+                   # 'fractals_randint': ['CONVERGENCE WARNING'],
+                    'feedback_fractals_randint': [feedback_fractals_randint.bic], 
+                    'randslope': [randslope.bic],
+                    'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                   # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
+                    })
+win1=bic.sort_values(by=0, axis=1).columns[0]
+
+
+no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_covariate=smf.mixedlm(formula+str('+prolific_sex'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+age_covariate=smf.mixedlm(formula+str('+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+digit_span_covariate=smf.mixedlm(formula+str('+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_age_covariate=smf.mixedlm(formula+str('+prolific_sex+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_digit_span_covariate=smf.mixedlm(formula+str('+prolific_sex+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+digit_span_age_covariate=smf.mixedlm(formula+str('+digit_span+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_age_digit_span_covariate=smf.mixedlm(formula+str('+prolific_sex+prolific_age+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+
+bic=pd.DataFrame({'no_covariate': [no_covariate.bic], 
+                    'sex_covariate': [sex_covariate.bic], 
+                    'age_covariate': [age_covariate.bic],
+                    'digit_span_covariate': [digit_span_covariate.bic],
+                    'sex_age_covariate': [sex_age_covariate.bic],
+                    'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
+                    'digit_span_age_covariate': [digit_span_age_covariate.bic],
+                    'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+win2=bic.sort_values(by=0, axis=1).columns[0]
+print("Winning models: "+ win1 +" "+ win2)
+```
+
+</details>
+
+    Winning models: basic_model age_covariate
+
+<p>
+
+Model assumptions are not violated
+</p>
+
+<p>
+
+Shapiro-Wilk
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+results = age_covariate
+#shapiro-Wilk test of normality of residuals
+labels = ["Statistic", "p-value"]
+norm_res = stats.shapiro(results.resid)
+for key, val in dict(zip(labels, norm_res)).items():
+    print(key, val)
+```
+
+</details>
+
+    Statistic 0.9975230341537713
+    p-value 0.1292606996511556
+
+<p>
+
+White Lagrange
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+het_white_res = het_white(results.resid, results.model.exog)
+
+labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
+
+for key, val in dict(zip(labels, het_white_res)).items():
+    print(key, val)
+```
+
+</details>
+
+    LM Statistic 5.161573742927866
+    LM-Test p-value 0.5232635502143057
+    F-Statistic 0.8586899417473388
+    F-Test p-value 0.5248257497082252
+
+<p>
+
+Results of this winning model
+</p>
+
+``` python
+print(results.summary())
+```
+
+                  Mixed Linear Model Regression Results
+    ==================================================================
+    Model:            MixedLM Dependent Variable: win_stay_transformed
+    No. Observations: 1011    Method:             ML                  
+    No. Groups:       340     Scale:              1363.2094           
+    Min. group size:  1       Log-Likelihood:     -5394.2250          
+    Max. group size:  3       Converged:          Yes                 
+    Mean group size:  3.0                                             
+    ------------------------------------------------------------------
+                          Coef.   Std.Err.   z    P>|z| [0.025  0.975]
+    ------------------------------------------------------------------
+    Intercept             101.627    9.292 10.937 0.000 83.414 119.839
+    block_type[T.Fear]     -1.764    2.847 -0.620 0.536 -7.344   3.816
+    block_type[T.Points]   -1.879    2.854 -0.658 0.510 -7.472   3.714
+    prolific_age            0.581    0.193  3.005 0.003  0.202   0.961
+    Group Var            2405.852    7.332                            
+    ==================================================================
+
+<p>
+
+And once age is excluded
+</p>
+
+``` python
+print(no_covariate.summary())
+```
+
+                   Mixed Linear Model Regression Results
+    ===================================================================
+    Model:             MixedLM Dependent Variable: win_stay_transformed
+    No. Observations:  1011    Method:             ML                  
+    No. Groups:        340     Scale:              1363.0690           
+    Min. group size:   1       Log-Likelihood:     -5398.6793          
+    Max. group size:   3       Converged:          Yes                 
+    Mean group size:   3.0                                             
+    -------------------------------------------------------------------
+                          Coef.   Std.Err.   z    P>|z|  [0.025  0.975]
+    -------------------------------------------------------------------
+    Intercept             127.674    3.374 37.846 0.000 121.062 134.286
+    block_type[T.Fear]     -1.754    2.847 -0.616 0.538  -7.334   3.826
+    block_type[T.Points]   -1.878    2.853 -0.658 0.510  -7.471   3.714
+    Group Var            2482.601    7.527                             
+    ===================================================================
+
+<p>
+
+With Bayesian t-tests
+</p>
+
+<p>
+
+Firstly for disgust vs fear:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Disgust', 'Fear')
+#print("Disgust vs Fear BF01: " + bf_null)
+
+print(f"Disgust vs Fear: BF01 = {bf_null}")
+```
+
+</details>
+
+    Disgust vs Fear: BF01 = 10.638297872340425
+
+<br>
+<p>
+
+Next for disgust vs points:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Disgust', 'Points')
+#print("Disgust vs Points BF01: " + bf_null)
+
+print(f"Disgust vs Points: BF01 = {bf_null}")
+```
+
+</details>
+
+    Disgust vs Points: BF01 = 13.88888888888889
+
+<br>
+<p>
+
+We also look at fear vs points (which is not directly assessed by the
+model)
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Points', 'Fear')
+
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+```
+
+</details>
+
+    Points vs Fear: T = 0.5412036148948165, CI95% = [-0.01  0.01], p = 0.5887280302223017
+
+<p>
+
+And because the result is null, also get a Bayes factor:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+print(f"Points vs Fear: BF01 = {bf_null}")
+```
+
+</details>
+
+    Points vs Fear: BF01 = 14.084507042253522
+
+<br>
+<h3>
+
+We also include the original outlier-free analysis for completeness
+</h3>
+
+In this case, the basic model (no random slopes or random intercepts)
+with just the age covariate produced the best fit (indexed by BIC
+scores).
+
+<p>
+
 Firstly, exclude outliers from the dataframe (outliers are define as
 those \>1.5 IQRs above or below the upper or lower quartile)
 
@@ -574,11 +879,10 @@ sensitivity_df=task_summary
 
 </details>
 
-<br>
-<h3>
+<p>
 
 Assess and correct for skewness in win-stay outcome (excluding outliers)
-</h3>
+</p>
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -599,16 +903,7 @@ print('Win-stay skew: '+str(skew(sensitivity_df.win_stay.dropna())))
 
     Win-stay skew: -1.1512521637523532
 
-![](winStay_files/figure-commonmark/cell-22-output-2.jpeg)
-
-<h3>
-
-<b>Outlier-free hypothesis testing</b>
-</h3>
-
-In this case, the basic model (no random slopes or random intercepts)
-with just the age covariate produced the best fit (indexed by BIC
-scores).
+![](winStay_files/figure-commonmark/cell-33-output-2.jpeg)
 
 <details class="code-fold">
 <summary>Code</summary>

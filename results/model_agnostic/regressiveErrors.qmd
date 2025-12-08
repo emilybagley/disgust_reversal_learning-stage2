@@ -144,7 +144,6 @@ win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
 
-
 <p>Shapiro-Wilk test of normality of residuals (violated)</p>
 ```{python}
 #| label: Mixed effects model -shapiro-wilk
@@ -542,6 +541,279 @@ print(confint.merMod(generalized_model, method='Wald'))
 <h3> <b> Sensitivity analysis </b></h3>
 We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.
 
+<p>The originally planned outlier criteria is not fit for purpose due to the large skew of the regressive error outcome. Instead, we run a sensitivity analysis excluding data-points that are outliers in terms of accuracy</p>
+
+<p>Exclude outliers according to this definition
+```{python}
+#| code-fold: true
+Q1 = task_summary["percentage_correct"].quantile(0.25)
+Q3 = task_summary["percentage_correct"].quantile(0.75)
+
+IQR_value = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR_value
+upper_bound = Q3 + 1.5 * IQR_value
+
+explore_df = task_summary[task_summary["percentage_correct"] >= lower_bound]
+
+```
+
+```{python}
+#| label: Skewness alt outlier
+#| echo: true
+#| code-fold: true
+pt=PowerTransformer(method='yeo-johnson', standardize=False)
+skl_yeojohnson=pt.fit(pd.DataFrame(explore_df.mean_regressive_er))
+skl_yeojohnson=pt.transform(pd.DataFrame(explore_df.mean_regressive_er))
+explore_df['regressive_er_transformed'] = pt.transform(pd.DataFrame(explore_df.mean_regressive_er))
+
+fig, axes = plt.subplots(1, 2, sharey=True)
+sns.histplot(data=explore_df, x="mean_regressive_er", ax=axes[0]) 
+sns.histplot(data=explore_df['regressive_er_transformed'], ax=axes[1])
+print('Regressive error skew: '+str(skew(explore_df.mean_regressive_er)))
+```
+
+<p>Mixed effects models assumptions are violated</p>
+In this case, the basic model (no random slopes or random intercepts, and no covariates) produced the best fit (indexed by BIC scores).
+<p>But the model assumptions were violated</p>
+```{python}
+#| label: Mixed effects model - model selection alt outlier
+#| echo: true
+#| code-fold: true
+data=explore_df.reset_index()
+
+formula = 'regressive_er_transformed ~ block_type'
+
+basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+
+#test which random effects to include
+#feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
+#fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) CONVERGENCE WARNING
+feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+
+randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+#feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) CONVERGENCE WARNING
+
+
+bic=pd.DataFrame({'basic_model': [basic_model.bic], 
+                   # 'feedback_andint': ['CONVERGENCE WARNING'], 
+                  #  'fractals_randint': ['CONVERGENCE WARNING'],
+                    'feedback_fractals_randint': [feedback_fractals_randint.bic],
+                    'randslope': [randslope.bic],
+                    'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                   # 'feedback_fractals_randint_randslope': ['CONVERGENCE WARNING']
+                   })
+win1=bic.sort_values(by=0, axis=1).columns[0]
+
+##test which covariates to add -- Using the random effects which were best above (basic model in this case)
+no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_covariate=smf.mixedlm(formula+str('+prolific_sex'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+age_covariate=smf.mixedlm(formula+str('+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+digit_span_covariate=smf.mixedlm(formula+str('+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_age_covariate=smf.mixedlm(formula+str('+prolific_sex+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_digit_span_covariate=smf.mixedlm(formula+str('+prolific_sex+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+digit_span_age_covariate=smf.mixedlm(formula+str('+digit_span+prolific_age'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+sex_age_digit_span_covariate=smf.mixedlm(formula+str('+prolific_sex+prolific_age+digit_span'), data, groups=data['participant_no'], missing='drop').fit(reml=False)
+
+bic=pd.DataFrame({'no_covariate': [no_covariate.bic], 
+                    'sex_covariate': [sex_covariate.bic], 
+                    'age_covariate': [age_covariate.bic],
+                    'digit_span_covariate': [digit_span_covariate.bic],
+                    'sex_age_covariate': [sex_age_covariate.bic],
+                    'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
+                    'digit_span_age_covariate': [digit_span_age_covariate.bic],
+                    'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+win2=bic.sort_values(by=0, axis=1).columns[0]
+print("Winning models: "+ win1 +" "+ win2)
+```
+
+<p>Shapiro-Wilk test of normality of residuals (violated)</p>
+```{python}
+#| label: Mixed effects model -shapiro-wilk alt outlier
+#| echo: true
+#| code-fold: true
+#chosen model
+results=no_covariate
+
+#shapiro-Wilk test of normality of residuals
+labels = ["Statistic", "p-value"]
+norm_res = stats.shapiro(results.resid)
+
+for key, val in dict(zip(labels, norm_res)).items():
+    print(key, val)
+    ##if test is significant then the assumption is violated
+        #is significant here
+```
+
+<p> White Lagrange multiplier Test for Heteroscedasticity (not violated) </p>
+```{python}
+#| label: Mixed effects model -white lagrange alt outlier
+#| echo: true
+#| code-fold: true
+#chosen model
+##homoskedasticity of variance 
+#White Lagrange Multiplier Test for Heteroscedasticity
+het_white_res = het_white(results.resid, results.model.exog)
+
+labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
+
+for key, val in dict(zip(labels, het_white_res)).items():
+    print(key, val)
+    ##again, only violated if you get a significant p value
+```
+
+<h4>So we run a generalized mixed effects model (done in R)</h4>
+
+```{R}
+#| label: alternative outlier exclusion R
+#| code-fold: true
+task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+Q1 <- quantile(task_summary$percentage_correct, 0.25)
+Q3 <- quantile(task_summary$percentage_correct, 0.75)
+
+IQR_value <- Q3 - Q1  
+
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+
+explore_df <- task_summary[task_summary$percentage_correct >= lower_bound, ]
+```
+
+Model details:
+<p>
+* Gamma probability distribution and inverse link function
+* no additional random effects
+* no additional covariates
+</p>
+<p>This is the specification that produced the best fit (according to BIC)</p>
+
+```{r}
+#| label: generalized mixed effects model selection alt outlier
+#| echo: true
+#| code-fold: true
+#| warning: false
+
+explore_df$pos_regressive_er <- explore_df$mean_regressive_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
+
+gamma_log <- glmer(pos_regressive_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="log"))
+gamma_inverse <- glmer(pos_regressive_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="inverse"))
+#gamma_identity <- glmer(pos_regressive_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="identity"))
+
+invgaus_log <- glmer(pos_regressive_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="log"))
+invgaus_inverse <- glmer(pos_regressive_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="inverse"))
+#invgaus_identity <- glmer(pos_regressive_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="identity"))
+
+bic_values <- c(
+  BIC(gamma_inverse),
+  BIC(invgaus_log),
+  BIC(invgaus_inverse)
+)
+model_names <- c("Gamma (inverse)", "inverse gaussian (log)", "inverse gaussian (inverse)")
+
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+win1 <- bic_df[which.min(bic_df$BIC), ]$Model
+win1 <- bic_df[which.min(bic_df$BIC), ]$Model
+
+
+basic_model <- glmer(pos_regressive_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="inverse"))
+
+feedback_randint <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
+#fractals_randint <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + (1|fractals), data=explore_df, family=Gamma(link="inverse"))
+#feedback_fractals_randint <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + (1|fractals) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
+
+#randslope <- glmer(pos_regressive_er ~ block_type + (block_type|participant_no), data=explore_df, family=Gamma(link="inverse"))
+#feedback_randint_randslope <- glmer(pos_regressive_er ~ block_type + (block_type|participant_no) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
+#feedback_fractals_randint_randslope <- glmer(pos_regressive_er ~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=explore_df, family=Gamma(link="inverse"))
+
+bic_values <- c(
+  BIC(basic_model),
+  BIC(feedback_randint)
+)
+model_names <- c("basic model", "feedback_randint")
+
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+win2 <- bic_df[which.min(bic_df$BIC), ]$Model
+
+no_covariate <- basic_model
+
+sex_covariate <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + prolific_sex, data=explore_df, family=Gamma(link="inverse"))
+#age_covariate <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + prolific_age, data=explore_df, family=Gamma(link="inverse"))
+digit_span_covariate <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + digit_span, data=explore_df, family=Gamma(link="inverse"))
+#sex_age_covariate <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + prolific_sex + prolific_age, data=explore_df, family=Gamma(link="inverse"))
+#sex_digit_span_covariate <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + prolific_sex + digit_span, data=explore_df, family=Gamma(link="inverse"))
+#digit_span_age_covariate <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + digit_span + prolific_age, data=explore_df, family=Gamma(link="inverse"))
+#sex_digit_span_age_covariate <- glmer(pos_regressive_er ~ block_type + (1|participant_no) + prolific_sex + prolific_age + digit_span, data=explore_df, family=Gamma(link="inverse"))
+
+bic_values <- c(
+  BIC(no_covariate),
+  BIC(digit_span_covariate)
+)
+model_names <- c("no_covariate", "digit_span_covariate")
+
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+win3 <- bic_df[which.min(bic_df$BIC), ]$Model
+
+print(paste0("Winning models: ", win1, " ", win2," ",win3))
+```
+
+
+<p>Results from this model show <b>no effect of block-type</b> on regressive error rate.</p>
+```{r}
+#| label: generalized mixed effects model alt outlier
+#| code-fold: true
+#| echo: true
+generalized_model <- no_covariate
+summary(generalized_model)
+```
+
+<br>
+<p>As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+
+<p>Firstly for disgust vs fear:</p>
+```{python}
+#| label: disgust vs fear bayes factor sensitivity alt outlier
+#| echo: true
+#| code-fold: true
+
+ttest, bf_null = bayes_factor(explore_df, 'mean_regressive_er', 'Disgust', 'Fear')
+
+print(f"Disgust vs Fear: BF01 = {bf_null}")
+```
+<br>
+<p>Next for disgust vs points:</p>
+```{python}
+#| label: disgust vs points bayes factor - sensitivity alt outlier
+#| echo: true
+#| code-fold: true
+
+ttest, bf_null = bayes_factor(explore_df, 'mean_regressive_er', 'Disgust', 'Points')
+#print("Disgust vs Fear BF01: " + bf_null)
+
+print(f"Disgust vs Points: BF01 = {bf_null}")
+```
+
+<br>
+<p>We also look at fear vs points (which is not directly assessed by the model)</p>
+```{python}
+#| label: points vs fear ttest - sensitivity alt outlier
+#| echo: true
+#| code-fold: true
+ttest, bf_null = bayes_factor(explore_df, 'mean_regressive_er', 'Points', 'Fear')
+
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+```
+
+<p>And because the result is null, also get a Bayes factor: </p>
+```{python}
+#| label: points vs fear bayes factor - sensitivity alt outlier
+#| echo: true
+#| code-fold: true
+print(f"Points vs Fear: BF01 = {bf_null}")
+```
+
+
+<h3>Pre-registered sensitivity analysis</h3>
+<p>The planned sensitivity analysis is included for completeness</p>
 <p>Firstly, exclude outliers from the dataframe (outliers are define as those >1.5 IQRs above or below the upper or lower quartile)
 
 ```{python}
