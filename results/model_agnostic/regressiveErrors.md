@@ -1132,6 +1132,22 @@ summary(generalized_model)
     block_typFr -0.189       
     blck_typPnt -0.195  0.454
 
+<p>
+
+Extract confidence intervals
+</p>
+
+``` r
+print(confint.merMod(no_covariate, method='Wald'))
+```
+
+                            2.5 %     97.5 %
+    .sig01                     NA         NA
+    .sigma                     NA         NA
+    (Intercept)       0.389035404 0.45809946
+    block_typeFear   -0.013037048 0.01299025
+    block_typePoints -0.005320085 0.02372256
+
 <br>
 <p>
 

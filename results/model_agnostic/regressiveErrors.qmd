@@ -351,7 +351,6 @@ print(f"Points vs Fear: BF01 = {bf_null}")
 ```
 
 
-
 ```{python}
 #| label: save out fear vs points pval
 #| echo: false
@@ -764,6 +763,13 @@ print(paste0("Winning models: ", win1, " ", win2," ",win3))
 #| echo: true
 generalized_model <- no_covariate
 summary(generalized_model)
+```
+
+<p>Extract confidence intervals</p>
+```{r}
+#| label: confidence intervals - alt outlier
+#| echo: true
+print(confint.merMod(no_covariate, method='Wald'))
 ```
 
 <br>

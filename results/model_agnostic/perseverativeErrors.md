@@ -771,6 +771,21 @@ print(f"T-value = {t}; p-value = {p}")
 
 <p>
 
+And check that the variable is not skewed (i.e., there are no floor or
+ceiling effects)
+</p>
+
+``` python
+sns.histplot(data=task_summary, x="percentage_correct") 
+print('Percentage correct skew: '+str(skew(task_summary.percentage_correct)))
+```
+
+    Percentage correct skew: -0.49987154559115393
+
+![](perseverativeErrors_files/figure-commonmark/unnamed-chunk-23-1.jpeg)
+
+<p>
+
 And now run a mixed effects model to assess whether it differs by
 block-type
 </p>
@@ -1727,7 +1742,7 @@ axes[1,1].set_xlabel('Lose-shift')
 
 </details>
 
-![](perseverativeErrors_files/figure-commonmark/unnamed-chunk-50-3.jpeg)
+![](perseverativeErrors_files/figure-commonmark/unnamed-chunk-51-3.jpeg)
 
 <p>
 

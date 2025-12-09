@@ -7,33 +7,6 @@ This file contains the code for the graphs included in the paper (and
 supplement)
 </p>
 
-<p>
-
-Firstly, we can use data from a randomly selected participant to show
-performance on the task
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-complete_task=pd.read_csv(r"U:\Documents\Disgust learning project\github\disgust_reversal_learning-final\csvs\complete_task_excluded.csv")
-sub_df=complete_task[complete_task.participant_no==56]
-block_df=sub_df[sub_df.block_no==0].reset_index()
-
-plt.figure(figsize=(4, 3)) 
-plt.rcParams['font.size'] = 12
-plt.plot(block_df.correct_stim, color="#4CC9F0")
-plt.plot(block_df.stim_selected, 'o', color="#3A0CA3", markersize=3.5)
-plt.xlabel('Trial number')
-plt.yticks([0,1], ['Fractal A', 'Fractal B'])
-plt.savefig('ReversalLearning_individual_plot.jpeg', dpi=300, bbox_inches='tight')
-```
-
-</details>
-
-![](modelAgnosticPlots_files/figure-commonmark/cell-3-output-1.jpeg)
-
 <b>Now, we can make hypothesis testing plots</b>
 <p>
 
@@ -116,7 +89,7 @@ plt.savefig('ReversaLearning_PerseverativeRegressive.jpeg', dpi=300, bbox_inches
 
 </details>
 
-![](modelAgnosticPlots_files/figure-commonmark/cell-4-output-1.jpeg)
+![](modelAgnosticPlots_files/figure-commonmark/cell-3-output-1.jpeg)
 
 <p>
 
@@ -205,7 +178,7 @@ plt.savefig('ReversaLearning_winStayLoseShift.jpeg', dpi=300, bbox_inches='tight
 
 </details>
 
-![](modelAgnosticPlots_files/figure-commonmark/cell-5-output-1.jpeg)
+![](modelAgnosticPlots_files/figure-commonmark/cell-4-output-1.jpeg)
 
 <p>
 
@@ -299,7 +272,7 @@ plt.savefig('ReversaLearning_DisgustNotEmotionNot_persEr.jpeg', dpi=300, bbox_in
 
 </details>
 
-![](modelAgnosticPlots_files/figure-commonmark/cell-6-output-1.jpeg)
+![](modelAgnosticPlots_files/figure-commonmark/cell-5-output-1.jpeg)
 
 <p>
 
@@ -383,41 +356,46 @@ id="lose-shift-emotionornot-disgustornot-plot" />
 
 <h3>
 
-4.  Examining the nature of outliers in the perseverative error outcome
-    </h3>
+Alternative outlier definition
+</h3>
 
-    <p>
+<p>
 
-    The perseverative error outcome in the hypothesis testing model
-    seemed to be quite dependent on outliers. Therefore, here we assess
-    the nature of those outliers:
-    <p>
+Given that a number of our variables have skewed distributions, the
+pre-registered outlier definition (relying on IQR) is not
+fit-for-purpose. Therefore, instead we use define outliers as datapoints
+that fall 1.5 IQRs outside of the inter-quartile range in terms of
+accuracy (which is normally distributed and arguably gives meaningful
+information as to whether the participant was paying attention,
+sucessfully learning etc.).
 
-    a- to determine whether they are ‘true’ outliers (i.e., due to
-    inattention etc.) resulting in alterations in task performance
-    across all metrics
-    </p>
+<p>
 
-    <p>
-
-    b- to determine whether these outliers performed differently on the
-    video rating task (e.g., were they more disgusted, leading to their
-    altered task performance?)
+This plot shows how the outliers according to the original definition
+fall within the accuracy distribution
+</p>
 
 <details class="code-fold">
 <summary>Code</summary>
 
 ``` python
-fig, axes = plt.subplots(2,1, sharex=False, gridspec_kw={'height_ratios': [1.5, 1]})
-fig.tight_layout(pad=1)
+fig, axes = plt.subplots(
+    2, 3,
+    sharex=False,
+    gridspec_kw={
+        'height_ratios': [1.5, 1],
+        'hspace': 0.5,    
+        'wspace': 0.1      
+    }
+)
+#fig.tight_layout(pad=0)
 #fig.set_size_inches(8.3, 5.8)
-fig.set_size_inches(3.7, 3.25)
+fig.set_size_inches(9, 3.25)
 plt.rcParams['font.size'] = 12   
 
 colorA="#9B0F47" #dark pink
 colorB="#3A0CA3" #darker purple
 colorC="#CBC3E3" #light purple
-
 
 ##identify the outliers in the perseverative error outcome
 Q1 = task_summary['mean_perseverative_er'].quantile(0.25)
@@ -432,21 +410,69 @@ outliers=task_summary[(task_summary['mean_perseverative_er']<lower_bound) | (tas
 bin_width=np.ptp(task_summary.mean_perseverative_er)/35
 bins=np.arange(min(task_summary.mean_perseverative_er), max(task_summary.mean_perseverative_er) + bin_width, bin_width)
 
-sns.histplot(data=task_summary, bins=bins, x="mean_perseverative_er", color=colorC, ax=axes[0]) 
+sns.histplot(data=task_summary, bins=bins, x="mean_perseverative_er", color=colorC, ax=axes[0,0]) 
 sns.histplot(data=outliers, bins=bins,
-x="mean_perseverative_er", color=colorA, zorder=2, ax=axes[0]) 
+x="mean_perseverative_er", color=colorA, zorder=2, ax=axes[0,0]) 
 
-axes[0].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
-axes[0].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
-axes[0].set_xlabel('Mean perseverative errors per reversal')
-print("Number of outliers ="+str(len(outliers)))
+axes[0,0].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
+axes[0,0].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
+axes[0,0].set_xlabel('Mean perseverative errors per reversal')
+print("Number of perseverative error outliers (according to original definition) ="+str(len(outliers)))
 
-axes[0].set_xlabel('')
-axes[0].set_ylabel('')
-axes[0].set_title('Perseverative er.', fontsize=12)
-axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-axes[0].set_yticks([])
-#axes[0].set_ylim(top=100)
+axes[0,0].set_xlabel('')
+axes[0,0].set_ylabel('')
+axes[0,0].set_title('Perseverative error', fontsize=12)
+axes[0,0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+axes[0,0].set_yticks([])
+axes[0,0].set_ylim(top=70)
+
+#percentage correct
+Q1 = task_summary['percentage_correct'].quantile(0.25)
+Q3 = task_summary['percentage_correct'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1- 1.5 *  IQR
+upper_bound = Q3 + 1.5 *  IQR
+bin_width=np.ptp(task_summary.percentage_correct)/25
+bins=np.arange(min(task_summary.percentage_correct), max(task_summary.percentage_correct) + bin_width, bin_width)
+sns.histplot(data=task_summary, x="percentage_correct", color=colorC, bins=bins, ax=axes[1,0]) 
+sns.histplot(data=outliers, x="percentage_correct", bins=bins, color=colorA, ax=axes[1,0]) 
+axes[1,0].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
+axes[1,0].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5,  label='Upper Bound')
+axes[1,0].set_xlabel('')
+axes[1,0].set_ylabel('')
+axes[1,0].set_title('Percentage correct', fontsize=12)
+axes[1,0].set_ylim(top=50)
+axes[1,0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+axes[1,0].set_yticks([])
+
+##identify the outliers in the regressive error outcome
+Q1 = task_summary['mean_regressive_er'].quantile(0.25)
+Q3 = task_summary['mean_regressive_er'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1- 1.5 *  IQR
+upper_bound = Q3 + 1.5 *  IQR
+if lower_bound < min(task_summary.mean_regressive_er):
+    lower_bound = min(task_summary.mean_regressive_er)
+outliers=task_summary[(task_summary['mean_regressive_er']<lower_bound) | (task_summary['mean_regressive_er']>upper_bound )]
+
+bin_width=np.ptp(task_summary.mean_regressive_er)/35
+bins=np.arange(min(task_summary.mean_regressive_er), max(task_summary.mean_regressive_er) + bin_width, bin_width)
+
+sns.histplot(data=task_summary, bins=bins, x="mean_regressive_er", color=colorC, ax=axes[0,1]) 
+sns.histplot(data=outliers, bins=bins,
+x="mean_regressive_er", color=colorA, zorder=2, ax=axes[0,1]) 
+
+axes[0,1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
+axes[0,1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
+axes[0,1].set_xlabel('Mean regressive errors per reversal')
+print("Number of regressive error outliers (according to original definition) ="+str(len(outliers)))
+
+axes[0,1].set_xlabel('')
+axes[0,1].set_ylabel('')
+axes[0,1].set_title('Regressive error', fontsize=12)
+axes[0,1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+axes[0,1].set_yticks([])
+axes[0,1].set_ylim(top=70)
 
 #percentage coorrect
 Q1 = task_summary['percentage_correct'].quantile(0.25)
@@ -456,22 +482,74 @@ lower_bound = Q1- 1.5 *  IQR
 upper_bound = Q3 + 1.5 *  IQR
 bin_width=np.ptp(task_summary.percentage_correct)/25
 bins=np.arange(min(task_summary.percentage_correct), max(task_summary.percentage_correct) + bin_width, bin_width)
-sns.histplot(data=task_summary, x="percentage_correct", color=colorC, bins=bins, ax=axes[1]) 
-sns.histplot(data=outliers, x="percentage_correct", bins=bins, color=colorA, ax=axes[1]) 
-axes[1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
-axes[1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5,  label='Upper Bound')
-axes[1].set_xlabel('')
-axes[1].set_ylabel('')
-axes[1].set_title('Percentage correct', fontsize=12)
-axes[1].set_ylim(top=50)
-axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-axes[1].set_yticks([])
+sns.histplot(data=task_summary, x="percentage_correct", color=colorC, bins=bins, ax=axes[1,1]) 
+sns.histplot(data=outliers, x="percentage_correct", bins=bins, color=colorA, ax=axes[1,1]) 
+axes[1,1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
+axes[1,1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5,  label='Upper Bound')
+axes[1,1].set_xlabel('')
+axes[1,1].set_ylabel('')
+axes[1,1].set_title('Percentage correct', fontsize=12)
+axes[1,1].set_ylim(top=50)
+axes[1,1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+axes[1,1].set_yticks([])
 
-plt.savefig('Exploratory_ReversaLearning_PerseverativeOutliers.jpeg', dpi=300, bbox_inches='tight')
+##identify the outliers in the regressive error outcome
+Q1 = task_summary['win_stay'].quantile(0.25)
+Q3 = task_summary['win_stay'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1- 1.5 *  IQR
+upper_bound = Q3 + 1.5 *  IQR
+if upper_bound > max(task_summary.win_stay):
+    upper_bound = max(task_summary.win_stay)
+if lower_bound < min(task_summary.win_stay):
+    lower_bound = min(task_summary.win_stay)
+outliers=task_summary[(task_summary['win_stay']<lower_bound) | (task_summary['win_stay']>upper_bound )]
+
+bin_width=np.ptp(task_summary.win_stay)/35
+bins=np.arange(min(task_summary.win_stay), max(task_summary.win_stay) + bin_width, bin_width)
+
+sns.histplot(data=task_summary, bins=bins, x="win_stay", color=colorC, ax=axes[0,2]) 
+sns.histplot(data=outliers, bins=bins,
+x="win_stay", color=colorA, zorder=2, ax=axes[0,2]) 
+
+axes[0,2].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
+axes[0,2].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
+axes[0,2].set_xlabel('Win-stay probability')
+print("Number of win-stay outliers (according to original definition) ="+str(len(outliers)))
+
+axes[0,2].set_xlabel('')
+axes[0,2].set_ylabel('')
+axes[0,2].set_title('Win-stay', fontsize=12)
+axes[0,2].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+axes[0,2].set_yticks([])
+axes[0,2].set_ylim(top=70)
+
+#percentage coorrect
+Q1 = task_summary['percentage_correct'].quantile(0.25)
+Q3 = task_summary['percentage_correct'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1- 1.5 *  IQR
+upper_bound = Q3 + 1.5 *  IQR
+bin_width=np.ptp(task_summary.percentage_correct)/25
+bins=np.arange(min(task_summary.percentage_correct), max(task_summary.percentage_correct) + bin_width, bin_width)
+sns.histplot(data=task_summary, x="percentage_correct", color=colorC, bins=bins, ax=axes[1,2]) 
+sns.histplot(data=outliers, x="percentage_correct", bins=bins, color=colorA, ax=axes[1,2]) 
+axes[1,2].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
+axes[1,2].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5,  label='Upper Bound')
+axes[1,2].set_xlabel('')
+axes[1,2].set_ylabel('')
+axes[1,2].set_title('Percentage correct', fontsize=12)
+axes[1,2].set_ylim(top=50)
+axes[1,2].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+axes[1,2].set_yticks([])
+
+plt.savefig('Outliers.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
 
-    Number of outliers =37
+    Number of perseverative error outliers (according to original definition) =37
+    Number of regressive error outliers (according to original definition) =113
+    Number of win-stay outliers (according to original definition) =65
 
-![](modelAgnosticPlots_files/figure-commonmark/cell-8-output-2.jpeg)
+![](modelAgnosticPlots_files/figure-commonmark/cell-7-output-2.jpeg)

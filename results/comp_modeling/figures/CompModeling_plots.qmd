@@ -95,6 +95,7 @@ library(loo)
 library(rstanarm)
 library(magick)
 library(cowplot)
+library(grid)
 ```
 
 <p>This file contains the code for the graphs included in the paper (and the supplement) regarding computational modeling</p>
@@ -231,21 +232,19 @@ plot <- ggplot(df, aes(x = model, y = waic, color= model, shape = model)) +
     custom_shape = guide_legend(
       title = "Learning rate type",
       override.aes = list(
-        shape = c(8, 1),   # circle for single, triangle for dual
-        color = "#000000"    # neutral color for shape legend
-      ),
+        shape = c(8, 1),   
+        color = "#000000"),    
       labels = c("Single learning rate", "Dual learning rate")
     )
     ) + 
     geom_segment(aes(x = 1, xend = 6, y = brack_x + 500, yend = brack_x + 500), inherit.aes = FALSE) +
     geom_segment(aes(x = 1, xend = 1, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
     geom_segment(aes(x = 6, xend = 6, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
-    annotate("text", x = 3.5, y = brack_x + 1000, label = "Stickiness models") +
+    annotate("text", x = 3.5, y = brack_x + 1000, label = "Stickiness", size=5) +
     geom_segment(aes(x = 7, xend = 12, y = brack_x + 500, yend = brack_x + 500), inherit.aes = FALSE) +
     geom_segment(aes(x = 7, xend = 7, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
     geom_segment(aes(x = 12, xend = 12, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
-    annotate("text", x = 9.5, y = brack_x + 1000, label = "No Stickiness models")
-
+    annotate("text", x = 9.5, y = brack_x + 1000, label = "No Stickiness", size=5)
 
 ggsave("ModelComp_plot.png", plot, width = 6, height = 4, dpi = 300, bg='white', units='in')
 plot
@@ -258,27 +257,28 @@ plot
 #| warning: false
 # Legend-only plot
 
-# Empty plot
+png("modelcomp_legend_plot.png", width = 1200, height = 800, res = 150)
+
 plot(NULL, xaxt='n', yaxt='n', bty='n', ylab='', xlab='', xlim=0:1, ylim=0:1)
 
-# Color legend for Model complexity
 legend('topleft',
        legend = c("Separate parameters", "Em vs Not parameters", "Shared parameters"),
-       pch = 16,        # solid circles
-       pt.cex = 3,      # size of points
-       cex = 1.5,       # size of text
-       bty = 'n',       # no box
+       pch = 16,       
+       pt.cex = 2,      
+       cex = 1.25,      
+       bty = 'n',      
        col = c("#9B0F47", "#3A0CA3", "#2487B8"))
 
 # Shape legend for Learning rate type
-legend('topright',
-       legend = c("Single learning rate", "Dual learning rate"),
-       pch = c(8, 1),  # shapes
-       pt.cex = 3,
-       cex = 1.5,
+legend('bottomleft',
+       legend = c("Dual learning rate", "Single learning rate"),
+       pch = c(8, 1),  
+       pt.cex = 2,
+       cex = 1.25,
        bty = 'n',
        col = "black")
 
+dev.off()
 ```
 
 <h3>Parameter recovery</h3>
@@ -302,26 +302,6 @@ param_cors <- param_cors[c('p_alpha', 'f_alpha', 'd_alpha',
                              c('pointsLearningRate', 'fearLearningRate', 'disgustLearningRate', 
                                 'pointsInverseTemp', 'fearInverseTemp', 'disgustInverseTemp',
                                     'pointsStickiness', 'fearStickiness', 'disgustStickiness')]
-
-rownames(param_cors) <- c("LR-p", "LR-f", "LR-d",
-                          "invTemp-p", "invTemp-f", "invTemp-d",
-                          "stick-p", "stick-f", "stick-d")
-
-colnames(param_cors) <- c("LR-p", "LR-f", "LR-d",
-                          "invTemp-p", "invTemp-f", "invTemp-d",
-                          "stick-p", "stick-f", "stick-d")
-
-plot <- pheatmap(param_cors, 
-         cluster_rows = FALSE, cluster_cols = FALSE, legend=FALSE,
-         display_numbers = TRUE, number_format = "%.2f", fontsize=16)
-
-ggsave("ParamRecovHeatmap_plot.png", plot, width = 6, height = 4, dpi = 300, bg='white', units='in')
-plot
-
-```
-
-```{r}
-#| code-fold: true
 
 learning_rate_long <- tibble(
   LearningRate = c(param_recov$pointsLearningRate, param_recov$fearLearningRate, param_recov$disgustLearningRate),
@@ -360,6 +340,12 @@ long_param_recov <- bind_rows(
 )
 
 my_palette <- c("#F72585", "#3A0CA3", "#4CC9F0")
+base_theme <- theme_minimal(base_size = 20) +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 20),
+    axis.text = element_text(size = 20)
+  )
 
 # Plot
 p1 <- ggplot(long_param_recov, aes(x = LearningRate, y = alpha, color = domain)) +
@@ -371,7 +357,8 @@ p1 <- ggplot(long_param_recov, aes(x = LearningRate, y = alpha, color = domain))
     title = "Learning rate",
     x = "Simulated",
     y = "Recovered"
-  )
+  ) +
+  base_theme
 
 p2 <- ggplot(long_param_recov, aes(x = InverseTemp, y = beta, color = domain)) +
   geom_point() +
@@ -382,7 +369,8 @@ p2 <- ggplot(long_param_recov, aes(x = InverseTemp, y = beta, color = domain)) +
     title = "Inverse Temperature",
     x = "Simulated",
     y = "Recovered"
-  )
+  ) +
+  base_theme
 
 p3 <- ggplot(long_param_recov, aes(x = Stickiness, y = omega, color = domain)) +
   geom_point() +
@@ -393,24 +381,109 @@ p3 <- ggplot(long_param_recov, aes(x = Stickiness, y = omega, color = domain)) +
     title = "Stickiness",
     x = "Simulated",
     y = "Recovered"
+  ) +
+  base_theme
+
+fmt <- function(x) sprintf("mean r = %.2f", x)
+lr <- fmt(mean(c(param_cors["p_alpha","pointsLearningRate"], 
+                param_cors["f_alpha","fearLearningRate"], 
+                param_cors["d_alpha","disgustLearningRate"])))
+
+it <- fmt(mean(c(param_cors["p_beta","pointsInverseTemp"], 
+                param_cors["f_beta","fearInverseTemp"], 
+                param_cors["d_beta","disgustInverseTemp"])))
+
+st <- fmt(mean(c(param_cors["p_omega","pointsStickiness"], 
+                param_cors["f_omega","fearStickiness"], 
+                param_cors["d_omega","disgustStickiness"])))
+
+
+annot_df <- function(text_vec, x, y) {
+  data.frame(
+    x = x,
+    y = y,
+    label = text_vec
   )
+}
+
+
+p1 <- p1 + annotate("text",
+                    x = 0.3, y = 0.1,
+                    label = lr,
+                    hjust = -0.1,
+                    vjust = 1.1,
+                    size = 6)
+
+p2 <- p2 + annotate("text",
+                    x = 3, y = 1,
+                    label = it,
+                    hjust = -0.1,
+                    vjust = 1.1,
+                    size = 6)
+
+p3 <- p3 + annotate("text",
+                    x = -1, y = -2.25,
+                    label = st,
+                    hjust = -0.1,
+                    vjust = 1.1,
+                    size = 6)     
 
 p1_clean <- p1 + theme(legend.position = "none")
 p2_clean <- p2 + theme(legend.position = "none")
 p3_clean <- p3 + theme(legend.position = "none")
 
-final_plot<-plot_grid(p1_clean, p2_clean, p3_clean, ncol=3, align='v', axis='l')
-ggsave("paramRecovCorr_plot.png", final_plot, width = 12, height = 4, dpi = 300, bg='white', units='in')
+
+three_plots <- plot_grid(p1_clean, p2_clean, p3_clean, ncol=3, align='v', axis='l')
+
+final_plot <- plot_grid(
+  title,
+  three_plots,
+  legend,
+  ncol = 1,
+  rel_heights = c(0.1, 1, 0.15)
+)
+
+ggsave("paramRecovCorr_plot.png", final_plot, width = 12, height = 5, dpi = 300, bg='white')
 final_plot
 ```
 
-<h3>Posterior predictive checks</h3>
 
+```{r}
+#| label: param recov legend 
+#| echo: true
+#| code-fold: true
+#| warning: false
+# Legend-only plot
+
+png("paramrecov_legend_plot.png", width = 1200, height = 800, res = 150)
+
+plot(NULL, xaxt='n', yaxt='n', bty='n', ylab='', xlab='', xlim=0:1, ylim=0:1)
+
+legend('topleft',
+       legend = c("Points", "Fear", "Disgust"),
+       pch = 16,       
+       pt.cex = 2,      
+       cex = 1.25,      
+       bty = 'n',      
+       col = c("#F72585", "#3A0CA3", "#2487B8"),
+       horiz=TRUE)
+
+dev.off()
+```
+
+<h3>Posterior predictive checks</h3>
 ```{r}
 #| label: PPC
 #| echo: true
 #| code-fold: true
 #| warning: false
+
+base_theme <- theme_minimal(base_size = 20) +
+  theme(
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 20),
+    axis.text = element_text(size = 20)
+  )
 
 postpred_alltrials <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/PPCs/postpred_alltrials_1lr_stick1_blk3_allparamsep.rds")
 in_range_df <- readRDS("../modelFitting/modelDiagnostics/PPCs/in_range_df.rds")
@@ -428,8 +501,9 @@ p1 <- ggplot(block_df, aes(x=trial)) +
   geom_line(aes(y=pred_median), color="red", linetype="dashed") +
   geom_ribbon(aes(ymin=pred_lower, ymax=pred_upper), fill="red", alpha=0.2) +
   labs(title=paste0("Lower quartile (", round(lq,2), ")"),
-        y="Choice") +
-  theme_minimal()
+        y="Choice", x="Trial") +
+  theme_minimal() +
+  base_theme
 
 med<-as.numeric(quantile(in_range_df$in_range_prob, probs=0.5))
 q_index <- which.min(abs(in_range_df$in_range_prob - med))
@@ -442,8 +516,9 @@ p2 <- ggplot(block_df, aes(x=trial)) +
   geom_line(aes(y=observed), color="black") +
   geom_line(aes(y=pred_median), color="red", linetype="dashed") +
   geom_ribbon(aes(ymin=pred_lower, ymax=pred_upper), fill="red", alpha=0.2) +
-  labs(title=paste0("Median (", round(med,2), ")"),, x="Trial") +
-  theme_minimal()
+  labs(title=paste0("Median (", round(med,2), ")"),, y="Choice", x="Trial") +
+  theme_minimal() +
+  base_theme
 
 uq<-as.numeric(quantile(in_range_df$in_range_prob, probs=0.75))
 q_index <- which.min(abs(in_range_df$in_range_prob - uq))
@@ -457,9 +532,23 @@ p3 <- ggplot(block_df, aes(x=trial)) +
   geom_line(aes(y=observed), color="black") +
   geom_line(aes(y=pred_median), color="red", linetype="dashed") +
   geom_ribbon(aes(ymin=pred_lower, ymax=pred_upper), fill="red", alpha=0.2) + 
-       labs(title=paste0("Upper quartile (", round(uq,2), ")"), x="Trial") +
-  theme_minimal()
+       labs(title=paste0("Upper quartile (", round(uq,2), ")"), y="Choice", x="Trial") +
+  theme_minimal() +
+  base_theme
 
+
+p1 <- p1 + theme(
+  axis.text.y = element_blank(),
+  axis.ticks.y = element_blank()
+)
+p2 <- p2 + theme(
+  axis.text.y = element_blank(),
+  axis.ticks.y = element_blank()
+)
+p3 <- p3 + theme(
+  axis.text.y = element_blank(),
+  axis.ticks.y = element_blank()
+)
 
 final_plot<-plot_grid(p1, p2, p3, ncol=3, align='v', axis='l')
 ggsave("PPC_plot.png", final_plot, width = 12, height = 4, dpi = 300, bg='white', units='in')
@@ -473,12 +562,13 @@ final_plot
 #| code-fold: true
 
 fig, axes = plt.subplots(1,3, sharey=False)
-fig.tight_layout(pad=3)
-fig.set_size_inches(7.5, 3.4)
+fig.tight_layout(pad=1)
+fig.set_size_inches(9, 3.4)
 
 ##plot hypothesised results
 palette = ["#F72585", "#3A0CA3", "#4CC9F0"]
 dark_palette = ["#9B0F47", "#5E2E9D", "#2487B8"]
+plt.rcParams['font.size'] = 12  
 
 sns.stripplot(data=df, x="block_type", y="LR", ax=axes[0], palette=palette, alpha=.5, jitter=True, marker='.', order=['Points', 'Disgust', 'Fear'], zorder=1)
 sns.boxplot(data=df, x="block_type", y="LR",  ax=axes[0], palette=dark_palette, fill=False, showfliers=False, notch=True, order=['Points', 'Disgust', 'Fear'], zorder=2)
@@ -503,7 +593,7 @@ if pointsFear_annot != 'NonSig':
     axes[0].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=12) 
 
 axes[0].set_xlabel("")
-axes[0].set_ylabel("Learning rate") 
+axes[0].set_ylabel("") 
 axes[0].set_title("Learning rate")
 axes[0].set_xticklabels(axes[0].get_xticklabels(), rotation=45)
 axes[0].set_ylim(top=y+h+0.075)
@@ -522,15 +612,15 @@ if points_annot != 'NonSig':
     x1, x2 = 0, 1  
     y, h, col = df["invTemp"].max() + 1.5, 1.5, 'black'  
     axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[1].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=15) 
+    axes[1].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=12) 
 if pointsFear_annot != 'NonSig':
     x1, x2 = 0, 2  
     y, h, col = df["LR"].max() + 1.5, 1.5, 'black'  
     axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[1].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=15) 
+    axes[1].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col, fontsize=12) 
 
 axes[1].set_xlabel("")
-axes[1].set_ylabel("Inverse temperature") 
+axes[1].set_ylabel("") 
 axes[1].set_title("Inverse temperature")
 axes[1].set_xticklabels(axes[0].get_xticklabels(), rotation=45)
 #axes[1].set_ylim(top=y+h+3.5)
@@ -557,207 +647,17 @@ if pointsFear_annot != 'NonSig':
     axes[2].text((x1+x2)*.5, y+h, points_annot, ha='center', va='bottom', color=col) 
 
 axes[2].set_xlabel("")
-axes[2].set_ylabel("Stickiness") 
+axes[2].set_ylabel("") 
 axes[2].set_title("Stickiness")
 axes[2].set_xticklabels(axes[0].get_xticklabels(), rotation=45)
 axes[2].set_ylim(top=y+h+0.15)
 
+for ax in axes:
+    for tick in ax.get_xticklabels():
+        tick.set_fontsize(15)
+    for tick in ax.get_yticklabels():
+        tick.set_fontsize(12)
+
 plt.savefig('ModelParams_hypothesisTesting.jpeg', dpi=300, bbox_inches='tight')
-
-```
-
-<p>Learning rate outliers </p>
-```{python}
-#| label: outliers
-#| code-fold: true
-
-fig, axes = plt.subplots(2,1, sharex=False, gridspec_kw={'height_ratios': [1.5, 1]})
-fig.tight_layout(pad=1)
-#fig.set_size_inches(8.3, 5.8)
-fig.set_size_inches(3.7, 3.25)
-plt.rcParams['font.size'] = 12   
-
-colorA="#9B0F47" #dark pink
-colorB="#3A0CA3" #darker purple
-colorC="#CBC3E3" #light purple
-
-#load in all files
-filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1lr_stick1_blk3_allparamsep_params.csv"
-params = pd.read_csv(filepath)
-
-#params = pd.read_csv("../csvs/winningModelOutput.csv")
-
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
-task_summary.sort_values(by=['participant_no', 'block_type'], inplace=True)
-params['participant_no']=list(set(task_summary.participant_no))
-
-#convert to long df
-long_params=pd.DataFrame()
-for subj in set(params['participant_no']):
-    subj_params= params[params['participant_no']==subj]
-    disgust_row=pd.DataFrame({
-        'participant_no': [float(subj_params['participant_no'])],
-        'LR':  [float(subj_params['d_alpha'])],
-        'invTemp': [float(subj_params['d_beta'])],
-        'stickiness': [float(subj_params['d_omega'])],
-        'block_type': ['Disgust']
-    })
-    fear_row=pd.DataFrame({
-        'participant_no': [float(subj_params['participant_no'])],
-        'LR':  [float(subj_params['f_alpha'])],
-        'invTemp': [float(subj_params['f_beta'])],
-        'stickiness': [float(subj_params['f_omega'])],
-        'block_type': ['Fear']
-    })
-    points_row=pd.DataFrame({
-        'participant_no': [float(subj_params['participant_no'])],
-        'LR':  [float(subj_params['p_alpha'])],
-        'invTemp': [float(subj_params['p_beta'])],
-        'stickiness': [float(subj_params['p_omega'])],
-        'block_type': ['Points']
-    })
-    long_params=pd.concat([long_params, disgust_row, fear_row, points_row])
-
-##combine with task_summary_df
-df=pd.merge(task_summary, long_params, on=['participant_no', 'block_type'], how='inner')
-
-#identify the outliers in the LR error outcome
-Q1 = df['LR'].quantile(0.25)
-Q3 = df['LR'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1- 1.5 *  IQR
-upper_bound = 1
-if lower_bound < min(df.LR):
-    lower_bound = min(df.LR)
-outliers=df[(df['LR']<lower_bound) | (df['LR']>upper_bound )]
-
-bin_width=0.015
-bins=np.arange(min(df.LR), max(df.LR) + bin_width, bin_width)
-sns.histplot(data=df, bins=bins, x="LR", color=colorC, ax=axes[0] )
-sns.histplot(data=outliers, bins=bins,
-x="LR", color=colorA, ax=axes[0] ) 
-axes[0].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=2, label='Lower Bound')
-axes[0].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=2, label='Upper Bound')
-
-axes[0].set_xlabel('')
-axes[0].set_ylabel('')
-axes[0].set_title('Learning Rate', fontsize=12)
-axes[0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-#axes[0].set_yticks([])
-#axes[0].set_ylim(top=100)
-
-#percentage correct
-Q1 = df['percentage_correct'].quantile(0.25)
-Q3 = df['percentage_correct'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1- 1.5 *  IQR
-upper_bound = Q3 + 1.5 *  IQR
-bin_width=0.01
-bins=np.arange(min(df.percentage_correct), max(df.percentage_correct) + bin_width, bin_width)
-sns.histplot(data=df, x="percentage_correct", color=colorC, bins=bins, ax=axes[1]) 
-sns.histplot(data=outliers, x="percentage_correct", color=colorA, bins=bins, ax=axes[1]) 
-axes[1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=2, label='Lower Bound')
-axes[1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=2, label='Upper Bound')
-axes[1].set_xlabel('Percentage correct')
-
-axes[1].set_xlabel('')
-axes[1].set_ylabel('')
-axes[1].set_title('Percentage correct', fontsize=12)
-axes[1].set_ylim(top=50)
-axes[1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-#axes[1].set_yticks([])
-
-plt.savefig('LROutliers.jpeg', dpi=300, bbox_inches='tight')
-```
-
-
-<h3>Learning rate exploratory analysis: Disgust vs not and em vs not</h3>
-<p>NB within sensitivity analysis</p>
-
-```{python}
-#| label: alternative outlier exclusion
-#| code-fold: true
-
-task_summary = pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/csvs/winningModelOutput.csv")
-
-Q1 = task_summary["percentage_correct"].quantile(0.25)
-Q3 = task_summary["percentage_correct"].quantile(0.75)
-
-IQR_value = Q3 - Q1
-lower_bound = Q1 - 1.5 * IQR_value
-upper_bound = Q3 + 1.5 * IQR_value
-
-task_summary = task_summary[task_summary["percentage_correct"] >= lower_bound]
-
-task_summary.loc[task_summary['block_type']=='Disgust', 'disgustOrNot']='Disgust'
-task_summary.loc[task_summary['block_type']!='Disgust', 'disgustOrNot']='Not'
-task_summary.loc[task_summary['block_type']=='Points', 'emotionOrNot']='Not'
-task_summary.loc[task_summary['block_type']!='Points', 'emotionOrNot']='Emotion'
-
-
-fig, axes = plt.subplots(1,2, sharey=True)
-fig.tight_layout(pad=3)
-fig.set_size_inches(3.7, 2.7)
-plt.rcParams['font.size'] = 12 
-
-disgust_not_palette=["#5E2E9D", "#00008B"]
-emotion_not_palette=["#4361EE", "#9B0F47"]
-
-disgust_not_light=["#3A0CA3", "#00008B"]
-emotion_not_light=["#4361EE", "#F72585"]
-
-sns.stripplot(data=task_summary, x="disgustOrNot", y="LR", ax=axes[0], palette=disgust_not_light, alpha=.5, jitter=True, marker='.', zorder=1)
-sns.boxplot(data=task_summary, x="disgustOrNot", y="LR", ax=axes[0], palette=disgust_not_palette, fill=False, showfliers=False, notch=True, zorder=2)
-#sns.pointplot(data=task_summary, x="disgustOrNot", y="LR", ax=axes[0], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, zorder=3)
-axes[0].set_xlabel("")
-axes[0].set_xticklabels(['Disgust', 'Not Disgust'], rotation=45)
-axes[0].set_ylabel("Learning Rate") 
-axes[0].set_title("Disgust vs Not", fontsize=12)
-
-sns.stripplot(data=task_summary, x="emotionOrNot", y="LR", ax=axes[1], palette=emotion_not_light, alpha=.5, jitter=True, marker='.', zorder=1)
-sns.boxplot(data=task_summary, x="emotionOrNot", y="LR", ax=axes[1],palette=emotion_not_palette, fill=False, showfliers=False, notch=True, zorder=2)
-#sns.pointplot(data=task_summary, x="emotionOrNot", y="LR", ax=axes[1], marker="D", color='black', errorbar=None, linestyle='none', markersize=4, zorder=3)
-
-
-emotionDisgust_pvals=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/pvals/disgustEmotion_LR_pvalsForPlotting.csv")
-
-disgustOrNot_pval=float(emotionDisgust_pvals[emotionDisgust_pvals.model=='disgustOrNot'].pvals)
-if disgustOrNot_pval < 0.001:
-    disgustOrNot_annot='***'
-elif disgustOrNot_pval <0.01:
-    disgustOrNot_annot='**'
-elif disgustOrNot_pval <0.05:
-    disgustOrNot_annot='*'
-else:
-    disgustOrNot_annot='NonSig'
-
-emotionOrNot_pval=float(emotionDisgust_pvals[emotionDisgust_pvals.model=='emotionOrNot'].pvals)
-if emotionOrNot_pval < 0.001:
-    emotionOrNot_annot='***'
-elif emotionOrNot_pval <0.01:
-    emotionOrNot_annot='**'
-elif emotionOrNot_pval <0.05:
-    emotionOrNot_annot='*'
-else:
-    emotionOrNot_annot='NonSig'
-
-
-if disgustOrNot_annot != 'NonSig':
-    x1, x2 = 0, 1  
-    y, h, col = task_summary["LR"].max() + 0.02, 0.02, 'grey'  
-    axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[0].text((x1+x2)*.5, y+h, disgustOrNot_annot, ha='center', va='bottom', color=col) 
-if emotionOrNot_annot != 'NonSig':
-    x1, x2 = 0, 1  
-    y, h, col = task_summary["LR"].max() +0.02, 0.02, 'grey'  
-    axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
-    axes[1].text((x1+x2)*.5, y+h, emotionOrNot_annot, ha='center', va='bottom', color=col) 
-
-axes[1].set_xlabel("")
-axes[1].set_xticklabels(['Emotion', 'Points-based'], rotation=45)
-axes[1].set_ylabel("") 
-axes[1].set_title("Emotion vs points", fontsize=12)
-axes[0].set_ylim(top=y+h+0.075)
-plt.savefig('DisgustNotEmotionNot_LRsensitivity.jpeg', dpi=300, bbox_inches='tight')
 
 ```
