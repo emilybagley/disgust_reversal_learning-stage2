@@ -1,85 +1,134 @@
 # disgust_reversal_learning-final
- Analysis scripts for stage 2 registered report
+<p> Analysis scripts for stage 2 registered report
 
- Contains all analysis scripts for model-agnostic analyses in the Stage 2 Registered Report, as well as the power analysis (which is unchanged from the stage 1 Registered Report).
- All changes from the stage 1 versions are minimal (debugging, adding real data, creating markdown versions of scripts etc.) and can be seen in the version history.
-
-<br>
-<b><h3>The clearest way to see all analysis is in the markdown scripts found in the Full_results_markdown folder:</h3></b>
-
-These files contain all analyses reported in the paper (which are duplicated in the original notebooks found in the other folders of this repository) in a clearer more intelligible way (e.g., with markdown explanations and without confusing extra steps)
-<br>
-<br>
-
-VideoRatings.md: contains models A-H as specified in the analysis plan (all the video rating checks)
-
-dataVisualisation.md: contains all the graphs for the model-agnostic analysis
-
-exploratory_analyses.md: contains all the exploratory model-agnostic analyses run (alongside explanations of them in markdown)
-
-model1_perseverativeErrors.md: contains all analyses regarding the perseverative error hypothesis (original model, model with video ratings and a sensitivity analysis)
-
-model2_regressive_errors.md: contains all analyses regarding the regressive error hypothesis (original model, model with video ratings and a sensitivity analysis)
-
-model3_winStay.md: contains all analyses regarding the win-stay hypothesis (original model, model with video ratings and a sensitivity analysis)
-
-model4_loseShift.md: contains all analyses regarding the lose-shift hypothesis (original model, model with video ratings and a sensitivity analysis)
-
-/figures contains high quality jpegs for each figure created in dataVisualisation.md
-
-(NB all notebooks have .qmd counterparts which are the quarto files used to create these markdown files)
-
-
+<p> Contains all scripts for all analyses detailed in the stage 2 registered report. 
+<p> (NB therefore, there is some duplication with the stage 1 report)
 
 <br>
-<br>
-<h3>Original notebooks (i.e., those written for the stage 1 registered report) are also found in this repository, duplicating the results shown in the markdown files</h3>
-<br>
- <b>Data checks/cleaning - all found within the data_cleaning folder:</b>
- 
- 00_data_checks.ipynb: used to make rolling exclusions. Look at data from one participant and determine if they passed the exclusion criteria (1 version for 1 example participant is included here).
- 
- 0_data_cleaning.ipynb: Used to create useable dataframes for subsequent analysis. Excludes using pre-registered exclusion criteria and calculates key task-outcomes.
-
- checking_exclusions.ipynb: Checks that after exclusions from failed attention checks the sample remains broadly representative in terms of sex, age and psychiatric diagnosis. 
- 
-
-
+<h3>Csvs folder:</h3>
+<p> Contains the csvs created in the data-cleaning scripts 
+<p> (e.g., a full blinded dataframe, a demography dataframe, a dataframe with video-ratings, task dataframes, exclusion details)
 
 <br>
-<br>
- <b>Planned model-agnostic analyses - all found within the model_agnostic_analyses folder:</b>
- 
- 1_video_ratings_analyses.ipynb: Completes models A-H as specified by the analysis plan. Full analysis of the video-rating task.
- 
- 2_task_model_agnostic_analysis.ipynb: Completes models 1-6. Full model-agnostic analysis of the reversal learning task
- 
- 2_task_model_agnostic_analysis_nooutliers.ipynb: exactly the same as above, but excludes all outliers (>1.5IQR outside of IQR)
- 
- /generalized_mixed_effects_models: contains notebooks with the model selection and results for each analysis that required a generalized mixed effects model (these were run in R, hence required separate notebooks). Contains both models for main analysis and sensitivity analysis.
-
-
-   
-<br>
- 3_exploratory_analyses.ipynb: contains unplanned exploratory analyses regarding the model-agnostic outcomes
-
- 3_exploratory_analyses_nooutiers.ipynb: exactly the same as above, but excludes all outliers (>1.5IQR outside of IQR)
-
- /exploratory_generalized_mixed_effects_models: contains notebooks with model selection and results for each exploratory analysis that required a generalized mixed effects model (these were run in R, hence required separate notebooks). Contains both models for main analysis and sensitivity analysis.
-
-
-
+<h3>Data folder:</h3>
+<p> Contains original data (raw jatos files) and unblinding document
+<p> data_to_blinded_csv.ipynb - converts data to blinded csv file 
 
 <br>
+<h3>data_cleaning folder:</h3>
+<p> 00_data_checks.ipynb: was be used to make rolling exclusions. Look at data from one participant and determine if they passed the exclusion criteria.
+<p> 0_data_clearning.ipynb: Takes blinded csv trials and makes exclusions using pre-registered exclusion criteria
+<p> checking_exclusions.ipynb: checks the exclusions did not affect representativeness of the sample (compares actual numbers in each demographic category to target numbers)
+
 <br>
-<b>Power analysis (unchanged from stage 1 Registered Report) - all found witin the power_analysis folder:</b>
-
-A_power_analysis_script: carries out both liberal and conservative power analyses, saving the outputs into power tables
-
-B_power_analysis_plots: uses the power tables to identify the minimum required sample and plot power curves
-
-C_power_analysis_withinsubjcorr: carries out additional checks for the main power analysis. 
+<h3>power_analysis folder:</h3>
+<p> A_power_analysis_script: carries out both liberal and conservative power analyses, saving the outputs into power tables
+<p> B_power_analysis_plots: uses the power tables to identify the minimum required sample and plot power curves
+<p> C_power_analysis_withinsubjcorr: carries out additional checks for the main power analysis. 
     namely, assessing the effects of a lower within-subject correlation on power.
-
-D_power_analysis_maximalmodels:  carries out additional checks for the main power analysis. 
+<p> D_power_analysis_maximalmodels:  carries out additional checks for the main power analysis. 
     namely, assessing the effects of a more maximal model on power.
+
+<br>
+<h3><b>results folder:</b></h3>
+<h4>/video_ratings folder</h4>
+<p> //pvals: contains p-values from key results for plotting
+ <br>
+  <br>
+<p> //figures: contains code to create figures and the figure files themselves 
+  <br>
+  <br>
+<p> VideoRatings.md: contains all the video-ratings analyses (models A-H specified by the analysis plan)
+<p> VideoRatings.qmd: contains quartofile that creates videoratings markdownfile
+
+<br>
+<br>
+<h4>/model_agnostic folder</h4>
+<p> //figures: contains codes to create figures and figure files themselves
+  <br>
+  <br>
+<p> //pvals: contains p-values from key results for plotting
+  <br>
+  <br>
+<p> perseverativeErrors.md: all analyses for perseverative error outcome
+<p> perseverativeErrors.qmd: quartofile to create perseverativeErrors.md
+<p> perseverativeErrors_files/: figure files for perseverativeErrors.md
+<p> regressiveErrors.md: all analyses for regressive error outcome
+<p> regressiveErrors.qmd: quartofile to create markdown file
+<p> regressiveErrors_files/: figure files for markdown file
+<p> winStay.md: all analyses for win-stay outcome
+<p> winStay.qmd: quartofile to make markdown file
+<p> winStay_files/: figure files for markdown file
+<p> loseShift.md: all analyses for lose-shift outcome
+<p> loseShift.qmd: quartofile to make markdown file
+<p> loseShift_files/: figure files for markdown file
+
+<br>
+<br>
+<h4>/comp_modeling folder</h4>
+<p> //figures: contains code to create figures and figure files themselves
+  <br>
+  <br>
+<p> //pvals: contains p-values from key results for plotting
+  <br>
+  <br>
+<p> modelCompAndChecks.md: contains model comparison and checks on the winning model
+<p> modelCompAndChecks.qmd: quartofile to create markdown
+<p> modelCompAndChecks_files: auto-generated figure files for modelCompAndChecks markdown
+<p> inverseTemp.md: contains analyses on inverse temperature parameter
+<p> inverseTemp.qmd: quartofile to create markdown
+<p> inverseTemp_files/ autogenerated figure files for markdown
+<p> learningRate.md: contains analyses on learning rate parameter
+<p> learningRate.qmd: quartofile to create markdown
+<p> learningRate_files/ autogenerated figure files for markdown
+<p> stickiness.md: contains analyses on stickiness parameter
+<p> stickiness.qmd:quartofile to create markdown
+<p> stickiness_files/ autogenerated figure files for markdown
+
+<br>
+ <br>
+<p> //csvs: contains csvs (and one rds file) for computational modeling analyses
+<p> complete_task_excluded.csv: raw task data (same as used in task agnostic analysis)
+<p> winningModelOutput.csv: parameters from the winning model (1lr_stick1_allparamsep)
+<p> sensitivity_winningModelOutput.csv: parameters from the winning model once outliers have been excluded
+
+<br>
+ <br>
+<p> //modelFitting: contains all files necessary to fit data to all models in the model space 
+<p> makeStanData.R: converts task-data to the structure necessary to fit to the stan model
+<p> submitcluster.sh: submits all models to the cluster (specifying number of iterations etc.). Calls runModel.sh/.r, runRandomModel.sh/.r, and checkModel_extractParams files
+<p> runModel.sh/.r: runs model and saves csv files (not included in this repository due to size)
+<p> runRandomModel.sh/.r: same as above but for random model (also extracts log-likelihood)
+  <br>
+  <br>
+<p> ///stanFiles: contains the stanfile for each model in the model space (all model are adapted from hBayesDM model - prl_rp (Ouden et al. ,2013 ;https://github.com/CCS-Lab/hBayesDM)
+  <br>
+  <br>
+<p> ///modelOutputs: would contain outputs for each model (not included here due to memory constraints)
+  <br>
+  <br>
+<p> ///checkModel_extractParams: contains a file for each model to extract everything needed from the model (parameters, draws matrix, effective sample size, r-hat, y-pred, log likelihood) 
+ <br>
+
+<br>
+<p> ///modelDiagnostics: contains code for parameter recovery, posterior predictive checks, r-hat checks and effective sample size checks (all run on winning model)
+<p> testingrhatneff.ipynb: checks that effective sample size and rhat for each model are good
+<p> rhat_neff_df.csv: a table which each model and its minimal effective sample size ratio and maximum r-hat value. 
+
+<br>
+ <br>
+<p> ////ParamRecov: contains code for parameter recovery in 1lr_stick1_allparamsep model
+<p> simData.sh/.r: simulates datapoints for 100 participants using the 1lr_stick1_allparamsep model equations (saves out simData.rds, simParams.rds and stan_data.rds)
+<p> runModel.sh/.r: runs model (as before) but using simulated data
+  <br>
+  <br>
+<p> /////modelOutputs: would contain output for this model (almost empty due to memory constraints)
+<p> modelPars_1lr_stick1_blk3_allparamsep.rds: contains recovered parameters from parameter recovery
+
+<br>
+ <br>
+<p> ////PPCs: contains code for posterior predictive checks
+<p> PPC.sh/.r: extracts y-pred matrix and combines with actual data
+<p> postpred_alltrials_1lr_stick1_blk3_allparamsep.rds: a combination of y-pred medians and IQR, and actual data
+<p> y_pred_1lr_stick1_blk3_allparamsep.rds: the y-pred matrix extracted from the winning model
+
