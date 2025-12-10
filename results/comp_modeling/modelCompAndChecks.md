@@ -1,4 +1,4 @@
-# Computational modeling model checking
+# Computational modeling - model checking
 
 
 <p>
@@ -9,8 +9,8 @@ completed after the model fitting process (prior to hypothesis testing)
 
 <p>
 
-Prior to this, data was processed, models were run and model-checks were
-extracted using the code within the modelFitting/ folder
+Prior to this, data were processed, models were run and model-checks
+were extracted using the code within the modelFitting folder
 </p>
 
 - data were pre-processed into the correct format for cmdstanr
@@ -18,8 +18,8 @@ extracted using the code within the modelFitting/ folder
 - data were fit to a series of Q-learning models which differed in the
   included parameters (and whether parameters were shared or differed
   across learning types) - submitCluster.sh and runModel.sh/R
-- models convergence outputs were extracted (effective sample size,
-  rhat) (code in /modelDiagnostics folder - testingrhatneff.ipynb)
+- model convergence outputs were extracted (effective sample size, rhat)
+  (code in /modelDiagnostics folder - testingrhatneff.ipynb)
 - posterior predictive checks and parameter recovery were also carried
   out (code in /modelDiagnostics/ParamRecov and /modelDiagnostics/PPCs)
 
@@ -224,11 +224,11 @@ ggplot(df, aes(x = model, y = waic)) +
 
 <p>
 
-BUT this also shows that no model produces no ‘clear’ winner (lower WAIC
-by \>SEs)
+BUT this also shows that no model is a ‘clear’ winner (lower WAIC by \>
+3 SEs)
 <p>
 
-BUT ‘stickiness’ models consistently produce a better fit
+However, ‘stickiness’ models consistently produce a better fit
 </p>
 
 <details class="code-fold">
@@ -259,7 +259,7 @@ ggplot(df, aes(x = model, y = waic, color=model)) +
 
 <p>
 
-And looking within this, the single learning rate models are have better
+And looking within this, the single learning rate models have better
 diagnostics (e.g., effective sample size is much higher for the single
 learning rate models))
 </p>
@@ -287,7 +287,7 @@ print(subset(rhat_neff_df, select = -max_rhat))
 
 <p>
 
-Within this, the ‘all parameter seperately’ flavour of model is the most
+Within this, the ‘all parameter separately’ flavour of model is the most
 theoretically informative (as it allows us to compare the three
 feedback-types) and it has the lowest WAIC value, suggesting that
 despite having the most free parameters, it is the most parsimonious.
@@ -327,7 +327,7 @@ is within the inter-quartile range of predicted choices across draws.
 This is done using the postpred_alltrials output from the PPCs.R script
 (/modelDiagnostics/PPCs). This code produces the overall mean % of
 trials within the inter-quartile range (across all participants and
-trials) and plots a single-block the participant who has the median
+trials) and plots a single block for the participant who has the median
 score for this percentage.
 
 <details class="code-fold">

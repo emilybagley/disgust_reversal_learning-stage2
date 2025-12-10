@@ -271,9 +271,9 @@ print(results.summary())
 <br>
 <p>
 
-As this hypothesis test found a no difference between fear and disgust
-or disgust and points, we will compute a Bayes Factor to test the
-strength of the evidence for the null
+As this hypothesis test found no difference between fear and disgust or
+disgust and points, we will compute a Bayes Factor to test the strength
+of the evidence for the null
 </p>
 
 <details class="code-fold">
@@ -352,7 +352,7 @@ print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {t
 
 <p>
 
-And because the result is null, also get a Bayes factor:
+And because the result is null, we also calculate a Bayes factor:
 </p>
 
 <details class="code-fold">
@@ -549,9 +549,8 @@ assess whether outliers are driving this effect.
 <p>
 
 The originally planned outlier criteria is not fit for purpose due to
-the large skew of the regressive error outcome. Instead, we run a
-sensitivity analysis excluding data-points that are outliers in terms of
-accuracy
+the large skew of the win-stay outcome. Instead, we run a sensitivity
+analysis excluding data-points that are outliers in terms of accuracy
 </p>
 
 <p>
@@ -853,7 +852,7 @@ scores).
 
 <p>
 
-Firstly, exclude outliers from the dataframe (outliers are define as
+Firstly, exclude outliers from the dataframe (outliers are defined as
 those \>1.5 IQRs above or below the upper or lower quartile)
 
 <details class="code-fold">
@@ -1064,9 +1063,9 @@ print(results.summary())
 <br>
 <p>
 
-As this hypothesis test found a no difference between fear and disgust
-or disgust and points, we will compute a Bayes Factor to test the
-strength of the evidence for the null
+As this hypothesis test found no difference between fear and disgust or
+disgust and points, we will compute a Bayes Factor to test the strength
+of the evidence for the null
 </p>
 
 <p>
@@ -1130,7 +1129,7 @@ print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {t
 
 <p>
 
-And because the result is null, also get a Bayes factor:
+And because the result is null, we also calculate a Bayes factor:
 </p>
 
 <details class="code-fold">

@@ -316,9 +316,9 @@ print(results.summary())
 <br>
 <p>
 
-As this hypothesis test found a no difference between fear and disgust,
-we will compute a Bayes Factor to test the strength of the evidence for
-the null
+As this hypothesis test found no difference between fear and disgust, we
+will compute a Bayes Factor to test the strength of the evidence for the
+null
 </p>
 
 <details class="code-fold">
@@ -963,3 +963,8 @@ print(results.summary())
     prolific_age         0.001    0.001  2.326 0.020  0.000  0.002
     Group Var            0.015    0.021                           
     ==============================================================
+
+<p>
+
+Results are unchanged by the addition of these covariates
+</p>

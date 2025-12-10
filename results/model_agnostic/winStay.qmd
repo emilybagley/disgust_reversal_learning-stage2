@@ -182,7 +182,7 @@ pvalForPlotting.to_excel(pvals_file, index=False)
 ```
 
 <br>
-<p>As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+<p>As this hypothesis test found no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
 
 ```{python}
 #| label: bayes factor function
@@ -235,7 +235,7 @@ ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Points', 'Fear')
 print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
 ```
 
-<p>And because the result is null, also get a Bayes factor: </p>
+<p>And because the result is null, we also calculate a Bayes factor: </p>
 ```{python}
 #| label: points vs fear bayes factor
 #| echo: true
@@ -364,7 +364,7 @@ print(results.summary())
 
 We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.
 
-<p>The originally planned outlier criteria is not fit for purpose due to the large skew of the regressive error outcome. Instead, we run a sensitivity analysis excluding data-points that are outliers in terms of accuracy</p>
+<p>The originally planned outlier criteria is not fit for purpose due to the large skew of the win-stay outcome. Instead, we run a sensitivity analysis excluding data-points that are outliers in terms of accuracy</p>
 
 <p>Exclude outliers according to this definition</p>
 ```{python}
@@ -541,7 +541,7 @@ print(f"Points vs Fear: BF01 = {bf_null}")
 In this case, the basic model (no random slopes or random intercepts) with just the age covariate produced the best fit (indexed by BIC scores).
 
 
-<p>Firstly, exclude outliers from the dataframe (outliers are define as those >1.5 IQRs above or below the upper or lower quartile)
+<p>Firstly, exclude outliers from the dataframe (outliers are defined as those >1.5 IQRs above or below the upper or lower quartile)
 
 ```{python}
 #| label: exclude outliers
@@ -681,7 +681,7 @@ print(results.summary())
 ```
 
 <br>
-<p>As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+<p>As this hypothesis test found no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
 
 <p>Firstly for disgust vs fear:</p>
 ```{python}
@@ -719,7 +719,7 @@ ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Points', 'Fear')
 print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
 ```
 
-<p>And because the result is null, also get a Bayes factor: </p>
+<p>And because the result is null, we also calculate a Bayes factor: </p>
 ```{python}
 #| label: points vs fear bayes factor - sensitivity
 #| echo: true

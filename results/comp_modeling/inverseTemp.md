@@ -4,8 +4,7 @@
 <p>
 
 This file contains hypothesis testing carried out on the winning model
-(1LR_stick1_allparamsep) using the <b>inverse temperature</b>
-parameters.
+(1LR_stick1_allparamsep) using the <b>inverse temperature</b> parameter.
 <p>
 
 <p>
@@ -15,7 +14,7 @@ types using the same mixed effects modeling strategy as was used in the
 model-agnostic hypothesis testing analyses (including skew transforms,
 assumptions testing, generalized models for failed model assumptions,
 video-ratings covariates, sensitivity analyses, bayes factors for null
-results, and BIC model copmarison as a means of selecting random effects
+results, and BIC model comparison as a means of selecting random effects
 and covariates).
 
 <br>
@@ -94,7 +93,7 @@ for subj in set(params['participant_no']):
 
 ##combine with task_summary_df
 df=pd.merge(task_summary, long_params, on=['participant_no', 'block_type'], how='inner')
-df.to_csv("winningModelOutput.csv")
+df.to_csv("csvs/winningModelOutput.csv")
 
 pvals_file = 'pvals/ModelingPvalsForPlotting.xlsx'
 ```
@@ -112,7 +111,7 @@ library(DHARMa)
 library('readxl')
 library('xlsx')
 
-df <- read.csv("winningModelOutput.csv")
+df <- read.csv("csvs/winningModelOutput.csv")
 pvals_file <-'pvals/ModelingPvalsForPlotting.xlsx'
 ```
 
@@ -347,7 +346,7 @@ print(paste0("Winning models: ", win1, " ", win2," ",win3))
 
 <p>
 
-Results from this model show no <b>significant effect of block-type</b>
+Results from this model show <b>no significant effect of block-type</b>
 </p>
 
 ``` r
@@ -404,9 +403,9 @@ print(confint.merMod(no_covariate, method='Wald'))
 
 <p>
 
-As this hypothesis test found a no difference between fear and disgust
-or points and disgust, we will compute Bayes Factors to test the
-strength of the evidence for the null
+As this hypothesis test found no difference between fear and disgust or
+points and disgust, we will compute Bayes Factors to test the strength
+of the evidence for the null
 </p>
 
 <details class="code-fold">
@@ -786,7 +785,7 @@ assess whether outliers are driving this effect.
 
 <p>
 
-Firstly, exclude outliers from the dataframe (outliers are define as
+Firstly, exclude outliers from the dataframe (outliers are defined as
 those \>1.5 IQRs above or below the upper or lower quartile)
 
 <details class="code-fold">
@@ -806,7 +805,7 @@ key_outcomes=['LR', 'invTemp', 'stickiness']
 for col in key_outcomes:
     df=replace_outliers_with_nan(df, col)
 
-df.to_csv("sensitivity_winningModelOutput.csv")
+df.to_csv("csvs/sensitivity_winningModelOutput.csv")
 ```
 
 </details>
@@ -854,7 +853,7 @@ print('invTemp skew: '+str(skew(df.invTemp.dropna())))
 <b>Mixed effects model assumptions violated</b>
 <p>
 
-In this case, a model with a random by-participant slope with and no
+In this case, a model with a random by-participant slope and no
 covariate produced the best fit (as indexed by BIC scores). But the
 model assumptions were violated:
 
@@ -994,7 +993,7 @@ This is the specification that produced the best fit (according to BIC)
 <summary>Code</summary>
 
 ``` r
-df <- read.csv("sensitivity_winningModelOutput.csv")
+df <- read.csv("csvs/sensitivity_winningModelOutput.csv")
 
 #inv Temp model
 gamma_log <- glmer(invTemp~ block_type + (1|participant_no), data=df, family=Gamma(link="log"))

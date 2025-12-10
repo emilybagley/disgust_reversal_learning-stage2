@@ -7,7 +7,6 @@ This file contains the code for the graphs included in the paper (and
 supplement)
 </p>
 
-<b>Now, we can make hypothesis testing plots</b>
 <p>
 
 <b>Firstly, we plot models 1 and 2 (regressive and perseverative
@@ -84,7 +83,7 @@ if pointsFear_annot != 'NonSig':
     y, h, col = df["LR"].max() + 1.5, 1.5, 'black'  
     axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
     axes[1].text((x1+x2)*.5, y+h, pointsFear_annot, ha='center', va='bottom', color=col, fontsize=10) 
-plt.savefig('ReversaLearning_PerseverativeRegressive.jpeg', dpi=300, bbox_inches='tight')
+plt.savefig('ReversalLearning_PerseverativeRegressive.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -173,7 +172,7 @@ if pointsFear_annot != 'NonSig':
     axes[1].text((x1+x2)*.5, y+h, pointsFear_annot, ha='center', va='bottom', color=col, fontsize=10) 
 
 #axes[1].set_ylim(top=y+h+0.05)
-plt.savefig('ReversaLearning_winStayLoseShift.jpeg', dpi=300, bbox_inches='tight')
+plt.savefig('ReversalLearning_winStayLoseShift.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -184,8 +183,8 @@ plt.savefig('ReversaLearning_winStayLoseShift.jpeg', dpi=300, bbox_inches='tight
 
 We also tested whether the effects of feedback-type in perseverative
 error and lose-shift analyses are better explained by a difference
-between disgust and other types or learning or a more general difference
-between emotional (fear/disgust) and non-emotional learning
+between disgust and other types of learning, or a more general
+difference between emotional (fear/disgust) and non-emotional learning
 </p>
 
 <p>
@@ -267,7 +266,7 @@ axes[1].set_ylabel("")
 axes[1].set_title("Emotion vs points", fontsize=12)
 axes[1].set_yscale('log')
 axes[0].set_ylim(top=y+h+10)
-plt.savefig('ReversaLearning_DisgustNotEmotionNot_persEr.jpeg', dpi=300, bbox_inches='tight')
+plt.savefig('ReversalLearning_DisgustNotEmotionNot_persEr.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -345,7 +344,7 @@ if emotionOrNot_annot != 'NonSig':
     y, h, col = task_summary["lose_shift"].max() +0.05, 0.025, 'black'  
     axes[1].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
     axes[1].text((x1+x2)*.5, y+h, emotionOrNot_annot, ha='center', va='bottom', color=col) 
-plt.savefig('ReversaLearning_DisgustNotEmotionNot_loseShift.jpeg', dpi=300, bbox_inches='tight')
+plt.savefig('ReversalLearning_DisgustNotEmotionNot_loseShift.jpeg', dpi=300, bbox_inches='tight')
 ```
 
 </details>
@@ -363,11 +362,11 @@ Alternative outlier definition
 
 Given that a number of our variables have skewed distributions, the
 pre-registered outlier definition (relying on IQR) is not
-fit-for-purpose. Therefore, instead we use define outliers as datapoints
+fit-for-purpose. Therefore, instead we define outliers as datapoints
 that fall 1.5 IQRs outside of the inter-quartile range in terms of
 accuracy (which is normally distributed and arguably gives meaningful
 information as to whether the participant was paying attention,
-sucessfully learning etc.).
+successfully learning etc.).
 
 <p>
 
@@ -417,7 +416,7 @@ x="mean_perseverative_er", color=colorA, zorder=2, ax=axes[0,0])
 axes[0,0].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
 axes[0,0].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
 axes[0,0].set_xlabel('Mean perseverative errors per reversal')
-print("Number of perseverative error outliers (according to original definition) ="+str(len(outliers)))
+print("Number of perseverative error outliers (according to the original definition) ="+str(len(outliers)))
 
 axes[0,0].set_xlabel('')
 axes[0,0].set_ylabel('')
@@ -440,7 +439,7 @@ axes[1,0].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, 
 axes[1,0].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5,  label='Upper Bound')
 axes[1,0].set_xlabel('')
 axes[1,0].set_ylabel('')
-axes[1,0].set_title('Percentage correct', fontsize=12)
+axes[1,0].set_title('Accuracy', fontsize=12)
 axes[1,0].set_ylim(top=50)
 axes[1,0].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 axes[1,0].set_yticks([])
@@ -465,7 +464,7 @@ x="mean_regressive_er", color=colorA, zorder=2, ax=axes[0,1])
 axes[0,1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
 axes[0,1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
 axes[0,1].set_xlabel('Mean regressive errors per reversal')
-print("Number of regressive error outliers (according to original definition) ="+str(len(outliers)))
+print("Number of regressive error outliers (according to the original definition) ="+str(len(outliers)))
 
 axes[0,1].set_xlabel('')
 axes[0,1].set_ylabel('')
@@ -488,7 +487,7 @@ axes[1,1].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, 
 axes[1,1].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5,  label='Upper Bound')
 axes[1,1].set_xlabel('')
 axes[1,1].set_ylabel('')
-axes[1,1].set_title('Percentage correct', fontsize=12)
+axes[1,1].set_title('Accuracy', fontsize=12)
 axes[1,1].set_ylim(top=50)
 axes[1,1].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 axes[1,1].set_yticks([])
@@ -515,7 +514,7 @@ x="win_stay", color=colorA, zorder=2, ax=axes[0,2])
 axes[0,2].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Lower Bound')
 axes[0,2].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5, label='Upper Bound')
 axes[0,2].set_xlabel('Win-stay probability')
-print("Number of win-stay outliers (according to original definition) ="+str(len(outliers)))
+print("Number of win-stay outliers (according to the original definition) ="+str(len(outliers)))
 
 axes[0,2].set_xlabel('')
 axes[0,2].set_ylabel('')
@@ -538,7 +537,7 @@ axes[1,2].axvline(lower_bound, color=colorB, linestyle='dashed', linewidth=1.5, 
 axes[1,2].axvline(upper_bound, color=colorB, linestyle='dashed', linewidth=1.5,  label='Upper Bound')
 axes[1,2].set_xlabel('')
 axes[1,2].set_ylabel('')
-axes[1,2].set_title('Percentage correct', fontsize=12)
+axes[1,2].set_title('Accuracy', fontsize=12)
 axes[1,2].set_ylim(top=50)
 axes[1,2].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 axes[1,2].set_yticks([])
@@ -548,8 +547,8 @@ plt.savefig('Outliers.jpeg', dpi=300, bbox_inches='tight')
 
 </details>
 
-    Number of perseverative error outliers (according to original definition) =37
-    Number of regressive error outliers (according to original definition) =113
-    Number of win-stay outliers (according to original definition) =65
+    Number of perseverative error outliers (according to the original definition) =37
+    Number of regressive error outliers (according to the original definition) =113
+    Number of win-stay outliers (according to the original definition) =65
 
 ![](modelAgnosticPlots_files/figure-commonmark/cell-7-output-2.jpeg)

@@ -4,8 +4,8 @@ format: gfm
 fig-format: jpeg
 ---
 
-<p>This file contains hypothesis testing carried out on the winning model (1lr_stick1_allparamsep) using the <b>learning rate</b> parameters.<p>
-<p> Learning rate parameters are compared between the three feedback types using the same mixed effects modeling strategy as was used in the model-agnostic hypothesis testing analyses (including skew transforms, assumptions testing, generalized models for failed model assumptions, video-ratings covariates, sensitivity analyses, bayes factors for null results, and BIC model copmarison as a means of selecting random effects and covariates).
+<p>This file contains hypothesis testing carried out on the winning model (1lr_stick1_allparamsep) using the <b>learning rate</b> parameter.<p>
+<p> Learning rate parameters are compared between the three feedback types using the same mixed effects modeling strategy as was used in the model-agnostic hypothesis testing analyses (including skew transforms, assumptions testing, generalized models for failed model assumptions, video-ratings covariates, sensitivity analyses, bayes factors for null results, and BIC model comparison as a means of selecting random effects and covariates).
 
 <h3>Load in packages and data- in python and then in r </h3>
 
@@ -273,7 +273,7 @@ win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
 ```
 
-<p>Results from this model show no <b>significant effect of block-type</b>: although the disgust vs points comparison is nearing significance. 
+<p>Results from this model show <b>no significant effect of block-type</b>: although the disgust vs points comparison is nearing significance. 
 
 ```{r}
 #| label: R generalized mixed effects model
@@ -288,7 +288,7 @@ summary(no_covariate)
 print(confint.merMod(no_covariate, method='Wald'))
 ```
 
-<p>As this hypothesis test found a no difference between fear and disgust or points and disgust, we will compute Bayes Factors to test the strength of the evidence for the null</p>
+<p>As this hypothesis test found no difference between fear and disgust or points and disgust, we will compute Bayes Factors to test the strength of the evidence for the null</p>
 ```{python}
 #| label: bayes factor function
 #| echo: true
@@ -368,7 +368,7 @@ pvalForPlotting.to_excel(pvals_file, index=False)
 
 <br>
 <h3><b>Adding video ratings</b></h3>
-We will next test whether this effect remains after video rating differences between fear and disgust have been controlled for. 
+We will next test whether this result remains after video rating differences between fear and disgust have been controlled for. 
 <p>As before, the mixed effects model violated assumptions, so a generalized mixed effects model must be run. </p>
 
 ```{python}
@@ -547,6 +547,10 @@ print(confint.merMod(no_covariate, method='Wald'))
 <h3> <b> Sensitivity analysis </b></h3>
 We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.
 
+
+<p>This variable is skewed, so the alternative outlier definition is used  - but we also include the pre-registered definition for completeness:</p>
+
+<b>Original/pre-registered outlier definition</b>
 <p>Firstly, exclude outliers from the dataframe (outliers are define as those >1.5 IQRs above or below the upper or lower quartile)
 ```{python}
 #| label: exclude outliers
@@ -570,7 +574,6 @@ df.to_csv("csvs/sensitivity_winningModelOutput.csv")
 ```
 
 <p>In the case of the learning rate outcome, 67 datapoints are excluded </p>
-
 ```{python}
 print("Number of LR outliers: "+str(len(df[df.LR.isna()])))
 ```
@@ -598,7 +601,7 @@ print('LR skew: '+str(skew(df.LR.dropna())))
 <br>
 
 <b>Mixed effects model assumptions violated</b>
-<p>In this case, a model with a random by-participant slope with and an age covariate produced the best fit (as indexed by BIC scores). But the model assumptions were violated:
+<p>In this case, a model with a random by-participant slope and an age covariate produced the best fit (as indexed by BIC scores). But the model assumptions were violated:
 
 <p> Select the winning mixed effects model: </p>
 ```{python}
@@ -824,8 +827,8 @@ pvalForPlotting.to_excel(pvals_file, index=False)
 
 ```
 
-<h3> Investigation in to extreme values (exploratory)</h3>
-<p>Given the discrepancy between the main and sensitivity analyses, we carried out an investigation into the properties of these 'outlier' particpants - to help interpret this result (as was done previously with the perseverative error outcome) </p>
+<h3> Alternative outlier analysis</h3>
+<p>Given the discrepancy between the main and sensitivity analyses, we carried out an investigation into the properties of these 'outlier' participants - to help interpret this result (as was done previously with the perseverative error outcome) </p>
 
 ```{python}
 #| label: outlier investigation
@@ -1140,7 +1143,7 @@ axes[1,1].set_xlabel('')
 
 ```
 
-<p>And test if there is a different proportion of these people with mental heath diagnoses (relative to the rest of the sample).</p>
+<p>And test if there is a different proportion of these people with mental health diagnoses (relative to the rest of the sample).</p>
 ```{python}
 #| label: chi-squared
 #| code-fold: true
@@ -1160,7 +1163,7 @@ print(f"Chi2: {chi2}; p-val: {p}")
 ```
 <br>
 <p> Together, these results suggest that the definition of outliers specified in the stage-1 registered report is not a good metric (as with the perseverative error outcome) - likely due to the skewed nature of the variable. Perhaps a better metric would be excluding blocks where the accuracy score (percentage correct) is defined as an outlier: as the histogram shows, there are a minority of the LR 'outliers' that fit this definition. </p>
-<p>Therefore, as a final exploratory analysis, we re-run the generalised mixed effects model excluding only the values that are outliers on the percentage correct outcome (have unusually low accuracy). (An analagous analysis was also run for the perseverative error outcome). </p>
+<p>Therefore, we re-run the generalised mixed effects model excluding only the values that are outliers on the percentage correct outcome (have unusually low accuracy). </p>
 
 <br>
 <p>Create a dataframe which excludes accuracy outliers</p>
@@ -1367,7 +1370,7 @@ summary(emotionOrNot)
 print(confint.merMod(emotionOrNot, method='Wald'))
 ```
 
-<p>Only the 'disgust or not' model finds a significant effect, suggesting that the difference between disgust and other types of learning (both fear and points learning) is the key driver of effects<p>
+<p>Only the 'emotion or not' model finds a significant effect, suggesting that the difference between points and other types of learning (both fear and disgust learning) is the key driver of effects<p>
 <p>BIC values also show that this model is the better fitting model, further supporting the hypothesis</p>
 ```{r}
 #| label: perseverative error - disgust vs emotion model model comparison

@@ -99,6 +99,7 @@ library(grid)
 ```
 
 <p>This file contains the code for the graphs included in the paper (and the supplement) regarding computational modeling</p>
+<p>NB correct spacing is seen in saved out files NOT figures in the markdown</p>
 
 <h3>Model comparison</h3>
 

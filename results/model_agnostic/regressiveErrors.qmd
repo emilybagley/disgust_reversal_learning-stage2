@@ -291,7 +291,7 @@ write.xlsx(pvalsForPlotting, file=pvals_file, row.names=FALSE)
 ```
 
 <br>
-<p>As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+<p>As this hypothesis test found no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
 
 ```{python}
 #| label: bayes factor function
@@ -556,6 +556,7 @@ explore_df = task_summary[task_summary["percentage_correct"] >= lower_bound]
 
 ```
 
+<p>Correct skew of this outlier-free dataset </p>
 ```{python}
 #| label: Skewness alt outlier
 #| echo: true
@@ -571,7 +572,7 @@ sns.histplot(data=explore_df['regressive_er_transformed'], ax=axes[1])
 print('Regressive error skew: '+str(skew(explore_df.mean_regressive_er)))
 ```
 
-<p>Mixed effects models assumptions are violated</p>
+<p>Mixed effects model assumptions are violated</p>
 In this case, the basic model (no random slopes or random intercepts, and no covariates) produced the best fit (indexed by BIC scores).
 <p>But the model assumptions were violated</p>
 ```{python}
@@ -773,7 +774,7 @@ print(confint.merMod(no_covariate, method='Wald'))
 ```
 
 <br>
-<p>As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+<p>As this hypothesis test found no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
 
 <p>Firstly for disgust vs fear:</p>
 ```{python}
@@ -820,7 +821,7 @@ print(f"Points vs Fear: BF01 = {bf_null}")
 
 <h3>Pre-registered sensitivity analysis</h3>
 <p>The planned sensitivity analysis is included for completeness</p>
-<p>Firstly, exclude outliers from the dataframe (outliers are define as those >1.5 IQRs above or below the upper or lower quartile)
+<p>Firstly, exclude outliers from the dataframe (outliers are defined as those >1.5 IQRs above or below the upper or lower quartile)
 
 ```{python}
 #| label: exclude outliers
@@ -844,7 +845,7 @@ sensitivity_df=task_summary
 ```
 
 <br>
-<h3>Assess and correct for skewness in perservative error outcome (excluding outliers)</h3>
+<h3>Assess and correct for skewness in regressive error outcome (excluding outliers)</h3>
 ```{python}
 #| label: Skewness sensitivity
 #| echo: true
@@ -917,7 +918,7 @@ win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
 
-<h4>This time the assumptions are not violated - so no generalized model needs to be run. </h4>
+<h4>This time the assumptions are not violated - so a generalized model needs to be run. </h4>
 <p>Shapiro-Wilk test of normality of residuals</p>
 ```{python}
 #| label: Mixed effects model sensitivity-shapiro-wilk
@@ -965,7 +966,7 @@ print(results.summary())
 ```
 
 <br>
-<p>As this hypothesis test found a no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+<p>As this hypothesis test found no difference between fear and disgust or disgust and points, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
 
 <p>Firstly for disgust vs fear:</p>
 ```{python}

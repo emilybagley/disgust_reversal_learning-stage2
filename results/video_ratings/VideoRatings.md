@@ -17,8 +17,8 @@ disgust of 10 videos from Cowen and Keltner (2017). This was done
 
 For each participant, the ‘best’ pair of fear and disgust videos (see
 paper for equation used to determine the ‘best’ pair) was selected prior
-to the reversal learning task. This pair were then used as punishments
-in the reversal learning task for the fear and disgust feedback-type
+to the reversal learning task. This pair was then used as punishments in
+the reversal learning task for the fear and disgust feedback-type
 blocks.
 </p>
 
@@ -53,13 +53,13 @@ This notebook contains
   identify any differences in valence, arousal and habituation between
   the two stimulus types (models A and B).
 - Analysis of ratings of the selected Cowen and Keltner videos to
-  validate that fear and disgust was sucessfully induced (models C and
+  validate that fear and disgust was successfully induced (models C and
   D)
 - Analysis of the points ratings (in comparison to timepoint 1 of the
   selected videos) to assess how the points feedback differed from the
-  fear and disgust feedback (models E-G) \*Exploratory video ratings
-  analyses looking at <b>all</b> videos (not just those selected for the
-  reversal learning task)
+  fear and disgust feedback (models E-G)
+- Exploratory video ratings analyses looking at <b>all</b> videos (not
+  just those selected for the reversal learning task)
 
 </p>
 
@@ -304,7 +304,7 @@ print("Winning models: "+ win1 +" "+ win2)
 
     Winning models: basic_model no_covariate
 
-- This model found an effect of trial-type: fear videos had were more
+- This model found an effect of trial-type: fear videos were more
   arousing than disgust (this was <b>counter to prediction</b>)
 - There was no trial-type\*timepoint interaction (no difference in
   habituation in the arousal measure)
@@ -392,7 +392,7 @@ print("Winning models: "+ win1 +" "+ win2)
 
     Winning models: randslope no_covariate
 
-- This model found an effect of trial-type: disgust videos had were more
+- This model found an effect of trial-type: disgust videos were more
   disgusting than fear (this was <b>as predicted</b>)
 - There was an effect of timepoint (all stimuli got less disgusting over
   time)
@@ -484,11 +484,10 @@ print("Winning models: "+ win1 +" "+ win2)
 
 <p>
 
-- This model found an effect of trial-type: disgust videos had were more
-  disgusting than fear (this was <b>as predicted</b>)
-- There was an effect of timepoint (all stimuli got less disgusting over
-  time)
-- There was a trial-type\*timepoint interaction (the disgust ratings for
+- This model found an effect of trial-type: fear videos were more
+  frightening than fear (this was <b>as predicted</b>)
+- There was an effect of timepoint
+- There was a trial-type\*timepoint interaction (the fear ratings for
   fear and disgust videos changed differentially over time)
 
 </p>
@@ -547,8 +546,8 @@ List of models to run:
 
 <p>
 
-NB there is only timepoint 1 of fear and disgust ratings are included in
-this model (as points rating only has one timepoint).
+NB only timepoint 1 of fear and disgust ratings is included in this
+model (as points rating only has one timepoint).
 </p>
 
 <br> <br>
@@ -942,7 +941,7 @@ print("Winning models: "+ win1 +" "+ win2)
 - This model found an effect of trial-type: fear videos were more
   frightening than losing points (<b>as predicted</b>)
 - Disgust videos, perhaps surprisingly (but mirroring results from model
-  H), were significantly <b>less</b> frightening than losing points
+  G), were significantly <b>less</b> frightening than losing points
 - There was also a significant negative effect of age
 
 </p>
@@ -1010,7 +1009,7 @@ Conclusions
 
 <p>
 
-Results from these models tells us:
+Results from these models tell us:
 </p>
 
 <p>
@@ -1033,6 +1032,7 @@ Results from these models tells us:
 
 </p>
 
+<br>
 <h3>
 
 <b>Exploratory video rating analyses</b>
@@ -1040,7 +1040,7 @@ Results from these models tells us:
 
 <p>
 
-Running video rating analysis with <b>all</b> of the fear and disgust
+Running video rating analyses with <b>all</b> of the fear and disgust
 videos
 </p>
 

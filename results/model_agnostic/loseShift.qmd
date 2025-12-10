@@ -205,7 +205,7 @@ print(results.summary())
 ```
 
 <br>
-<p>As this hypothesis test found a no difference between fear and disgust, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
+<p>As this hypothesis test found no difference between fear and disgust, we will compute a Bayes Factor to test the strength of the evidence for the null</p>
 ```{python}
 #| label: bayes factor function
 #| echo: true
@@ -575,5 +575,5 @@ print(results.summary())
 
 ```
 
-
+<p>Results are unchanged by the addition of these covariates</p>
 

@@ -418,9 +418,9 @@ print(confint.merMod(no_covariate, method='Wald'))
 <br>
 <p>
 
-As this hypothesis test found a no difference between fear and disgust
-or disgust and points, we will compute a Bayes Factor to test the
-strength of the evidence for the null
+As this hypothesis test found no difference between fear and disgust or
+disgust and points, we will compute a Bayes Factor to test the strength
+of the evidence for the null
 </p>
 
 <details class="code-fold">
@@ -816,6 +816,11 @@ explore_df = task_summary[task_summary["percentage_correct"] >= lower_bound]
 
 </details>
 
+<p>
+
+Correct skew of this outlier-free dataset
+</p>
+
 <details class="code-fold">
 <summary>Code</summary>
 
@@ -839,7 +844,7 @@ print('Regressive error skew: '+str(skew(explore_df.mean_regressive_er)))
 
 <p>
 
-Mixed effects models assumptions are violated
+Mixed effects model assumptions are violated
 </p>
 
 In this case, the basic model (no random slopes or random intercepts,
@@ -1151,9 +1156,9 @@ print(confint.merMod(no_covariate, method='Wald'))
 <br>
 <p>
 
-As this hypothesis test found a no difference between fear and disgust
-or disgust and points, we will compute a Bayes Factor to test the
-strength of the evidence for the null
+As this hypothesis test found no difference between fear and disgust or
+disgust and points, we will compute a Bayes Factor to test the strength
+of the evidence for the null
 </p>
 
 <p>
@@ -1242,7 +1247,7 @@ The planned sensitivity analysis is included for completeness
 
 <p>
 
-Firstly, exclude outliers from the dataframe (outliers are define as
+Firstly, exclude outliers from the dataframe (outliers are defined as
 those \>1.5 IQRs above or below the upper or lower quartile)
 
 <details class="code-fold">
@@ -1271,7 +1276,7 @@ sensitivity_df=task_summary
 <br>
 <h3>
 
-Assess and correct for skewness in perservative error outcome (excluding
+Assess and correct for skewness in regressive error outcome (excluding
 outliers)
 </h3>
 
@@ -1364,7 +1369,7 @@ print("Winning models: "+ win1 +" "+ win2)
 
 <h4>
 
-This time the assumptions are not violated - so no generalized model
+This time the assumptions are not violated - so a generalized model
 needs to be run.
 </h4>
 
@@ -1472,9 +1477,9 @@ print(results.summary())
 <br>
 <p>
 
-As this hypothesis test found a no difference between fear and disgust
-or disgust and points, we will compute a Bayes Factor to test the
-strength of the evidence for the null
+As this hypothesis test found no difference between fear and disgust or
+disgust and points, we will compute a Bayes Factor to test the strength
+of the evidence for the null
 </p>
 
 <p>

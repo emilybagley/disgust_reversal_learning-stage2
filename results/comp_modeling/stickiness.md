@@ -4,7 +4,7 @@
 <p>
 
 This file contains hypothesis testing carried out on the winning model
-(1LR_stick1_allparamsep) using the <b>stickiness</b> parameters.
+(1LR_stick1_allparamsep) using the <b>stickiness</b> parameter.
 <p>
 
 <p>
@@ -14,7 +14,7 @@ using the same mixed effects modeling strategy as was used in the
 model-agnostic hypothesis testing analyses (including skew transforms,
 assumptions testing, generalized models for failed model assumptions,
 video-ratings covariates, sensitivity analyses, bayes factors for null
-results, and BIC model copmarison as a means of selecting random effects
+results, and BIC model comparison as a means of selecting random effects
 and covariates).
 
 <br>
@@ -703,7 +703,7 @@ assess whether outliers are driving this effect.
 
 <p>
 
-Firstly, exclude outliers from the dataframe (outliers are define as
+Firstly, exclude outliers from the dataframe (outliers are defined as
 those \>1.5 IQRs above or below the upper or lower quartile)
 
 <details class="code-fold">
@@ -763,7 +763,7 @@ print('stickiness skew: '+str(skew(df.stickiness.dropna())))
 <b>Mixed effects model assumptions violated</b>
 <p>
 
-In this case, a model with a random by-participant slope with and no
+In this case, a model with a random by-participant slope and no
 covariate produced the best fit (as indexed by BIC scores). But the
 model assumptions were violated:
 

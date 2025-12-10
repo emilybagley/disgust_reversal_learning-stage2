@@ -89,7 +89,7 @@ pvals_file = 'pvals/pvalsForPlotting.xlsx'
 
 <h3>
 
-Assess and correct for skewness in perservative error outcome
+Assess and correct for skewness in perseverative error outcome
 </h3>
 
 <details class="code-fold">
@@ -116,7 +116,7 @@ print('Perseverative error skew: '+str(skew(task_summary.mean_perseverative_er))
 
 <h3>
 
-<b>Mixed effects model assumptions violated</b>
+<b>Mixed effects model assumptions were violated</b>
 </h3>
 
 In this case, the basic model (no random slopes or random intercepts,
@@ -398,9 +398,9 @@ print(confint.merMod(no_covariate, method='Wald'))
 <br>
 <p>
 
-As this hypothesis test found a no difference between fear and disgust,
-we will compute a Bayes Factor to test the strength of the evidence for
-the null
+As this hypothesis test found no difference between fear and disgust, we
+will compute a Bayes Factor to test the strength of the evidence for the
+null
 </p>
 
 <details class="code-fold">
@@ -476,7 +476,7 @@ print(f"Points vs Fear: BF01 = {bf_null}")
 <b>Adding video ratings</b>
 </h3>
 
-We will next test whether this effect remains after video rating
+Next, we will test whether this effect remains after video rating
 differences between fear and disgust have been controlled for.
 <p>
 
@@ -749,11 +749,11 @@ print(confint.merMod(generalized_model, method='Wald'))
 
 <p>
 
-Hypothesis testing analyses showed a difference in perseverative error
-rate between fear and points learning. To better understand this change,
-we tested whether this difference is mirrored by a difference in overall
-task performance (indexed by percentage of trials where participants
-were correct)
+The above analyses show a difference in perseverative error rate between
+fear and points learning. To better understand this change, we tested
+whether this difference is mirrored by a difference in overall task
+performance (indexed by percentage of trials where participants were
+correct - an ‘accuracy’ score)
 </p>
 
 <p>
@@ -828,7 +828,7 @@ bic_values <- c(
   BIC(invgaus_inverse),
   BIC(invgaus_identity)
 )
-model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity", "Inverse Gaussian (log)", "Inverse Gaussian (inverse)", "Inverse Gaussian (identity)")
+model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse Gaussian (log)", "Inverse Gaussian (inverse)", "Inverse Gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
@@ -864,7 +864,7 @@ print(paste0("Winning models: ", win1, " ", win2," ",win3))
 
 </details>
 
-    [1] "Winning models: Gamma (identity feedback_randint no_covariate"
+    [1] "Winning models: Gamma (identity) feedback_randint no_covariate"
 
 ``` r
 data<-task_summary
@@ -956,7 +956,7 @@ To assess this, we run two competing models:
   (combining the fear and disgust block) and non-emotional learning (the
   points block)
 - Another assessing the presence of a difference between disgust-based
-  learning and learning which is not about digsust (combining the fear
+  learning and learning which is not about disgust (combining the fear
   and points blocks)
   <p>
 
@@ -987,7 +987,7 @@ task_summary <- task_summary %>%
 
 <p>
 
-Run the hypothesis test for ‘disgust or not’ (using the same model
+Next, run the hypothesis test for ‘disgust or not’ (using the same model
 specification as used for the hypothesis testing analysis).
 </p>
 
@@ -1145,6 +1145,223 @@ assess whether outliers are driving this effect.
 
 <p>
 
+Because of the skew of this variable, we use an ‘alternative’ outlier
+definition which excludes datapoints which fall outside of the normal
+range of accuracy (\>1.5 IQRs outside of the IQR)
+</p>
+
+``` r
+task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+Q1 <- quantile(task_summary$percentage_correct, 0.25)
+Q3 <- quantile(task_summary$percentage_correct, 0.75)
+
+IQR_value <- Q3 - Q1  
+
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+
+explore_df <- task_summary[task_summary$percentage_correct >= lower_bound, ]
+```
+
+<p>
+
+Select the winning model, as before
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+explore_df$pos_perseverative_er <- explore_df$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
+
+#gamma_log <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="log"))
+gamma_inverse <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="inverse"))
+gamma_identity <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="identity"))
+
+#invgaus_log <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="log"))
+invgaus_inverse <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="inverse"))
+invgaus_identity <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="identity"))
+
+bic_values <- c(
+  #BIC(gamma_log),
+  BIC(gamma_inverse),
+  BIC(gamma_identity),
+  BIC(invgaus_inverse),
+  BIC(invgaus_identity)
+)
+model_names <- c("Gamma (inverse)", "Gamma (identity)", "inverse gaussian (inverse)", "inverse gaussian (identity)")
+
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+win1 <- bic_df[which.min(bic_df$BIC), ]$Model
+
+basic_model <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="inverse"))
+
+#feedback_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
+#fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|fractals), data=explore_df, family=Gamma(link="inverse"))
+feedback_fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|fractals) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
+
+#randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no), data=explore_df, family=Gamma(link="inverse"))
+#feedback_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
+#feedback_fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=explore_df, family=Gamma(link="inverse"))
+
+bic_values <- c(
+  BIC(basic_model),
+  BIC(feedback_fractals_randint)
+)
+model_names <- c("basic model", "feedback_fractals_randint")
+
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+
+bic_df <- bic_df[order(bic_df$BIC), ]
+win2 <- bic_df[which.min(bic_df$BIC), ]$Model
+
+no_covariate <- basic_model
+sex_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_sex, data=explore_df, family=Gamma(link="inverse"))
+#age_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_age, data=explore_df, family=Gamma(link="inverse"))
+#digit_span_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + digit_span, data=explore_df, family=Gamma(link="inverse"))
+#sex_age_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_sex + prolific_age, data=explore_df, family=Gamma(link="inverse"))
+sex_digit_span_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_sex + digit_span, data=explore_df, family=Gamma(link="inverse"))
+#digit_span_age_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_age + digit_span, data=explore_df, family=Gamma(link="inverse"))
+#sex_digit_span_age_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_age + prolific_sex + digit_span, data=explore_df, family=Gamma(link="inverse"))
+
+bic_values <- c(
+  BIC(no_covariate),
+  BIC(sex_covariate),
+  BIC(sex_digit_span_covariate)
+)
+model_names <- c("no_covariate", "sex_covariate", "sex_digit_span_covariate")
+
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+win3 <- bic_df[which.min(bic_df$BIC), ]$Model
+
+print(paste0("Winning models: ", win1, " ", win2," ",win3))
+```
+
+</details>
+
+    [1] "Winning models: Gamma (inverse) basic model no_covariate"
+
+<p>
+
+Results from the winning model:
+</p>
+
+``` r
+summary(no_covariate)
+```
+
+    Generalized linear mixed model fit by maximum likelihood (Laplace
+      Approximation) [glmerMod]
+     Family: Gamma  ( inverse )
+    Formula: pos_perseverative_er ~ block_type + (1 | participant_no)
+       Data: explore_df
+
+         AIC      BIC   logLik deviance df.resid 
+      1528.9   1553.5   -759.4   1518.9     1006 
+
+    Scaled residuals: 
+        Min      1Q  Median      3Q     Max 
+    -1.2588 -0.7193 -0.1927  0.5409  3.7869 
+
+    Random effects:
+     Groups         Name        Variance Std.Dev.
+     participant_no (Intercept) 0.1267   0.3559  
+     Residual                   0.6186   0.7865  
+    Number of obs: 1011, groups:  participant_no, 340
+
+    Fixed effects:
+                     Estimate Std. Error t value Pr(>|z|)    
+    (Intercept)       1.32831    0.07496  17.719   <2e-16 ***
+    block_typeFear    0.11945    0.08457   1.412   0.1579    
+    block_typePoints  0.18945    0.08845   2.142   0.0322 *  
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    Correlation of Fixed Effects:
+                (Intr) blck_F
+    block_typFr -0.525       
+    blck_typPnt -0.524  0.425
+
+``` r
+print(confint.merMod(no_covariate, method='Wald'))
+```
+
+                           2.5 %    97.5 %
+    .sig01                    NA        NA
+    .sigma                    NA        NA
+    (Intercept)       1.18137968 1.4752336
+    block_typeFear   -0.04631678 0.2852100
+    block_typePoints  0.01609627 0.3628113
+
+<p>
+
+Because of the null result between fear and disgust, we compute a bayes
+factor for the strength of that null:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+Q1 = task_summary['percentage_correct'].quantile(0.25)
+Q3 = task_summary['percentage_correct'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1- 1.5 *  IQR
+upper_bound = Q3 + 1.5 *  IQR
+explore_df = task_summary[task_summary.percentage_correct > lower_bound]
+
+ttest, bf_null = bayes_factor(explore_df, 'mean_perseverative_er', 'Disgust', 'Fear')
+#print("Disgust vs Fear BF01: " + bf_null)
+
+print(f"Disgust vs Fear: BF01 = {bf_null}")
+```
+
+</details>
+
+    Disgust vs Fear: BF01 = 3.6363636363636362
+
+<p>
+
+We also look at fear vs points (which is not directly assessed by the
+model)
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+ttest, bf_null = bayes_factor(explore_df, 'mean_perseverative_er', 'Points', 'Fear')
+
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+```
+
+</details>
+
+    Points vs Fear: T = -1.0671071146229145, CI95% = [-0.12  0.03], p = 0.28669417323635055
+
+<p>
+
+And because the result is null, also get a Bayes factor:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+print(f"Points vs Fear: BF01 = {bf_null}")
+```
+
+</details>
+
+    Points vs Fear: BF01 = 9.25925925925926
+
+    U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
+      warn("Workbook contains no default style, apply openpyxl's default")
+
+<br> <br> <b>We also include the pre-registered outlier analysis for
+completeness</b>
+<p>
+
 Firstly, exclude outliers from the dataframe (outliers are define as
 those \>1.5 IQRs above or below the upper or lower quartile)
 
@@ -1172,11 +1389,11 @@ sensitivity_df=task_summary
 </details>
 
 <br>
-<h3>
+<p>
 
-Assess and correct for skewness in perservative error outcome (excluding
-outliers)
-</h3>
+Assess and correct for skewness in perseverative error outcome
+(excluding outliers)
+</p>
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1199,11 +1416,6 @@ print('Perseverative error skew: '+str(skew(sensitivity_df.mean_perseverative_er
     Perseverative error skew: 0.9439083554848277
 
 ![](perseverativeErrors_files/figure-commonmark/Skewness%20sensitivity-1.jpeg)
-
-<h3>
-
-<b>Outlier-free hypothesis testing</b>
-</h3>
 
 In this case, the basic model (no random slopes or random intercepts,
 and no covariates) produced the best fit (indexed by BIC scores). BUT
@@ -1431,8 +1643,7 @@ print(paste0("Winning models: ", win1, " ", win2," ",win3))
 
 <p>
 
-Results from this model show <b>no effect of block-type</b>: suggests
-that the difference seen before is driven by outliers.
+Results from this model show <b>no effect of block-type</b>
 
 ``` r
 sensitivity_df <- read.csv("sensitivity_df.csv")
@@ -1492,9 +1703,9 @@ print(confint.merMod(generalized_model, method='Wald'))
 <br>
 <p>
 
-As this hypothesis test found a no difference between fear and disgust
-or disgust and points, we will compute a Bayes Factor to test the
-strength of the evidence for the null
+As this hypothesis test found no difference between fear and disgust or
+disgust and points, we will compute a Bayes Factor to test the strength
+of the evidence for the null
 </p>
 
 <p>
@@ -1570,400 +1781,6 @@ print(f"Points vs Fear: BF01 = {bf_null}")
 </details>
 
     Points vs Fear: BF01 = 12.658227848101266
-
-    U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
-      warn("Workbook contains no default style, apply openpyxl's default")
-
-<h3>
-
-Investigation in to extreme values (exploratory)
-</h3>
-
-<p>
-
-Given the discrepancy between the main and sensitivity analyses, we
-carried out an investigation into the properties of these ‘outlier’
-particpants - to help interpret this result
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
-chosen_stim_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
-vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
-
-##due to error some don't have points values - so will have to exclude them
-participants_to_remove=list(set(chosen_stim_df[chosen_stim_df.unpleasant_1.isna()].participant_no))
-chosen_stim_df_short=chosen_stim_df[~chosen_stim_df['participant_no'].isin(participants_to_remove)]
-task_summary_short=task_summary[~task_summary['participant_no'].isin(participants_to_remove)]
-
-##add stimulus rating totals for each category to task summary dataframe
-stim_ratings_totals=pd.DataFrame()
-block_feedback=pd.DataFrame()
-for participant_no in set(chosen_stim_df_short.participant_no):
-    participant_df=chosen_stim_df_short[chosen_stim_df_short.participant_no==participant_no]
-    disgust=participant_df[participant_df.trial_type=="disgust"]
-    fear=participant_df[participant_df.trial_type=="fear"]
-    points=participant_df[participant_df.trial_type=="points"]
-    disgust_score=int(disgust.unpleasant_1)+int(disgust.unpleasant_2)+int(disgust.arousing_1)+int(disgust.arousing_2)
-    fear_score=int(fear.unpleasant_1)+int(fear.unpleasant_2)+int(fear.arousing_1)+int(fear.arousing_2)
-    points_score=int(points.unpleasant_1)+int(points.arousing_1)
-    
-    row=pd.DataFrame({
-        'participant_no': [participant_no],
-        'disgust_score': [disgust_score],
-        'fear_score': [fear_score],
-        'points_score': [points_score],
-        'all_emotion_score': [disgust_score + fear_score + points_score]
-    })
-    stim_ratings_totals=pd.concat([stim_ratings_totals, row])
-task_summary=pd.merge(task_summary, stim_ratings_totals, on='participant_no', how='outer')
-
-##identify the outliers in the perseverative error outcome
-Q1 = task_summary['mean_perseverative_er'].quantile(0.25)
-Q3 = task_summary['mean_perseverative_er'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1- 1.5 *  IQR
-upper_bound = Q3 + 1.5 *  IQR
-if lower_bound < min(task_summary.mean_perseverative_er):
-    lower_bound = min(task_summary.mean_perseverative_er)
-outliers=task_summary[(task_summary['mean_perseverative_er']<lower_bound) | (task_summary['mean_perseverative_er']>upper_bound )]
-
-bin_width=0.2
-bins=np.arange(min(task_summary.mean_perseverative_er), max(task_summary.mean_perseverative_er) + bin_width, bin_width)
-sns.histplot(data=task_summary, bins=bins, x="mean_perseverative_er") 
-sns.histplot(data=outliers, bins=bins,
-x="mean_perseverative_er") 
-plt.axvline(lower_bound, color='red', linestyle='dashed', linewidth=2, label='Lower Bound')
-plt.axvline(upper_bound, color='red', linestyle='dashed', linewidth=2, label='Upper Bound')
-print("Number of outliers ="+str(len(outliers)))
-```
-
-</details>
-
-    Number of outliers =37
-
-![](perseverativeErrors_files/figure-commonmark/outlier%20investigation-1.jpeg)
-
-<p>
-
-Plot where these outliers lie on other key outcomes
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-fig, axes = plt.subplots(2,2, sharey=True)
-fig.tight_layout(pad=1.75)
-fig.set_size_inches(5, 5)
-title="Perseverative error outliers on other key task outcomes"
-plt.suptitle(title, fontsize=12)
-plt.ylim(0,40) 
-```
-
-</details>
-
-    (0.0, 40.0)
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-## this is because there are 37 outliers 
-# #and we want to be able to see clearly where they lie in the distribution
-
-#percentage coorrect
-Q1 = task_summary['percentage_correct'].quantile(0.25)
-Q3 = task_summary['percentage_correct'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1- 1.5 *  IQR
-upper_bound = Q3 + 1.5 *  IQR
-bin_width=0.01
-bins=np.arange(min(task_summary.percentage_correct), max(task_summary.percentage_correct) + bin_width, bin_width)
-sns.histplot(data=task_summary, x="percentage_correct", bins=bins, ax=axes[0,0]) 
-sns.histplot(data=outliers, x="percentage_correct", bins=bins, ax=axes[0,0]) 
-axes[0,0].axvline(lower_bound, color='red', linestyle='dashed', linewidth=2, label='Lower Bound')
-axes[0,0].axvline(upper_bound, color='red', linestyle='dashed', linewidth=2, label='Upper Bound')
-axes[0,0].set_xlabel('Percentage correct')
-
-#regressive error
-Q1 = task_summary['mean_regressive_er'].quantile(0.25)
-Q3 = task_summary['mean_regressive_er'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1- 1.5 *  IQR
-upper_bound = Q3 + 1.5 *  IQR
-if lower_bound < min(task_summary.mean_regressive_er):
-    lower_bound = min(task_summary.mean_regressive_er)
-bin_width=5
-bins=np.arange(min(task_summary.mean_regressive_er), max(task_summary.mean_regressive_er) + bin_width, bin_width)
-sns.histplot(data=task_summary, x="mean_regressive_er", bins=bins, ax=axes[0,1]) 
-sns.histplot(data=outliers, x="mean_regressive_er", bins=bins, ax=axes[0,1]) 
-axes[0,1].axvline(lower_bound, color='red', linestyle='dashed', linewidth=2, label='Lower Bound')
-axes[0,1].axvline(upper_bound, color='red', linestyle='dashed', linewidth=2, label='Upper Bound')
-axes[0,1].set_xlabel('Regressive errors')
-
-#win-stay
-Q1 = task_summary['win_stay'].quantile(0.25)
-Q3 = task_summary['win_stay'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1- 1.5 *  IQR
-upper_bound = Q3 + 1.5 *  IQR
-if upper_bound > max(task_summary.win_stay):
-    upper_bound = max(task_summary.win_stay)
-bin_width=0.01
-bins=np.arange(min(task_summary.win_stay), max(task_summary.win_stay) + bin_width, bin_width)
-sns.histplot(data=task_summary, x="win_stay", bins=bins, ax=axes[1,0]) 
-sns.histplot(data=outliers, x="win_stay", bins=bins, ax=axes[1,0]) 
-axes[1,0].axvline(lower_bound, color='red', linestyle='dashed', linewidth=2, label='Lower Bound')
-axes[1,0].axvline(upper_bound, color='red', linestyle='dashed', linewidth=2, label='Upper Bound')
-axes[1,0].set_xlabel('Win-stay')
-
-#lose-shift
-Q1 = task_summary['lose_shift'].quantile(0.25)
-Q3 = task_summary['lose_shift'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1- 1.5 *  IQR
-upper_bound = Q3 + 1.5 *  IQR
-if upper_bound > max(task_summary.lose_shift):
-    upper_bound = max(task_summary.lose_shift)
-if lower_bound < min(task_summary.lose_shift):
-    lower_bound = min(task_summary.lose_shift)
-bin_width=0.01
-bins=np.arange(min(task_summary.lose_shift), max(task_summary.lose_shift) + bin_width, bin_width)
-sns.histplot(data=task_summary, x="lose_shift", bins=bins, ax=axes[1,1]) 
-sns.histplot(data=outliers, x="lose_shift", bins=bins, ax=axes[1,1]) 
-axes[1,1].axvline(lower_bound, color='red', linestyle='dashed', linewidth=2, label='Lower Bound')
-axes[1,1].axvline(upper_bound, color='red', linestyle='dashed', linewidth=2, label='Upper Bound')
-axes[1,1].set_xlabel('Lose-shift')
-```
-
-</details>
-
-![](perseverativeErrors_files/figure-commonmark/unnamed-chunk-51-3.jpeg)
-
-<p>
-
-Together, these results suggest that the definition of outliers
-specified in the stage-1 registered report is not a good metric. Perhaps
-a better metric is excluding blocks where the accuracy score (percentage
-correct) is defined as an outlier: as the histogram shows, there are a
-minority of the perseverative error ‘outliers’ that fit this definition.
-</p>
-
-<p>
-
-Therefore, as a final exploratory analysis, we re-run the generalised
-mixed effects model excluding only the values that are outliers on the
-percentage correct outcome (have unusually low accuracy)
-</p>
-
-``` r
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
-Q1 <- quantile(task_summary$percentage_correct, 0.25)
-Q3 <- quantile(task_summary$percentage_correct, 0.75)
-
-IQR_value <- Q3 - Q1  
-
-lower_bound <- Q1 - 1.5 * IQR_value
-upper_bound <- Q3 + 1.5 * IQR_value
-
-explore_df <- task_summary[task_summary$percentage_correct >= lower_bound, ]
-```
-
-<p>
-
-Select the winning model, as before
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` r
-explore_df$pos_perseverative_er <- explore_df$mean_perseverative_er + 0.01 ##+0.01 as all values must be positive (i.e., can't have 0s)
-
-#gamma_log <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="log"))
-gamma_inverse <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="inverse"))
-gamma_identity <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="identity"))
-
-#invgaus_log <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="log"))
-invgaus_inverse <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="inverse"))
-invgaus_identity <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=inverse.gaussian(link="identity"))
-
-bic_values <- c(
-  #BIC(gamma_log),
-  BIC(gamma_inverse),
-  BIC(gamma_identity),
-  BIC(invgaus_inverse),
-  BIC(invgaus_identity)
-)
-model_names <- c("Gamma (inverse)", "Gamma (identity)", "inverse gaussian (inverse)", "inverse gaussian (identity)")
-
-bic_df <- data.frame(Model = model_names, BIC = bic_values)
-win1 <- bic_df[which.min(bic_df$BIC), ]$Model
-
-basic_model <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="inverse"))
-
-#feedback_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
-#fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|fractals), data=explore_df, family=Gamma(link="inverse"))
-feedback_fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|fractals) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
-
-#randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no), data=explore_df, family=Gamma(link="inverse"))
-#feedback_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
-#feedback_fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=explore_df, family=Gamma(link="inverse"))
-
-bic_values <- c(
-  BIC(basic_model),
-  BIC(feedback_fractals_randint)
-)
-model_names <- c("basic model", "feedback_fractals_randint")
-
-bic_df <- data.frame(Model = model_names, BIC = bic_values)
-
-bic_df <- bic_df[order(bic_df$BIC), ]
-win2 <- bic_df[which.min(bic_df$BIC), ]$Model
-
-no_covariate <- basic_model
-sex_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_sex, data=explore_df, family=Gamma(link="inverse"))
-#age_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_age, data=explore_df, family=Gamma(link="inverse"))
-#digit_span_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + digit_span, data=explore_df, family=Gamma(link="inverse"))
-#sex_age_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_sex + prolific_age, data=explore_df, family=Gamma(link="inverse"))
-sex_digit_span_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_sex + digit_span, data=explore_df, family=Gamma(link="inverse"))
-#digit_span_age_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_age + digit_span, data=explore_df, family=Gamma(link="inverse"))
-#sex_digit_span_age_covariate <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + prolific_age + prolific_sex + digit_span, data=explore_df, family=Gamma(link="inverse"))
-
-bic_values <- c(
-  BIC(no_covariate),
-  BIC(sex_covariate),
-  BIC(sex_digit_span_covariate)
-)
-model_names <- c("no_covariate", "sex_covariate", "sex_digit_span_covariate")
-
-bic_df <- data.frame(Model = model_names, BIC = bic_values)
-win3 <- bic_df[which.min(bic_df$BIC), ]$Model
-
-print(paste0("Winning models: ", win1, " ", win2," ",win3))
-```
-
-</details>
-
-    [1] "Winning models: Gamma (inverse) basic model no_covariate"
-
-<p>
-
-Results from the winning model:
-</p>
-
-``` r
-summary(no_covariate)
-```
-
-    Generalized linear mixed model fit by maximum likelihood (Laplace
-      Approximation) [glmerMod]
-     Family: Gamma  ( inverse )
-    Formula: pos_perseverative_er ~ block_type + (1 | participant_no)
-       Data: explore_df
-
-         AIC      BIC   logLik deviance df.resid 
-      1528.9   1553.5   -759.4   1518.9     1006 
-
-    Scaled residuals: 
-        Min      1Q  Median      3Q     Max 
-    -1.2588 -0.7193 -0.1927  0.5409  3.7869 
-
-    Random effects:
-     Groups         Name        Variance Std.Dev.
-     participant_no (Intercept) 0.1267   0.3559  
-     Residual                   0.6186   0.7865  
-    Number of obs: 1011, groups:  participant_no, 340
-
-    Fixed effects:
-                     Estimate Std. Error t value Pr(>|z|)    
-    (Intercept)       1.32831    0.07496  17.719   <2e-16 ***
-    block_typeFear    0.11945    0.08457   1.412   0.1579    
-    block_typePoints  0.18945    0.08845   2.142   0.0322 *  
-    ---
-    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-    Correlation of Fixed Effects:
-                (Intr) blck_F
-    block_typFr -0.525       
-    blck_typPnt -0.524  0.425
-
-``` r
-print(confint.merMod(no_covariate, method='Wald'))
-```
-
-                           2.5 %    97.5 %
-    .sig01                    NA        NA
-    .sigma                    NA        NA
-    (Intercept)       1.18137968 1.4752336
-    block_typeFear   -0.04631678 0.2852100
-    block_typePoints  0.01609627 0.3628113
-
-<p>
-
-Because of the null result between fear and disgust we compute a bayes
-factor for the strength of that null:
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-Q1 = task_summary['percentage_correct'].quantile(0.25)
-Q3 = task_summary['percentage_correct'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1- 1.5 *  IQR
-upper_bound = Q3 + 1.5 *  IQR
-explore_df = task_summary[task_summary.percentage_correct > lower_bound]
-
-ttest, bf_null = bayes_factor(explore_df, 'mean_perseverative_er', 'Disgust', 'Fear')
-#print("Disgust vs Fear BF01: " + bf_null)
-
-print(f"Disgust vs Fear: BF01 = {bf_null}")
-```
-
-</details>
-
-    Disgust vs Fear: BF01 = 3.6363636363636362
-
-<p>
-
-We also look at fear vs points (which is not directly assessed by the
-model)
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-ttest, bf_null = bayes_factor(explore_df, 'mean_perseverative_er', 'Points', 'Fear')
-
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
-```
-
-</details>
-
-    Points vs Fear: T = -1.0671071146229145, CI95% = [-0.12  0.03], p = 0.28669417323635055
-
-<p>
-
-And because the result is null, also get a Bayes factor:
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
-```
-
-</details>
-
-    Points vs Fear: BF01 = 9.25925925925926
 
     U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
       warn("Workbook contains no default style, apply openpyxl's default")
