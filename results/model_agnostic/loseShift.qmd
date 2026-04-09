@@ -39,6 +39,7 @@ import statsmodels.formula.api as smf
 import pingouin as pg
 import warnings
 from scipy.stats import ttest_rel
+from scipy.stats import pearsonr
 #from statannotations.Annotator import Annotator
 from scipy.stats import skew
 from statsmodels.stats.diagnostic import het_white
@@ -53,6 +54,8 @@ pd.options.mode.copy_on_write = True
 task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
+
+pd.set_option('display.max_columns', None)
 ```
 
 ```{r, message=FALSE}
@@ -82,7 +85,6 @@ print('lose-shift  skew: '+str(skew(task_summary.lose_shift, nan_policy='omit'))
 
 <h3><b>Hypothesis testing</b></h3>
 <p>In this case, the basic model (no random slopes or random intercepts)  with an age covariate produced the best fit (indexed by BIC scores).
-
 ```{python}
 #| label: Mixed effects model - model selection
 #| echo: true
@@ -111,6 +113,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                   #  'feedback_randint_randslope':['CONVERGENCE WARNING'],
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGED']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (basic model in this case)
@@ -131,12 +134,12 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
 
-
-
+<p>And model assumptions are not violated</p>
 <p>Shapiro-Wilk test of normality of residuals</p>
 ```{python}
 #| label: Mixed effects model -shapiro-wilk
@@ -228,7 +231,7 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ttest, bf_null = bayes_factor(task_summary, 'lose_shift', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 <p>We also look at fear vs points (which is not directly assessed by the model)</p>
@@ -238,7 +241,7 @@ print(f"Disgust vs Fear: BF01 = {bf_null}")
 #| code-fold: true
 ttest, bf_null = bayes_factor(task_summary, 'lose_shift', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 <p>Although the Bayes factor is a bit ambiguous </p>
@@ -246,7 +249,7 @@ print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {t
 #| label: points vs fear bayes factor
 #| echo: true
 #| code-fold: true
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 
@@ -292,6 +295,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                   #  'feedback_randint_randslope':['CONVERGENCE WARNING'],
                   #  'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above 
@@ -312,11 +316,12 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
 
-
+<p>But this time model assumptions were violated:</p>
 <p>Shapiro-Wilk test of normality of residuals</p>
 ```{python}
 #| label: mixed effects model shapiro-wilk - w video ratings
@@ -381,6 +386,7 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse Gaussian (log)", "Inverse Gaussian (inverse)", "Inverse Gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(lose_shift ~ block_type + valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=task_summary, family=Gamma(link="identity"))
@@ -400,6 +406,7 @@ bic_values <- c(
 model_names <- c("basic model", "fractals_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 no_covariate <- basic_model

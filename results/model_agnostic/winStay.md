@@ -50,6 +50,7 @@ import warnings
 from scipy.stats import ttest_rel
 #from statannotations.Annotator import Annotator
 from scipy.stats import skew
+from scipy.stats import pearsonr
 from statsmodels.stats.diagnostic import het_white
 from sklearn.preprocessing import PowerTransformer
 import statannot
@@ -62,6 +63,8 @@ pd.options.mode.copy_on_write = True
 task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
+
+pd.set_option('display.max_columns', None)
 ```
 
 </details>
@@ -128,6 +131,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above 
@@ -148,12 +152,23 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
 
 </details>
 
+        basic_model     randslope  feedback_randint_randslope
+    0  10654.776639  10686.800039                10693.727599
+       age_covariate  no_covariate  sex_age_covariate  sex_covariate  \
+    0   10652.959552  10654.776639       10657.845179    10659.53567   
+
+       digit_span_age_covariate  digit_span_covariate  \
+    0              10659.639877          10660.838919   
+
+       sex_age_digit_span_covariate  sex_digit_span_covariate  
+    0                  10664.663371              10665.885164  
     Winning models: basic_model age_covariate
 
 <p>
@@ -303,12 +318,12 @@ Firstly for disgust vs fear:
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01 = 12.658227848101266
+    Disgust vs Fear: BF01(339) = 12.658227848101266
 
 <br>
 <p>
@@ -323,12 +338,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Disgust', 'Points')
 #print("Disgust vs Points BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01 = {bf_null}")
+print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01 = 16.129032258064516
+    Disgust vs Points: BF01(339) = 16.129032258064516
 
 <br>
 <p>
@@ -343,12 +358,12 @@ model)
 ``` python
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = 0.5306363673941353, CI95% = [-0.01  0.01], p = 0.5960182242845022
+    Points vs Fear: T = 0.5306363673941353, CI95% = [-0.01  0.01], p = 0.5960182242845022, dof = 339
 
 <p>
 
@@ -359,12 +374,12 @@ And because the result is null, we also calculate a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 14.285714285714285
+    Points vs Fear: BF01(339) = 14.285714285714285
 
 <br> <br>
 <p>
@@ -402,6 +417,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above 
@@ -423,12 +439,26 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)   
 ```
 
 </details>
 
+        basic_model     randslope  feedback_randint_randslope  \
+    0  10674.320476  10706.429455                10713.357016   
+
+       feedback_fractals_randint  
+    0               11110.274675  
+       age_covariate  no_covariate  sex_age_covariate  sex_covariate  \
+    0   10673.131274  10674.320476       10677.939294   10678.981914   
+
+       digit_span_age_covariate  digit_span_covariate  \
+    0              10679.744339          10680.319189   
+
+       sex_age_digit_span_covariate  sex_digit_span_covariate  
+    0                  10684.713948              10685.286736  
     Winning models: basic_model age_covariate
 
 <p>
@@ -628,6 +658,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 
@@ -648,12 +679,26 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
 
 </details>
 
+        basic_model     randslope  feedback_randint_randslope  \
+    0  10831.952157  10861.793462                10868.712156   
+
+       feedback_fractals_randint  
+    0               11252.059459  
+       age_covariate  no_covariate  sex_age_covariate  sex_covariate  \
+    0   10829.962252  10831.952157       10834.607841   10836.462853   
+
+       digit_span_age_covariate  digit_span_covariate  \
+    0              10836.622728          10837.977042   
+
+       sex_age_digit_span_covariate  sex_digit_span_covariate  
+    0                  10841.416288              10842.795039  
     Winning models: basic_model age_covariate
 
 <p>
@@ -777,12 +822,12 @@ Firstly for disgust vs fear:
 ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01 = 10.638297872340425
+    Disgust vs Fear: BF01(334) = 10.638297872340425
 
 <br>
 <p>
@@ -797,12 +842,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Disgust', 'Points')
 #print("Disgust vs Points BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01 = {bf_null}")
+print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01 = 13.88888888888889
+    Disgust vs Points: BF01(332) = 13.88888888888889
 
 <br>
 <p>
@@ -817,12 +862,12 @@ model)
 ``` python
 ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = 0.5412036148948165, CI95% = [-0.01  0.01], p = 0.5887280302223017
+    Points vs Fear: T = 0.5412036148948165, CI95% = [-0.01  0.01], p = 0.5887280302223017, dof = 334
 
 <p>
 
@@ -833,14 +878,32 @@ And because the result is null, also get a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 14.084507042253522
+    Points vs Fear: BF01(334) = 14.084507042253522
 
 <br>
+
+<p>
+
+We also test whether win-stay probability correlates with this accuracy
+measure (which it does).
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+print(pearsonr(task_summary.win_stay, task_summary.percentage_correct))
+```
+
+</details>
+
+    PearsonRResult(statistic=np.float64(0.7312081252801357), pvalue=np.float64(2.6677586602745028e-171))
+
 <h3>
 
 We also include the original outlier-free analysis for completeness
@@ -902,7 +965,7 @@ print('Win-stay skew: '+str(skew(sensitivity_df.win_stay.dropna())))
 
     Win-stay skew: -1.1512521637523532
 
-![](winStay_files/figure-commonmark/cell-33-output-2.jpeg)
+![](winStay_files/figure-commonmark/cell-34-output-2.jpeg)
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -930,6 +993,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]})
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above 
@@ -950,12 +1014,26 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)  
 ```
 
 </details>
 
+       basic_model     randslope  feedback_randint_randslope  \
+    0  11728.03423  11757.948767                11764.810479   
+
+       feedback_fractals_randint_randslope  feedback_fractals_randint  
+    0                         11771.672198               12004.796615  
+       age_covariate  no_covariate  sex_age_covariate  digit_span_age_covariate  \
+    0   11725.404058   11728.03423       11728.730583              11731.114853   
+
+       sex_covariate  digit_span_covariate  sex_age_digit_span_covariate  \
+    0   11731.156237          11732.672305                  11734.866348   
+
+       sex_digit_span_covariate  
+    0              11736.418628  
     Winning models: basic_model age_covariate
 
 <p>
@@ -1080,12 +1158,12 @@ Firstly for disgust vs fear:
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01 = 13.88888888888889
+    Disgust vs Fear: BF01(305) = 13.88888888888889
 
 <br>
 <p>
@@ -1100,12 +1178,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Disgust', 'Points')
 #print("Disgust vs Points BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01 = {bf_null}")
+print(f"Disgust vs Points: BF01 ({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01 = 8.474576271186441
+    Disgust vs Points: BF01 (307) = 8.474576271186441
 
 <br>
 <p>
@@ -1120,12 +1198,12 @@ model)
 ``` python
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = -0.8765499910171823, CI95% = [-0.01  0.01], p = 0.3814187127415595
+    Points vs Fear: T = -0.8765499910171823, CI95% = [-0.01  0.01], p = 0.3814187127415595, dof = 306
 
 <p>
 
@@ -1136,9 +1214,9 @@ And because the result is null, we also calculate a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 10.638297872340425
+    Points vs Fear: BF01(306) = 10.638297872340425

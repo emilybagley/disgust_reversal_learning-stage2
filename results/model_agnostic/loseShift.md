@@ -48,6 +48,7 @@ import statsmodels.formula.api as smf
 import pingouin as pg
 import warnings
 from scipy.stats import ttest_rel
+from scipy.stats import pearsonr
 #from statannotations.Annotator import Annotator
 from scipy.stats import skew
 from statsmodels.stats.diagnostic import het_white
@@ -62,6 +63,8 @@ pd.options.mode.copy_on_write = True
 task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
+
+pd.set_option('display.max_columns', None)
 ```
 
 </details>
@@ -144,6 +147,18 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                   #  'feedback_randint_randslope':['CONVERGENCE WARNING'],
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGED']
                     })
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       basic_model
+    0 -1288.060284
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (basic model in this case)
@@ -164,6 +179,24 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       age_covariate  no_covariate  digit_span_covariate  \
+    0   -1288.535949  -1288.060284          -1281.850289   
+
+       digit_span_age_covariate  sex_age_covariate  sex_covariate  \
+    0              -1281.808445       -1281.615594   -1281.133448   
+
+       sex_digit_span_covariate  sex_age_digit_span_covariate  
+    0              -1274.939687                   -1274.90024  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
@@ -171,6 +204,11 @@ print("Winning models: "+ win1 +" "+ win2)
 </details>
 
     Winning models: basic_model age_covariate
+
+<p>
+
+And model assumptions are not violated
+</p>
 
 <p>
 
@@ -343,12 +381,12 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ttest, bf_null = bayes_factor(task_summary, 'lose_shift', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01 = 6.172839506172839
+    Disgust vs Fear: BF01(339) = 6.172839506172839
 
 <p>
 
@@ -362,12 +400,12 @@ model)
 ``` python
 ttest, bf_null = bayes_factor(task_summary, 'lose_shift', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = 2.344453221275527, CI95% = [0.   0.03], p = 0.019631690375740526
+    Points vs Fear: T = 2.344453221275527, CI95% = [0.   0.03], p = 0.019631690375740526, dof = 339
 
 <p>
 
@@ -378,12 +416,12 @@ Although the Bayes factor is a bit ambiguous
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 1.1013215859030836
+    Points vs Fear: BF01(339) = 1.1013215859030836
 
 <br>
 <p>
@@ -426,6 +464,18 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                   #  'feedback_randint_randslope':['CONVERGENCE WARNING'],
                   #  'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       basic_model
+    0  -1269.68479
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above 
@@ -446,6 +496,24 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       age_covariate  no_covariate  digit_span_covariate  \
+    0   -1269.938873   -1269.68479          -1263.947126   
+
+       digit_span_age_covariate  sex_age_covariate  sex_covariate  \
+    0              -1263.521928        -1263.01444   -1262.757291   
+
+       sex_digit_span_covariate  sex_age_digit_span_covariate  
+    0              -1257.035454                  -1256.614644  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
@@ -453,6 +521,11 @@ print("Winning models: "+ win1 +" "+ win2)
 </details>
 
     Winning models: basic_model age_covariate
+
+<p>
+
+But this time model assumptions were violated:
+</p>
 
 <p>
 
@@ -546,6 +619,23 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse Gaussian (log)", "Inverse Gaussian (inverse)", "Inverse Gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                            Model       BIC
+    3            Gamma (identity) -1593.697
+    1                 Gamma (log) -1585.851
+    2             Gamma (inverse) -1565.289
+    6 Inverse Gaussian (identity) -1521.572
+    4      Inverse Gaussian (log) -1510.362
+    5  Inverse Gaussian (inverse) -1483.811
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(lose_shift ~ block_type + valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=task_summary, family=Gamma(link="identity"))
@@ -565,6 +655,19 @@ bic_values <- c(
 model_names <- c("basic model", "fractals_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                 Model       BIC
+    1      basic model -1593.697
+    2 fractals_randint -1587.548
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 no_covariate <- basic_model

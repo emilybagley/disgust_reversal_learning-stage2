@@ -53,10 +53,12 @@ from sklearn.preprocessing import PowerTransformer
 import statannot
 from scipy.stats import ttest_ind
 from scipy.stats import ttest_1samp
+from scipy.stats import pearsonr
 import itertools
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
+pd.set_option('display.max_columns', None)
 
 filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1LR_stick1_blk3_allparamsep_params.csv"
 params = pd.read_csv(filepath)
@@ -142,17 +144,15 @@ print('invTemp skew: '+str(skew(df.invTemp)))
 
 <br>
 
-<b>Mixed effects model assumptions violated</b>
-<p>
-
-In this case, a basic model (no random slopes or random intercepts) with
-an age covariate produced the best fit (as indexed by BIC scores). But
-the model assumptions were violated:
-
 <p>
 
 Select the winning mixed effects model:
 </p>
+
+<p>
+
+In this case, a basic model (no random slopes or random intercepts) with
+an age covariate produced the best fit (as indexed by BIC scores).
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -182,6 +182,21 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       basic_model   randslope  feedback_randint_randslope  \
+    0   590.696193  622.322375                  629.249934   
+
+       feedback_fractals_randint  
+    0                 996.925784  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (basic model in this case)
@@ -202,6 +217,24 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       age_covariate  no_covariate  sex_age_covariate  sex_covariate  \
+    0     590.181488    590.696193         595.472381     595.874691   
+
+       digit_span_covariate  digit_span_age_covariate  \
+    0            596.891749                596.902139   
+
+       sex_age_digit_span_covariate  sex_digit_span_covariate  
+    0                    602.306506                602.308386  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
@@ -210,6 +243,7 @@ print("Winning models: "+ win1 +" "+ win2)
 
     Winning models: basic_model age_covariate
 
+<b>But model assumptions were violated:</b>
 <p>
 
 Shapiro-Wilk test of normality of residuals
@@ -291,6 +325,23 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                            Model      BIC
+    3            Gamma (identity) 2184.735
+    1                 Gamma (log) 2216.211
+    2             Gamma (inverse) 2484.512
+    6 Inverse gaussian (identity) 2826.289
+    4      Inverse gaussian (log) 2842.118
+    5  Inverse gaussian (inverse) 3163.468
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(invTemp~ block_type + (1|participant_no), data=df, family=Gamma(link="identity"))
@@ -314,6 +365,19 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                 Model      BIC
+    1      basic model 2184.735
+    2 feedback_randint 2191.662
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #choose covariate structure for basic model
@@ -335,6 +399,21 @@ bic_values <- c(
 model_names <- c("no_covariate", "sex_covariate", "digit_span_covariate", "sex_digit_span_covariate")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                         Model      BIC
+    1             no_covariate 2184.735
+    2            sex_covariate 2189.898
+    3     digit_span_covariate 2191.123
+    4 sex_digit_span_covariate 2196.475
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -429,12 +508,12 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01 = {bf_null}")
+print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01 = 3.2051282051282053
+    Disgust vs Points: BF01(339) = 3.2051282051282053
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -451,12 +530,12 @@ print(f"Disgust vs Points: BF01 = {bf_null}")
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01 = 12.5
+    Disgust vs Fear: BF01(339) = 12.5
 
 <p>
 
@@ -470,12 +549,12 @@ model)
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = 1.0137354501695723, CI95% = [-0.05  0.17], p = 0.31143197844956166
+    Points vs Fear: T = 1.0137354501695723, CI95% = [-0.05  0.17], p = 0.31143197844956166, dof = 339
 
 <p>
 
@@ -486,12 +565,12 @@ And because the result is null, also get a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 9.900990099009901
+    Points vs Fear: BF01(339) = 9.900990099009901
 
     U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
       warn("Workbook contains no default style, apply openpyxl's default")
@@ -537,6 +616,21 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       basic_model   randslope  feedback_randint_randslope  \
+    0   609.910345  641.352911                   648.28047   
+
+       feedback_fractals_randint  
+    0                 996.925784  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
@@ -556,7 +650,24 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
 
+</details>
+
+       age_covariate  no_covariate  sex_covariate  sex_age_covariate  \
+    0     609.872747    609.910345     614.979652         615.071884   
+
+       digit_span_covariate  digit_span_age_covariate  sex_digit_span_covariate  \
+    0            615.954885                616.479718                621.296042   
+
+       sex_age_digit_span_covariate  
+    0                    621.828683  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
@@ -565,6 +676,7 @@ print("Winning models: "+ win1 +" "+ win2)
 
     Winning models: basic_model age_covariate
 
+<b>But model assumptions are violated</b>
 <p>
 
 Shapiro-Wilk test of normality of residuals
@@ -644,6 +756,23 @@ model_names <- c("Gamma (log)",
                  "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                            Model      BIC
+    3            Gamma (identity) 2204.229
+    1                 Gamma (log) 2235.922
+    2             Gamma (inverse) 2504.385
+    6 Inverse gaussian (identity) 2846.345
+    4      Inverse gaussian (log) 2861.914
+    5  Inverse gaussian (inverse) 3182.523
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(invTemp~ block_type + valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=df, family=Gamma(link="identity"))
@@ -675,6 +804,19 @@ model_names <- c("basic model",
                 )
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                 Model      BIC
+    1      basic model 2204.229
+    2 feedback_randint 2211.156
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #choose covariates
@@ -698,6 +840,20 @@ model_names <- c("no_covariate",
                 )
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                     Model      BIC
+    1         no_covariate 2204.229
+    2        sex_covariate 2209.244
+    3 digit_span_covariate 2210.425
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -787,6 +943,11 @@ assess whether outliers are driving this effect.
 
 Firstly, exclude outliers from the dataframe (outliers are defined as
 those \>1.5 IQRs above or below the upper or lower quartile)
+<p>
+
+NB this variable is less skewed than some other variables (less than 1),
+so the alternative outlier definition is not required
+</p>
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -889,6 +1050,21 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       basic_model   randslope  feedback_randint_randslope  \
+    0   657.238634  688.510209                  695.418965   
+
+       feedback_fractals_randint  
+    0                1040.526397  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 #test which covariates to add
@@ -910,6 +1086,24 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       no_covariate  age_covariate  sex_covariate  sex_age_covariate  \
+    0    657.238634      657.65469     662.285592         662.803475   
+
+       digit_span_covariate  digit_span_age_covariate  sex_digit_span_covariate  \
+    0              663.7275                664.489514                668.955362   
+
+       sex_age_digit_span_covariate  
+    0                    669.698817  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
@@ -917,6 +1111,11 @@ print("Winning models: "+ win1 +" "+ win2)
 </details>
 
     Winning models: basic_model no_covariate
+
+<p>
+
+But model assumptions were violated
+</p>
 
 <p>
 
@@ -1015,6 +1214,23 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                            Model      BIC
+    3            Gamma (identity) 2052.007
+    1                 Gamma (log) 2095.576
+    2             Gamma (inverse) 2361.162
+    6 Inverse gaussian (identity) 2696.740
+    4      Inverse gaussian (log) 2718.061
+    5  Inverse gaussian (inverse) 3023.800
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(invTemp~ block_type + (1|participant_no), data=df, family=Gamma(link="identity"))
@@ -1039,6 +1255,19 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                 Model      BIC
+    1      basic model 2052.007
+    2 feedback_randint 2058.916
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #choose covariate structure for basic model
@@ -1059,6 +1288,20 @@ bic_values <- c(
 model_names <- c("no_covariate", "sex_covariate", "sex_digit_span_covariate")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                         Model      BIC
+    1             no_covariate 2052.007
+    2            sex_covariate 2057.137
+    3 sex_digit_span_covariate 2063.911
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -1136,12 +1379,12 @@ Compute a Bayesian t-test to compare Disgust and Points conditions
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01 = {bf_null}")
+print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01 = 4.25531914893617
+    Disgust vs Points: BF01(330) = 4.25531914893617
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1149,12 +1392,12 @@ print(f"Disgust vs Points: BF01 = {bf_null}")
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01 = 16.129032258064516
+    Disgust vs Fear: BF01(328) = 16.129032258064516
 
 <p>
 
@@ -1168,12 +1411,12 @@ model)
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = 1.539624312216987, CI95% = [-0.02  0.18], p = 0.12462498805443724
+    Points vs Fear: T = 1.539624312216987, CI95% = [-0.02  0.18], p = 0.12462498805443724, dof = 325
 
 <p>
 
@@ -1184,9 +1427,9 @@ And because the result is null, also get a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 5.0
+    Points vs Fear: BF01(325) = 5.0

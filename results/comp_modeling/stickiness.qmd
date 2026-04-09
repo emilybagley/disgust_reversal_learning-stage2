@@ -44,6 +44,7 @@ import itertools
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
+pd.set_option('display.max_columns', None)
 
 filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1LR_stick1_blk3_allparamsep_params.csv"
 params = pd.read_csv(filepath)
@@ -112,7 +113,7 @@ print('stickiness skew: '+str(skew(df.stickiness)))
 ```
 
 <b>Mixed effects model assumptions violated</b>
-<p>In this case, a basic model (no random slopes or random intercepts) with no covariates produced the best fit (as indexed by BIC scores). But the model assumptions were violated:
+<p>In this case, a basic model (no random slopes or random intercepts) with no covariates produced the best fit (as indexed by BIC scores). 
 
 <p> Select the winning mixed effects model: </p>
 ```{python}
@@ -141,6 +142,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (basic model in this case)
@@ -161,12 +163,13 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 
 ```
 
-
+But the model assumptions were violated:
 <p>Shapiro-Wilk test of normality of residuals</p>
 ```{python}
 #| label: Mixed effects model -shapiro-wilk
@@ -230,6 +233,7 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #now pick random effect structure
@@ -255,7 +259,7 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
-
+print(bic_df[order(bic_df$BIC), ])
 bic_df <- bic_df[order(bic_df$BIC), ]
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
@@ -277,6 +281,7 @@ bic_values <- c(
 model_names <- c("no_covariate", "sex_covariate")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -324,7 +329,7 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 
 ttest, bf_null = bayes_factor(df, 'stickiness', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 ```{python}
@@ -367,6 +372,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                    # 'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (basic model in this case)
@@ -387,6 +393,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 
@@ -458,6 +465,7 @@ model_names <- c("Gamma (log)",
                  "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(stickiness~ block_type + valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=df, family=Gamma(link="identity"))
@@ -489,7 +497,7 @@ model_names <- c("basic model",
                 )
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
-
+print(bic_df[order(bic_df$BIC), ])
 bic_df <- bic_df[order(bic_df$BIC), ]
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
@@ -513,9 +521,89 @@ summary(no_covariate)
 print(confint.merMod(no_covariate, method='Wald'))
 ```
 
+<h3><b>Exploratory analysis: emotion vs not & disgust vs not </b></h3>
+<p>The planned hypothesis testing analyses revealed differences between the three types of learning (fear, disgust and points) in the stickiness parameter.
+To determine whether data was better explained with a model including differences between all three types of learning, differences between emotional and non-emotional learning (digsust/fear vs points), or disgust and non-disgust learning (disgust vs fear/points), we completed an exploratory analysis. 
+
+<p>We compare three competing models:
+<p>
+* The original hypothesis testing model
+* One assessing the presence of a difference between emotional learning (combining the fear and disgust block) and non-emotional learning (the points block)
+* Another assessing the presence of a difference between disgust-based learning and learning which is not about disgust (combining the fear and points blocks)
+<p>We will use a) the presence/absence of significant results and b) the model fit (as indexed by BIC - as before) to guide interpretation of these competing models</p>
+
+```{r}
+#| code-fold: true
+df <- df %>%
+  mutate(
+    disgustOrNot = ifelse(block_type == "Disgust", "Disgust", "Not"),
+    emotionOrNot = ifelse(block_type == "Points", "Not", "Emotion")
+  )
+```
+
+<p>We run all models using the same model specification as the winning model for the planned analysis (to allow a fair model comparison).</p>
+<p>In this case, a generalized mixed effects model with:</p>
+<p>
+* Gamma probability distribution and identity link function
+* no additional random effects or slopes
+* no additional covariates
+</p>
+
+<p>The original hypothesis testing model:</p>
+```{r}
+#| code-fold: true
+basic_model <- glmer(stickiness~ block_type + (1|participant_no), data=df, family=Gamma(link="identity"))
+summary(basic_model)
+```
+
+<p>Disgust or not
+```{r}
+#| label: disgust or not
+#| echo: true
+disgustOrNot <- glmer(stickiness ~ disgustOrNot + (1|participant_no), data=df, family=Gamma(link="log"))
+summary(disgustOrNot)
+```
+
+```{r}
+#| label: disgustOrNot confidence intervals
+#| echo: true
+print(confint.merMod(disgustOrNot, method='Wald'))
+```
+
+<p>Emotion or not</p>
+```{r}
+#| label: emotion or not
+#| echo: true
+emotionOrNot <- glmer(stickiness ~ emotionOrNot + (1|participant_no), data=df, family=Gamma(link="log"))
+summary(emotionOrNot)
+```
+
+```{r}
+#| label: emotionOrNot confidence intervals
+#| echo: true
+print(confint.merMod(emotionOrNot, method='Wald'))
+```
+
+<br>
+<p>Finally, compare BIC values between the three models</p>
+```{r}
+#| label: perseverative error - disgust vs emotion model model comparison
+#re-run the basic model for comparison
+bic_values <- c(
+    BIC(basic_model),
+    BIC(disgustOrNot),
+    BIC(emotionOrNot)
+)
+model_names <- c("Original model", "Disgust or not", "Emotion or not")
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+bic_df <- bic_df[order(bic_df$BIC), ]
+
+print(bic_df[order(bic_df$BIC), ])
+```
+
 <br>
 <h3> <b> Sensitivity analysis </b></h3>
-We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.
+We also ran the planned analyses after outliers had been excluded, to assess whether outliers are driving this effect.
 
 <p>Firstly, exclude outliers from the dataframe (outliers are defined as those >1.5 IQRs above or below the upper or lower quartile)
 
@@ -590,6 +678,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (basic model in this case)
@@ -610,6 +699,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 
@@ -687,6 +777,7 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #now pick random effect structure
@@ -712,6 +803,7 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 no_covariate <- basic_model
@@ -731,6 +823,7 @@ bic_values <- c(
 model_names <- c("no_covariate", "sex_covariate", "sex_digit_span_covariate")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -758,7 +851,6 @@ print(confint.merMod(no_covariate, method='Wald'))
 #| code-fold: true
 ttest, bf_null = bayes_factor(df, 'stickiness', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
-
 

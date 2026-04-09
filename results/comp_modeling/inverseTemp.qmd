@@ -40,10 +40,12 @@ from sklearn.preprocessing import PowerTransformer
 import statannot
 from scipy.stats import ttest_ind
 from scipy.stats import ttest_1samp
+from scipy.stats import pearsonr
 import itertools
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
+pd.set_option('display.max_columns', None)
 
 filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1LR_stick1_blk3_allparamsep_params.csv"
 params = pd.read_csv(filepath)
@@ -119,10 +121,8 @@ print('invTemp skew: '+str(skew(df.invTemp)))
 
 <br>
 
-<b>Mixed effects model assumptions violated</b>
-<p>In this case, a basic model (no random slopes or random intercepts) with an age covariate produced the best fit (as indexed by BIC scores). But the model assumptions were violated:
-
 <p> Select the winning mixed effects model: </p>
+<p>In this case, a basic model (no random slopes or random intercepts) with an age covariate produced the best fit (as indexed by BIC scores).
 
 ```{python}
 #| label: Mixed effects model - model selection
@@ -153,6 +153,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (basic model in this case)
@@ -173,10 +174,12 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
 
+<b>But model assumptions were violated:</b>
 <p>Shapiro-Wilk test of normality of residuals</p>
 ```{python}
 #| label: Mixed effects model -shapiro-wilk
@@ -237,6 +240,7 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(invTemp~ block_type + (1|participant_no), data=df, family=Gamma(link="identity"))
@@ -260,6 +264,7 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #choose covariate structure for basic model
@@ -281,6 +286,7 @@ bic_values <- c(
 model_names <- c("no_covariate", "sex_covariate", "digit_span_covariate", "sex_digit_span_covariate")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -335,7 +341,7 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01 = {bf_null}")
+print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 #print(f"Disgust vs Points: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
 ```
 
@@ -346,7 +352,7 @@ print(f"Disgust vs Points: BF01 = {bf_null}")
 
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 
@@ -357,7 +363,7 @@ print(f"Disgust vs Fear: BF01 = {bf_null}")
 #| code-fold: true
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 <p>And because the result is null, also get a Bayes factor: </p>
@@ -365,7 +371,7 @@ print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {t
 #| label: points vs fear bayes factor
 #| echo: true
 #| code-fold: true
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 ```{python}
@@ -411,6 +417,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
@@ -430,12 +437,12 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
-
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
 
-
+<b>But model assumptions are violated</b>
 <p>Shapiro-Wilk test of normality of residuals</p>
 ```{python}
 #| label: LR mixed effects model shapiro-wilk - w video ratings
@@ -493,6 +500,7 @@ model_names <- c("Gamma (log)",
                  "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(invTemp~ block_type + valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=df, family=Gamma(link="identity"))
@@ -524,6 +532,7 @@ model_names <- c("basic model",
                 )
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #choose covariates
@@ -547,6 +556,7 @@ model_names <- c("no_covariate",
                 )
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -572,6 +582,7 @@ print(confint.merMod(no_covariate, method='Wald'))
 We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.
 
 <p>Firstly, exclude outliers from the dataframe (outliers are defined as those >1.5 IQRs above or below the upper or lower quartile)
+<p>NB this variable is less skewed than some other variables (less than 1), so the alternative outlier definition is not required</p>
 
 ```{python}
 #| label: exclude outliers
@@ -595,7 +606,6 @@ df.to_csv("csvs/sensitivity_winningModelOutput.csv")
 ```
 
 <p>In the case of the inverse temperature outcome, 19 datapoints are excluded </p>
-
 ```{python}
 print("Number of inverse temperature outliers: "+str(len(df[df.invTemp.isna()])))
 ```
@@ -653,6 +663,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 #test which covariates to add
@@ -674,11 +685,13 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 
 ```
 
+<p>But model assumptions were violated</p>
 <p>Shapiro-Wilk test of normality of residuals</p>
 ```{python}
 #| label: Mixed effects model sensitivity-shapiro-wilk
@@ -747,6 +760,7 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(invTemp~ block_type + (1|participant_no), data=df, family=Gamma(link="identity"))
@@ -771,6 +785,7 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #choose covariate structure for basic model
@@ -791,6 +806,7 @@ bic_values <- c(
 model_names <- c("no_covariate", "sex_covariate", "sex_digit_span_covariate")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -818,7 +834,7 @@ print(confint.merMod(no_covariate, method='Wald'))
 
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01 = {bf_null}")
+print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 ```{python}
@@ -828,7 +844,7 @@ print(f"Disgust vs Points: BF01 = {bf_null}")
 
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 
@@ -839,7 +855,7 @@ print(f"Disgust vs Fear: BF01 = {bf_null}")
 #| code-fold: true
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 <p>And because the result is null, also get a Bayes factor: </p>
@@ -847,7 +863,7 @@ print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {t
 #| label: points vs fear bayes factor sensitivity
 #| echo: true
 #| code-fold: true
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 

@@ -45,6 +45,7 @@ import statsmodels.formula.api as smf
 import pingouin as pg
 import warnings
 from scipy.stats import ttest_rel
+from scipy.stats import pearsonr
 #from statannotations.Annotator import Annotator
 from scipy.stats import skew
 from statsmodels.stats.diagnostic import het_white
@@ -56,6 +57,7 @@ import itertools
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
+pd.set_option('display.max_columns', None)
 
 filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1lr_stick1_blk3_allparamsep_params.csv"
 params = pd.read_csv(filepath)
@@ -148,12 +150,10 @@ print('LR skew: '+str(skew(df.LR)))
 
 <br>
 
-<b>Mixed effects model assumptions violated</b>
 <p>
 
 In this case, a basic model (no random slopes or random intercepts) with
-an age covariate produced the best fit (as indexed by BIC scores). But
-the model assumptions were violated:
+an age covariate produced the best fit (as indexed by BIC scores).
 
 <p>
 
@@ -187,6 +187,18 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     #'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       basic_model  randslope  feedback_fractals_randint
+    0  -304.507487  -275.6558                -193.502327
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 #test which covariates to add
@@ -208,6 +220,24 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       age_covariate  no_covariate  digit_span_age_covariate  sex_age_covariate  \
+    0    -308.323479   -304.507487               -301.744826        -301.436138   
+
+       sex_covariate  digit_span_covariate  sex_age_digit_span_covariate  \
+    0     -297.65066           -297.586758                   -294.891743   
+
+       sex_digit_span_covariate  
+    0               -290.736471  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
@@ -215,6 +245,11 @@ print("Winning models: "+ win1 +" "+ win2)
 </details>
 
     Winning models: basic_model age_covariate
+
+<p>
+
+But model assumptions were violated:
+</p>
 
 <p>
 
@@ -296,6 +331,22 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                            Model       BIC
+    1                 Gamma (log) -2845.951
+    2             Gamma (inverse) -2831.902
+    5 Inverse gaussian (identity) -2745.815
+    3      Inverse gaussian (log) -2730.270
+    4  Inverse gaussian (inverse) -2715.945
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(LR~ block_type + (1|participant_no), data=df, family=Gamma(link="log"))
@@ -318,6 +369,21 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                          Model       BIC
+    1               basic model -2845.951
+    3          fractals_randint -2843.825
+    2          feedback_randint -2843.128
+    4 feedback_fractals_randint -2840.426
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 no_covariate <- basic_model
@@ -422,12 +488,12 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ``` python
 ttest, bf_null = bayes_factor(df, 'LR', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01 = {bf_null}")
+print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01 = 2.320185614849188
+    Disgust vs Points: BF01(339) = 2.320185614849188
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -436,12 +502,12 @@ print(f"Disgust vs Points: BF01 = {bf_null}")
 ttest, bf_null = bayes_factor(df, 'LR', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01 = 14.285714285714285
+    Disgust vs Fear: BF01(339) = 14.285714285714285
 
 <p>
 
@@ -455,12 +521,12 @@ model)
 ``` python
 ttest, bf_null = bayes_factor(df, 'LR', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = 1.3090073099974557, CI95% = [-0.    0.01], p = 0.19141848984835413
+    Points vs Fear: T = 1.3090073099974557, CI95% = [-0.    0.01], p = 0.19141848984835413, dof = 339
 
 <p>
 
@@ -471,12 +537,12 @@ And because the result is null, also get a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 7.042253521126761
+    Points vs Fear: BF01(339) = 7.042253521126761
 
     U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
       warn("Workbook contains no default style, apply openpyxl's default")
@@ -522,6 +588,18 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                    # 'feedback_randint_randslope':[feedback_randint_randslope.bic],
                    # 'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       basic_model   randslope
+    0  -285.780691 -256.518886
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
@@ -541,6 +619,24 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       age_covariate  no_covariate  digit_span_age_covariate  sex_age_covariate  \
+    0    -288.831507   -285.780691               -282.106366         -281.95089   
+
+       sex_covariate  digit_span_covariate  sex_age_digit_span_covariate  \
+    0    -278.935812           -278.853578                   -275.253038   
+
+       sex_digit_span_covariate  
+    0                -272.00845  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
@@ -548,6 +644,11 @@ print("Winning models: "+ win1 +" "+ win2)
 </details>
 
     Winning models: basic_model age_covariate
+
+<p>
+
+But model assumptions are violated:
+</p>
 
 <p>
 
@@ -643,6 +744,22 @@ model_names <- c("Gamma (log)",
                  "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                            Model       BIC
+    1                 Gamma (log) -2825.866
+    2             Gamma (inverse) -2811.835
+    5 Inverse gaussian (identity) -2725.687
+    3      Inverse gaussian (log) -2710.213
+    4  Inverse gaussian (inverse) -2695.914
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(LR~ block_type + valence_diff + arousal_diff + valence_habdiff + (1|participant_no), data=df, family=Gamma(link="log"))
@@ -674,6 +791,21 @@ model_names <- c("basic model",
                 )
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                          Model       BIC
+    1               basic model -2825.866
+    3          fractals_randint -2823.821
+    2          feedback_randint -2822.913
+    4 feedback_fractals_randint -2820.279
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 no_covariate <- basic_model
@@ -875,6 +1007,18 @@ bic=pd.DataFrame({#'basic_model': [basic_model.bic],
                     #'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       randslope  feedback_fractals_randint
+    0 -565.62418                -519.020219
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
@@ -894,6 +1038,24 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_digit_span_covariate': [sex_digit_span_covariate.bic],
                     'digit_span_age_covariate': [digit_span_age_covariate.bic],
                     'sex_age_digit_span_covariate': [sex_age_digit_span_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
+```
+
+</details>
+
+       age_covariate  digit_span_age_covariate  sex_age_covariate  no_covariate  \
+    0    -572.941006               -567.020653        -566.246075    -565.62418   
+
+       sex_age_digit_span_covariate  sex_covariate  digit_span_covariate  \
+    0                   -560.451439     -558.95322           -558.888542   
+
+       sex_digit_span_covariate  
+    0               -552.263977  
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 win2=bic.sort_values(by=0, axis=1).columns[0]
 print("Winning models: "+ win1 +" "+ win2)
 ```
@@ -901,6 +1063,11 @@ print("Winning models: "+ win1 +" "+ win2)
 </details>
 
     Winning models: randslope age_covariate
+
+<p>
+
+But assumptions are violated:
+</p>
 
 <p>
 
@@ -999,6 +1166,23 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Gamma (identity)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                            Model       BIC
+    3            Gamma (identity) -3907.892
+    1                 Gamma (log) -3904.719
+    2             Gamma (inverse) -3901.593
+    6 Inverse gaussian (identity) -3894.000
+    4      Inverse gaussian (log) -3890.667
+    5  Inverse gaussian (inverse) -3887.385
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(LR~ block_type + (1|participant_no), data=df, family=Gamma(link="identity"))
@@ -1020,6 +1204,21 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                          Model       BIC
+    3          fractals_randint -3918.952
+    4 feedback_fractals_randint -3912.092
+    1               basic model -3907.892
+    2          feedback_randint -3901.032
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #choose covariates
@@ -1044,6 +1243,19 @@ bic_values <- c(
 model_names <- c("no_covariate", "sex_covariate")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+              Model       BIC
+    1  no_covariate -3918.952
+    2 sex_covariate -3912.116
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -1126,12 +1338,12 @@ assessed by the original model)
 ``` python
 ttest, bf_null = bayes_factor(df, 'LR', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = -0.5458273429917914, CI95% = [-0.01  0.  ], p = 0.5855943565442677
+    Points vs Fear: T = -0.5458273429917914, CI95% = [-0.01  0.  ], p = 0.5855943565442677, dof = 297
 
 <p>
 
@@ -1142,12 +1354,12 @@ And because the result is null, also get a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 13.333333333333334
+    Points vs Fear: BF01(297) = 13.333333333333334
 
     U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
       warn("Workbook contains no default style, apply openpyxl's default")
@@ -1566,6 +1778,22 @@ the values that are outliers on the percentage correct outcome (have
 unusually low accuracy).
 </p>
 
+<p>
+
+This accuracy outcome correlates with the learning rate parameter:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+print(pearsonr(df.percentage_correct, df.LR))
+```
+
+</details>
+
+    PearsonRResult(statistic=np.float64(0.31096994426488206), pvalue=np.float64(2.625909308006798e-24))
+
 <br>
 <p>
 
@@ -1612,6 +1840,22 @@ bic_values <- c(
 model_names <- c("Gamma (log)", "Gamma (inverse)", "Inverse gaussian (log)", "Inverse gaussian (inverse)", "Inverse gaussian (identity)")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                            Model       BIC
+    1                 Gamma (log) -2826.100
+    2             Gamma (inverse) -2812.126
+    5 Inverse gaussian (identity) -2726.962
+    3      Inverse gaussian (log) -2711.381
+    4  Inverse gaussian (inverse) -2697.103
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win1 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 basic_model <- glmer(LR~ block_type + (1|participant_no), data=explore_df, family=Gamma(link="log"))
@@ -1633,6 +1877,21 @@ bic_values <- c(
 model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+                          Model       BIC
+    1               basic model -2826.100
+    3          fractals_randint -2823.902
+    2          feedback_randint -2822.813
+    4 feedback_fractals_randint -2820.093
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 #choose covariates
@@ -1652,6 +1911,19 @@ bic_values <- c(
 model_names <- c("no_covariate", "sex_covariate")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+              Model       BIC
+    1  no_covariate -2826.100
+    2 sex_covariate -2819.215
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
 win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
@@ -1734,12 +2006,12 @@ explore_df = task_summary[task_summary.percentage_correct > lower_bound]
 ttest, bf_null = bayes_factor(explore_df, 'LR', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01 = {bf_null}")
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01 = 14.285714285714285
+    Disgust vs Fear: BF01(334) = 14.285714285714285
 
 <p>
 
@@ -1753,12 +2025,12 @@ model)
 ``` python
 ttest, bf_null = bayes_factor(explore_df, 'LR', 'Points', 'Fear')
 
-print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
 ```
 
 </details>
 
-    Points vs Fear: T = 1.4763257609457563, CI95% = [-0.    0.01], p = 0.14079862102944335
+    Points vs Fear: T = 1.4763257609457563, CI95% = [-0.    0.01], p = 0.14079862102944335, dof = 334
 
 <p>
 
@@ -1769,12 +2041,12 @@ And because the result is null, also get a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01 = {bf_null}")
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01 = 5.555555555555555
+    Points vs Fear: BF01(334) = 5.555555555555555
 
     U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
       warn("Workbook contains no default style, apply openpyxl's default")
@@ -1950,7 +2222,7 @@ model_names <- c("Original model", "Disgust or not", "Emotion or not")
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
 bic_df <- bic_df[order(bic_df$BIC), ]
 
-print(bic_df)
+print(bic_df[order(bic_df$BIC), ])
 ```
 
                Model       BIC
