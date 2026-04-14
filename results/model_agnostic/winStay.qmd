@@ -549,6 +549,8 @@ print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```{python}
 #| code-fold: true
 print(pearsonr(task_summary.win_stay, task_summary.percentage_correct))
+
+print("dof = "+str(len(set(task_summary.participant_no))-2))
 ```
 
 <h3> We also include the original outlier-free analysis for completeness </h3>

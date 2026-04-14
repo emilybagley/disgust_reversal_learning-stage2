@@ -980,6 +980,17 @@ print(pearsonr(task_summary.mean_perseverative_er, task_summary.percentage_corre
 
     PearsonRResult(statistic=np.float64(-0.5055950895424014), pvalue=np.float64(2.7197363565685622e-67))
 
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+print("dof = "+str(len(set(task_summary.participant_no))-2))
+```
+
+</details>
+
+    dof = 338
+
 <p>
 
 And now run a mixed effects model to assess whether it differs by
@@ -1160,6 +1171,75 @@ print(confint.merMod(generalized_model, method='Wald'))
     (Intercept)       0.646105782 0.67023937
     block_typeFear   -0.005966842 0.01645941
     block_typePoints -0.009430144 0.02963858
+
+<p>
+
+Because of the null result, we compute bayes factors for the strength of
+that null:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Disgust', 'Fear')
+#print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
+
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+```
+
+</details>
+
+    Disgust vs Fear: BF01(339) = 10.989010989010989
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Disgust', 'Points')
+#print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
+
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+```
+
+</details>
+
+    Disgust vs Fear: BF01(339) = 3.546099290780142
+
+<p>
+
+We also look at fear vs points (which is not directly assessed by the
+model)
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Points', 'Fear')
+
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
+```
+
+</details>
+
+    Points vs Fear: T = 0.8739173373388256, CI95% = [-0.    0.01], p = 0.38278193105844427, dof = 339
+
+<p>
+
+And because the result is null, also get a Bayes factor:
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+```
+
+</details>
+
+    Points vs Fear: BF01(339) = 11.235955056179776
 
     U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
       warn("Workbook contains no default style, apply openpyxl's default")

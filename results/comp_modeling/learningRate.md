@@ -896,15 +896,12 @@ assess whether outliers are driving this effect.
 
 <p>
 
-This variable is skewed, so the alternative outlier definition is used -
-but we also include the pre-registered definition for completeness:
+This variable is skewed, so the alternative outlier definition is used
+(see below)- but we also include the pre-registered definition for
+completeness:
 </p>
 
 <b>Original/pre-registered outlier definition</b>
-<p>
-
-Firstly, exclude outliers from the dataframe (outliers are define as
-those \>1.5 IQRs above or below the upper or lower quartile)
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -941,7 +938,7 @@ print("Number of LR outliers: "+str(len(df[df.LR.isna()])))
 
 <p>
 
-Assess and correct for skewness
+Assess and correct for skewness in outlier excluded dataset
 </p>
 
 <details class="code-fold">
@@ -970,17 +967,16 @@ print('LR skew: '+str(skew(df.LR.dropna())))
 
 <br>
 
-<b>Mixed effects model assumptions violated</b>
+<p>
+
+Select the winning mixed effects model:
+</p>
+
 <p>
 
 In this case, a model with a random by-participant slope and an age
 covariate produced the best fit (as indexed by BIC scores). But the
 model assumptions were violated:
-
-<p>
-
-Select the winning mixed effects model:
-</p>
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1793,6 +1789,17 @@ print(pearsonr(df.percentage_correct, df.LR))
 </details>
 
     PearsonRResult(statistic=np.float64(0.31096994426488206), pvalue=np.float64(2.625909308006798e-24))
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+print("dof = "+str(len(set(df.participant_no))-2))
+```
+
+</details>
+
+    dof = 338
 
 <br>
 <p>

@@ -98,10 +98,14 @@ library(cowplot)
 library(grid)
 ```
 
+
+
 <p>This file contains the code for the graphs included in the paper (and the supplement) regarding computational modeling</p>
 <p>NB correct spacing is seen in saved out files NOT figures in the markdown</p>
 
 <h3>Model comparison</h3>
+
+
 
 ```{r}
 #| label: WAIC model comparison plot
@@ -265,9 +269,9 @@ plot <- plot +
   ) +
   geom_text(
     data = df[df$winner, ],
-    aes(x = model, y = y_arrow - 300, label = "Winning model"),
+    aes(x = model, y = y_arrow - 300, label = "Winning model (best convergence metrics)"),
     inherit.aes = FALSE,
-    size = 5
+    size = 5,
     #fontface = "bold"
   )
 
@@ -306,7 +310,11 @@ legend('bottomleft',
 dev.off()
 ```
 
+
+
 <h3>Parameter recovery</h3>
+
+
 
 ```{r}
 #| label: paramater recovery
@@ -472,7 +480,6 @@ ggsave("paramRecovCorr_plot.png", final_plot, width = 12, height = 5, dpi = 300,
 final_plot
 ```
 
-
 ```{r}
 #| label: param recov legend 
 #| echo: true
@@ -496,7 +503,11 @@ legend('topleft',
 dev.off()
 ```
 
+
+
 <h3>Posterior predictive checks</h3>
+
+
 ```{r}
 #| label: PPC
 #| echo: true
@@ -581,7 +592,11 @@ final_plot
 ```
 
 
+
+
 <h3>Model params </h3>
+
+
 
 ```{python}
 #| code-fold: true
@@ -686,3 +701,4 @@ for ax in axes:
 plt.savefig('ModelParams_hypothesisTesting.jpeg', dpi=300, bbox_inches='tight')
 
 ```
+

@@ -955,6 +955,17 @@ print(pearsonr(task_summary.mean_regressive_er, task_summary.percentage_correct)
 
     PearsonRResult(statistic=np.float64(-0.6113952688804564), pvalue=np.float64(1.368997100425574e-105))
 
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+print("dof = "+str(len(set(task_summary.participant_no))-2))
+```
+
+</details>
+
+    dof = 338
+
 <p>
 
 Exclude outliers according to this definition

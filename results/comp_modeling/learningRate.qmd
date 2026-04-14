@@ -1182,6 +1182,8 @@ print(f"Chi2: {chi2}; p-val: {p}")
 ```{python}
 #| code-fold: true
 print(pearsonr(df.percentage_correct, df.LR))
+
+print("dof = "+str(len(set(df.participant_no))-2))
 ```
 
 

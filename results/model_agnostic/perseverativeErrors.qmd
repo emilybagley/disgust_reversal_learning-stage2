@@ -556,6 +556,8 @@ print('Percentage correct skew: '+str(skew(task_summary.percentage_correct)))
 ```{python}
 #| code-fold: true
 print(pearsonr(task_summary.mean_perseverative_er, task_summary.percentage_correct))
+
+print("dof = "+str(len(set(task_summary.participant_no))-2))
 ```
 
 <p>And now run a mixed effects model to assess whether it differs by block-type</p>
@@ -642,6 +644,42 @@ summary(generalized_model)
 #| label: confidence intervals - percentage correct
 #| echo: true
 print(confint.merMod(generalized_model, method='Wald'))
+```
+
+<p>Because of the null result, we compute bayes factors for the strength of that null: </p>
+```{python}
+#| echo: true
+#| code-fold: true
+ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Disgust', 'Fear')
+#print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
+
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+```
+
+```{python}
+#| echo: true
+#| code-fold: true
+ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Disgust', 'Points')
+#print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
+
+print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+```
+
+
+<p>We also look at fear vs points (which is not directly assessed by the model)</p>
+```{python}
+#| echo: true
+#| code-fold: true
+ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Points', 'Fear')
+
+print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}, dof = {ttest['dof'].iloc[0]}")
+```
+
+<p>And because the result is null, also get a Bayes factor: </p>
+```{python}
+#| echo: true
+#| code-fold: true
+print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ```
 
 

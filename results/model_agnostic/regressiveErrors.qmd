@@ -557,6 +557,8 @@ We also ran the same analyses after outliers had been excluded, to assess whethe
 ```{python}
 #| code-fold: true
 print(pearsonr(task_summary.mean_regressive_er, task_summary.percentage_correct))
+
+print("dof = "+str(len(set(task_summary.participant_no))-2))
 ```
 
 

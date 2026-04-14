@@ -121,6 +121,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'vid_randint': [vid_randint.bic], 
                     'randslope': [randslope.bic],
                     'vid_randint_randslope':[vid_randint_randslope.bic]})
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above
@@ -133,6 +134,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -180,6 +182,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                    # 'randslope': ['CONVERGENCE WARNING'],
                    # 'vid_randint_randslope':['CONVERGENCE WARNING']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (basic model)
@@ -192,6 +195,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -240,6 +244,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'vid_randint': [vid_randint.bic], 
                     'randslope': [randslope.bic],
                     'vid_randint_randslope':[vid_randint_randslope.bic]})
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (vid_rantint)
@@ -252,6 +257,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -300,6 +306,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'vid_randint': [vid_randint.bic], 
                     'randslope': [randslope.bic],
                     'vid_randint_randslope':[vid_randint_randslope.bic]})
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 ##test which covariates to add -- Using the random effects which were best above (rand slope)
@@ -312,6 +319,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -379,6 +387,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                    # 'randslope': ['CONVERENCE WARNING'],
                     #'vid_randint_randslope':['CONVERGENCE WARNING']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 #test covariates
@@ -391,6 +400,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -458,6 +468,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     ##'randslope': ['CONVERGENCE WARNING'],
                     #'vid_randint_randslope':['CONVERGENCE WARNING']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 #test covariates
@@ -470,6 +481,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -517,6 +529,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                    # 'randslope': ['CONVERGENCE WARNING'],
                     #'vid_randint_randslope':['CONVERGENCE WARNING']
                     })
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
@@ -528,6 +541,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -589,6 +603,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     #'vid_randint': ['CONVERGENCE WARNING'], 
                     'randslope': [randslope.bic],
                     'vid_randint_randslope':[vid_randint_randslope.bic]})
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 #test covariates
@@ -601,6 +616,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -724,6 +740,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'vid_randint': [vid_randint.bic], 
                     'randslope': [randslope.bic],
                     'vid_randint_randslope':[vid_randint_randslope.bic]})
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'Vid': '0+Vid'}, re_formula='~trial_type').fit(reml=False)
@@ -735,6 +752,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)
@@ -778,6 +796,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'vid_randint': [vid_randint.bic], 
                     'randslope': [randslope.bic],
                     'vid_randint_randslope':[vid_randint_randslope.bic]})
+print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 
 no_covariate=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'Vid': '0+Vid'}, re_formula='~trial_type').fit(reml=False)
@@ -789,6 +808,7 @@ bic=pd.DataFrame({'no_covariate': [no_covariate.bic],
                     'sex_covariate': [sex_covariate.bic], 
                     'age_covariate': [age_covariate.bic],
                     'sex_age_covariate': [sex_age_covariate.bic]})
+print(bic.sort_values(by=0, axis=1))
 win2=bic.sort_values(by=0, axis=1).columns[0]
 
 print("Winning models: "+ win1 +" "+ win2)

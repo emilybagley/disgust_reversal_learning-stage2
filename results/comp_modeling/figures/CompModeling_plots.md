@@ -113,6 +113,8 @@ df <- data.frame(
     )
 )
 df <- df[order(df$waic), ] 
+df$winner <- FALSE
+df$winner[2] <- TRUE #the winning model has the second lowest BIC score
 df$model <- factor(df$model, levels = df$model[order(df$waic)])
 df <- df[!grepl("hybrid", df$model, ignore.case = TRUE), ]
 
@@ -137,7 +139,6 @@ custom_labels <- c("seperate parameters",
 plot <- ggplot(df, aes(x = model, y = waic, color= model, shape = model)) +
   geom_point(size =4) +
   geom_errorbar(aes(ymin = waic - se, ymax = waic + se), width = 0.5, size =1) +
-
   #coord_flip()+
   labs(y = "WAIC", x="") +
   scale_color_manual(values=c("#9B0F47", "#9B0F47",  
@@ -182,6 +183,29 @@ plot <- ggplot(df, aes(x = model, y = waic, color= model, shape = model)) +
     geom_segment(aes(x = 7, xend = 7, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
     geom_segment(aes(x = 12, xend = 12, y = brack_x + 500, yend = brack_x + 300), inherit.aes = FALSE) +
     annotate("text", x = 9.5, y = brack_x + 1000, label = "No Stickiness", size=5)
+
+
+#highlight best model
+y_arrow <- min(df$waic - df$se) - 2000
+plot <- plot +
+  expand_limits(x =-1, y = y_arrow - 500)
+plot <- plot +
+  geom_segment(
+    data = df[df$winner, ],
+    aes(x = model, xend = model,
+        y = y_arrow, yend = waic - se - 200),
+    inherit.aes = FALSE,
+    arrow = arrow(length = unit(0.3, "cm")),
+    color = "black",
+    linewidth = 1
+  ) +
+  geom_text(
+    data = df[df$winner, ],
+    aes(x = model, y = y_arrow - 300, label = "Selected model"),
+    inherit.aes = FALSE,
+    size = 5,
+    fontface = "bold"
+  )
 
 ggsave("ModelComp_plot.png", plot, width = 6, height = 4, dpi = 300, bg='white', units='in')
 plot

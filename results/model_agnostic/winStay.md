@@ -898,11 +898,14 @@ measure (which it does).
 
 ``` python
 print(pearsonr(task_summary.win_stay, task_summary.percentage_correct))
+
+print("dof = "+str(len(set(task_summary.participant_no))-2))
 ```
 
 </details>
 
     PearsonRResult(statistic=np.float64(0.7312081252801357), pvalue=np.float64(2.6677586602745028e-171))
+    dof = 338
 
 <h3>
 
