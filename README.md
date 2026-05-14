@@ -4,6 +4,8 @@
 <p> Contains all scripts for all analyses detailed in the stage 2 registered report. 
 <p> (NB therefore, there is some duplication with the stage 1 report)
 
+Note, data is not shared in this repo but can be found on the corresponding OSF page: https://osf.io/f5rmt/files/osfstorage
+
 <br>
 <h3>Csvs folder:</h3>
 <p> Contains the csvs created in the data-cleaning scripts 
