@@ -145,12 +145,14 @@ feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 #feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False) CONVERGENCE WARNING
+#fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) CONVERGENCE WARNING
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                     'feedback_fractals_randint': [feedback_fractals_randint.bic], 
-                    'randslope': [randslope.bic]})
+                    'randslope': [randslope.bic]
+                    })
 print(bic.sort_values(by=0, axis=1))
 ```
 
@@ -350,6 +352,10 @@ basic_model <- glmer(pos_perseverative_er ~ block_type + (1|participant_no), dat
 feedback_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="inverse"))
 fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|fractals), data=task_summary, family=Gamma(link="inverse"))
 feedback_fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|participant_no) + (1|fractals) + (1|feedback_details), data=task_summary, family=Gamma(link="inverse"))
+
+randslope <-  glmer(pos_perseverative_er ~ block_type + (block_type|participant_no), data=task_summary, family=Gamma(link="inverse"))
+fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|fractals), data=task_summary, family=Gamma(link="inverse"))
+feedback_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="inverse"))
 feedback_fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=task_summary, family=Gamma(link="inverse"))
 
 bic_values <- c(
@@ -357,9 +363,12 @@ bic_values <- c(
   BIC(feedback_randint),
   BIC(fractals_randint),
   BIC(feedback_fractals_randint),
+  BIC(randslope),
+  BIC(fractals_randint_randslope),
+  BIC(feedback_randint_randslope),
   BIC(feedback_fractals_randint_randslope)
 )
-model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint", "feedback_fractals_randint_randslope")
+model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint", "randslope", "fractals_randint_randslope","feedback_randint_randslope", "feedback_fractals_randint_randslope")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
 print(bic_df[order(bic_df$BIC), ])
@@ -372,7 +381,10 @@ print(bic_df[order(bic_df$BIC), ])
     3                    fractals_randint 1618.877
     2                    feedback_randint 1618.877
     4           feedback_fractals_randint 1625.805
-    5 feedback_fractals_randint_randslope 1660.220
+    5                           randslope 1646.365
+    6          fractals_randint_randslope 1653.293
+    7          feedback_randint_randslope 1653.295
+    8 feedback_fractals_randint_randslope 1660.220
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -590,6 +602,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
         
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 #feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False) CONVERGENCE WARNING
+#fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) CONVERGENCE WARNING
         
 
@@ -599,6 +612,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                   #  'feedback_fractals_randint': ['CONVERGENCE WARNING'],
                     'randslope': [randslope.bic],
                   #  'feedback_randint_randslope':['CONVERGENCE WARNING'],
+                   # 'fractals_randint_randslope': [fractals_randint_randslope.bic]
                    # 'feedback_fractals_randint_randslope': ['CONVERGENCE WARNING']
                    })
 print(bic.sort_values(by=0, axis=1))
@@ -778,14 +792,16 @@ fractals_randint <- glmer(pos_perseverative_er ~ block_type + valence_diff + aro
 
 #randslope <- glmer(pos_perseverative_er ~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type|participant_no), data=task_summary, family=Gamma(link="inverse"))
 feedback_randint_randslope <- glmer(pos_perseverative_er ~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="inverse"))
+fractal_randint_randslope <- glmer(pos_perseverative_er ~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type|participant_no) + (1|fractals), data=task_summary, family=Gamma(link="inverse"))
 #feedback_fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=task_summary, family=Gamma(link="inverse"))
 
 bic_values <- c(
   BIC(basic_model),
   BIC(fractals_randint),
+  BIC(fractals_randint_randslope),
   BIC(feedback_randint_randslope)
 )
-model_names <- c("basic model", "fractals_randint", "feedback_randint_randslope")
+model_names <- c("basic model", "fractals_randint", "fractals_randint_randslope", "feedback_randint_randslope")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
 print(bic_df[order(bic_df$BIC), ])
@@ -796,7 +812,8 @@ print(bic_df[order(bic_df$BIC), ])
                            Model      BIC
     1                basic model 1630.528
     2           fractals_randint 1637.456
-    3 feedback_randint_randslope 1671.711
+    3 fractals_randint_randslope 1653.293
+    4 feedback_randint_randslope 1671.711
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1011,7 +1028,7 @@ The winning model (as indexed by BIC) had:
 - a gamma probability function
 - an identity link function
 - no covariates
-- random intercepts for feedback videos
+- random intercepts for fractals
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1063,18 +1080,23 @@ feedback_randint <- glmer(percentage_correct ~ block_type +(1|participant_no) + 
 fractals_randint <- glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals), data=task_summary, family=Gamma(link="identity"))
 feedback_fractals_randint <- glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals) + (1|feedback_details), data=task_summary, family=Gamma(link="identity"))
 
-#randslope <- glmer(percentage_correct ~ block_type +(block_type + valence_diff + arousal_diff + valence_habdiff|participant_no), data=task_summary, family=Gamma(link="identity"))
-#feedback_randint_randslope <- glmer(percentage_correct ~ block_type +(block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="identity"))
-#feedback_fractals_randint_randslope <- glmer(percentage_correct ~ block_type +(block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|feedback_details) + (1|fractals), data=task_summary, family=Gamma(link="identity"))
+#randslope <- glmer(percentage_correct ~ block_type +(block_type|participant_no), data=task_summary, family=Gamma(link="identity"))
+feedback_randint_randslope <- glmer(percentage_correct ~ block_type +(block_type|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="identity"))
+#fractals_randint_randslope <- glmer(percentage_correct ~ block_type +(block_type|participant_no) + (1|fractals), data=task_summary, family=Gamma(link="identity")) #variance-covariance not positive defnite or contains nan values
+#feedback_fractals_randint_randslope <- glmer(percentage_correct ~ block_type +(block_type|participant_no) + (1|feedback_details) + (1|fractals), data=task_summary, family=Gamma(link="identity")) #variance-covariance not positive defnite or contains nan values
 
 bic_values <- c(
   BIC(basic_model),
   BIC(feedback_randint),
   BIC(fractals_randint),
   BIC(feedback_fractals_randint)
+  #BIC(randslope),
+  #BIC(feedback_randint_randslope),
+  #BIC(fractals_randint_randslope),
+  #BIC(feedback_fractals_randint_randslope)
 )
 
-model_names <- c("basic model", "fractals_randint", "feedback_randint", "feedback_fractals_randint")
+model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint")
 
 bic_df <- data.frame(Model = model_names, BIC = bic_values)
 print(bic_df[order(bic_df$BIC), ])
@@ -1083,10 +1105,10 @@ print(bic_df[order(bic_df$BIC), ])
 </details>
 
                           Model       BIC
-    3          feedback_randint -2591.183
+    3          fractals_randint -2591.183
     1               basic model -2589.873
     4 feedback_fractals_randint -2584.289
-    2          fractals_randint -2582.968
+    2          feedback_randint -2582.968
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1094,16 +1116,53 @@ print(bic_df[order(bic_df$BIC), ])
 ``` r
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
-no_covariate <- feedback_randint
+no_covariate <- fractals_randint
+#age_covariate <-  glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals) + prolific_age, data=task_summary, family=Gamma(link="identity"))
+sex_covariate <-  glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals) + prolific_sex, data=task_summary, family=Gamma(link="identity"))
+#digit_span_covariate <-  glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals) + digit_span, data=task_summary, family=Gamma(link="identity"))
+
+#sex_age_covariate <-  glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals) + prolific_sex + prolific_age, data=task_summary, family=Gamma(link="identity"))
+#sex_digit_span_covariate <-  glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals) + prolific_sex + digit_span, data=task_summary, family=Gamma(link="identity"))
+#digit_span_age_covariate <-  glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals) + digit_span + prolific_age, data=task_summary, family=Gamma(link="identity"))
+#sex_digit_span_age_covariate <-  glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals) + prolific_age + prolific_sex + digit_span, data=task_summary, family=Gamma(link="identity"))
+
+bic_values <- c(
+  BIC(no_covariate),
+  #BIC(age_covariate),
+  BIC(sex_covariate)
+ # BIC(digit_span_covariate),
+  #BIC(sex_age_covariate),
+ #BIC(sex_digit_span_covariate),
+  #BIC(digit_span_age_covariate),
+ # BIC(sex_digit_span_age_covariate)
+)
+model_names <- c("no_covariate", "sex_covariate")
+
+bic_df <- data.frame(Model = model_names, BIC = bic_values)
+print(bic_df[order(bic_df$BIC), ])
+```
+
+</details>
+
+              Model       BIC
+    1  no_covariate -2591.183
+    2 sex_covariate -2584.261
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` r
+win3 <- bic_df[which.min(bic_df$BIC), ]$Model
+
 ##all other models not converge
-win3 <- 'no_covariate'
+#win3 <- 'no_covariate'
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
 ```
 
 </details>
 
-    [1] "Winning models: Gamma (identity) feedback_randint no_covariate"
+    [1] "Winning models: Gamma (identity) fractals_randint no_covariate"
 
 <p>
 
@@ -1115,7 +1174,7 @@ Now we run the hypothesis test:
 
 ``` r
 data<-task_summary
-generalized_model <- glmer(percentage_correct ~ block_type +(1|participant_no) + (1|feedback_details), data=data, family=Gamma(link="identity"))
+generalized_model <- glmer(percentage_correct ~ block_type +(1|participant_no) + (1|fractals), data=task_summary, family=Gamma(link="identity"))
 summary(generalized_model)
 ```
 
@@ -1125,35 +1184,35 @@ summary(generalized_model)
       Approximation) [glmerMod]
      Family: Gamma  ( identity )
     Formula: percentage_correct ~ block_type + (1 | participant_no) + (1 |  
-        feedback_details)
-       Data: data
+        fractals)
+       Data: task_summary
 
          AIC      BIC   logLik deviance df.resid 
-     -2612.5  -2583.0   1312.3  -2624.5     1014 
+     -2620.7  -2591.2   1316.4  -2632.7     1014 
 
     Scaled residuals: 
         Min      1Q  Median      3Q     Max 
-    -3.2556 -0.5020  0.0390  0.5401  2.7870 
+    -3.2091 -0.5097  0.0359  0.5419  2.7921 
 
     Random effects:
-     Groups           Name        Variance  Std.Dev.
-     participant_no   (Intercept) 2.580e-03 0.050795
-     feedback_details (Intercept) 9.027e-06 0.003005
-     Residual                     9.488e-03 0.097408
-    Number of obs: 1020, groups:  participant_no, 340; feedback_details, 11
+     Groups         Name        Variance  Std.Dev.
+     participant_no (Intercept) 2.595e-03 0.050938
+     fractals       (Intercept) 8.935e-05 0.009452
+     Residual                   9.365e-03 0.096770
+    Number of obs: 1020, groups:  participant_no, 340; fractals, 28
 
     Fixed effects:
                      Estimate Std. Error t value Pr(>|z|)    
-    (Intercept)      0.658173   0.006157 106.905   <2e-16 ***
-    block_typeFear   0.005246   0.005721   0.917    0.359    
-    block_typePoints 0.010104   0.009967   1.014    0.311    
+    (Intercept)      0.659491   0.006931  95.148   <2e-16 ***
+    block_typeFear   0.005012   0.004269   1.174   0.2404    
+    block_typePoints 0.009113   0.004268   2.135   0.0328 *  
     ---
     Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
     Correlation of Fixed Effects:
                 (Intr) blck_F
-    block_typFr -0.316       
-    blck_typPnt -0.077  0.591
+    block_typFr -0.301       
+    blck_typPnt -0.299  0.496
 
 <p>
 
@@ -1164,18 +1223,25 @@ Extract confidence intervals
 print(confint.merMod(generalized_model, method='Wald'))
 ```
 
-                            2.5 %     97.5 %
-    .sig01                     NA         NA
-    .sig02                     NA         NA
-    .sigma                     NA         NA
-    (Intercept)       0.646105782 0.67023937
-    block_typeFear   -0.005966842 0.01645941
-    block_typePoints -0.009430144 0.02963858
+                             2.5 %     97.5 %
+    .sig01                      NA         NA
+    .sig02                      NA         NA
+    .sigma                      NA         NA
+    (Intercept)       0.6459056077 0.67307548
+    block_typeFear   -0.0033549230 0.01337928
+    block_typePoints  0.0007472511 0.01747908
 
 <p>
 
-Because of the null result, we compute bayes factors for the strength of
-that null:
+This reveals that the difference in perseverative errors between points
+and disgust conditions results in a difference in accuracy between the
+two conditions.
+</p>
+
+<p>
+
+Because of the null fear vs disgust result, we compute bayes factors for
+the strength of that null:
 </p>
 
 <details class="code-fold">
@@ -1191,20 +1257,6 @@ print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 </details>
 
     Disgust vs Fear: BF01(339) = 10.989010989010989
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Disgust', 'Points')
-#print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
-
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
-```
-
-</details>
-
-    Disgust vs Fear: BF01(339) = 3.546099290780142
 
 <p>
 
@@ -1535,11 +1587,13 @@ feedback_fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|partic
 
 #randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no), data=explore_df, family=Gamma(link="inverse"))
 #feedback_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details), data=explore_df, family=Gamma(link="inverse"))
+#fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|fractals), data=explore_df, family=Gamma(link="inverse"))
 #feedback_fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=explore_df, family=Gamma(link="inverse"))
 
 bic_values <- c(
   BIC(basic_model),
-  BIC(feedback_fractals_randint)
+  #BIC(feedback_fractals_randint),
+  BIC(fractals_randint_randslope)
 )
 model_names <- c("basic model", "feedback_fractals_randint")
 
@@ -1553,7 +1607,7 @@ print(bic_df[order(bic_df$BIC), ])
 
                           Model      BIC
     1               basic model 1553.470
-    2 feedback_fractals_randint 1567.307
+    2 feedback_fractals_randint 1653.293
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1797,6 +1851,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 #feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+#fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
@@ -1805,6 +1860,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                    # 'fractals_randint': ['CONVERGENCE WARNING'],
                    # 'feedback_fractals_randint': ['NOT CONVERGE'], #
                     'randslope': [randslope.bic],
+                    #'fractals_randint_randslope': [fractals_randint_randslope.bic]
                    # 'feedback_randint_randslope':['CONVERGENCE WARNING'],
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                    })
@@ -2007,6 +2063,7 @@ feedback_fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|partic
 
 #randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no), data=task_summary, family=Gamma(link="inverse"))
 #feedback_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="inverse"))
+#fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="inverse"))
 #feedback_fractals_randint_randslope <- glmer(pos_perseverative_er ~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=task_summary, family=Gamma(link="inverse"))
 
 bic_values <- c(
@@ -2014,6 +2071,7 @@ bic_values <- c(
   BIC(feedback_randint),
   BIC(fractals_randint),
   BIC(feedback_fractals_randint)
+ # BIC(fractals_randint_randslope)
 )
 model_names <- c("basic model", "feedback_randint", "fractals_randint", "feedback_fractals_randint")
 

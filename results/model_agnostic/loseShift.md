@@ -136,6 +136,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 #randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 #feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+#fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
@@ -145,6 +146,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                   #  'feedback_fractals_randint': ['CONVERGENCE WARNING'], 
                   #  'randslope': ['CONVERGENCE WARNING'],
                   #  'feedback_randint_randslope':['CONVERGENCE WARNING'],
+                 # 'fractals_randint_randslope': [fractals_randint_randslope.bic],
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGED']
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -407,22 +409,6 @@ print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {t
 
     Points vs Fear: T = 2.344453221275527, CI95% = [0.   0.03], p = 0.019631690375740526, dof = 339
 
-<p>
-
-Although the Bayes factor is a bit ambiguous
-</p>
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
-```
-
-</details>
-
-    Points vs Fear: BF01(339) = 1.1013215859030836
-
 <br>
 <p>
 
@@ -453,6 +439,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 #randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 #feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
@@ -462,6 +449,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                    # 'feedback_fractals_randint': ['CONVERGENCE WARNING'], 
                    # 'randslope': ['CONVERGENCE WARNING'],
                   #  'feedback_randint_randslope':['CONVERGENCE WARNING'],
+                  'fractals_randint_randslope': [fractals_randint_randslope.bic]
                   #  'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -469,8 +457,8 @@ print(bic.sort_values(by=0, axis=1))
 
 </details>
 
-       basic_model
-    0  -1269.68479
+       basic_model  fractals_randint_randslope
+    0  -1269.68479                -1232.785878
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -646,11 +634,13 @@ fractals_randint <- glmer(lose_shift ~ block_type + valence_diff + arousal_diff 
 
 #randslope <- glmer(lose_shift ~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no), data=task_summary, family=Gamma(link="identity"))
 #feedback_randint_randslope <- glmer(lose_shift ~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|feedback_details), data=task_summary, family=Gamma(link="identity"))
+#fractals_randint_randslope <- glmer(lose_shift ~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|fractals), data=task_summary, family=Gamma(link="identity"))
 #feedback_fractals_randint_randslope <- glmer(lose_shift ~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|feedback_details) + (1|fractals), data=task_summary, family=Gamma(link="identity"))
 
 bic_values <- c(
   BIC(basic_model),
   BIC(fractals_randint)
+  #BIC(fractals_randint_randslope)
 )
 model_names <- c("basic model", "fractals_randint")
 
@@ -671,6 +661,7 @@ print(bic_df[order(bic_df$BIC), ])
 win2 <- bic_df[which.min(bic_df$BIC), ]$Model
 
 no_covariate <- basic_model
+#no other models converged
 win3 <- 'no_covariate'
 
 print(paste0("Winning models: ", win1, " ", win2," ",win3))

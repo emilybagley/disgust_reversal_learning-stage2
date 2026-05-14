@@ -163,15 +163,17 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                     #'feedback_randint': [feedback_randint.bic], 
                     #'fractals_randint': [fractals_randint.bic],
-                    #'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
+                    #'feedback_fractals_randint': [feedback_fractals_randint.bic], 
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -179,8 +181,11 @@ print(bic.sort_values(by=0, axis=1))
 
 </details>
 
-       basic_model   randslope  feedback_randint_randslope
-    0   124.924317  135.470815                  142.398372
+       basic_model   randslope  feedback_randint_randslope  \
+    0   124.924317  135.470815                  142.398372   
+
+       fractals_randint_randslope  
+    0                  142.398372  
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -344,6 +349,7 @@ feedback_fractals_randint <- glmer(stickiness~ block_type + (1|participant_no) +
 
 randslope <- glmer(stickiness~ block_type + (block_type|participant_no), data=df, family=Gamma(link="identity"))
 #feedback_randint_randslope <- glmer(stickiness~ block_type + (block_type|participant_no) + (1|feedback_details), data=df, family=Gamma(link="identity"))
+#fractals_randint_randslope <- glmer(stickiness~ block_type + (block_type|participant_no) + (1|fractals), data=df, family=Gamma(link="identity"))
 #feedback_fractals_randint_randslope <- glmer(stickiness~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=df, family=Gamma(link="identity"))
 
 bic_values <- c(
@@ -352,6 +358,7 @@ bic_values <- c(
   BIC(fractals_randint),
   BIC(feedback_fractals_randint)
   #BIC(randslope)
+ # BIC(fractals_randint_randslope)
   #BIC(feedback_randint_randslope)
   #BIC(feedback_fractals_randint_randslope)
 )
@@ -531,6 +538,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
@@ -540,6 +548,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     #'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
                    # 'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -547,8 +556,11 @@ print(bic.sort_values(by=0, axis=1))
 
 </details>
 
-       basic_model   randslope  feedback_randint_randslope
-    0   143.778316  154.742339                  161.669898
+       basic_model   randslope  fractals_randint_randslope  \
+    0   143.778316  154.742339                  161.669898   
+
+       feedback_randint_randslope  
+    0                  161.669898  
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -712,6 +724,7 @@ fractals_randint <- glmer(stickiness~ block_type + valence_diff + arousal_diff +
 
 #randslope <- glmer(stickiness~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no), data=df, family=Gamma(link="identity"))
 #feedback_randint_randslope <- glmer(stickiness~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|feedback_details), data=df, family=Gamma(link="identity"))
+#fractals_randint_randslope <- glmer(stickiness~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|fractals), data=df, family=Gamma(link="identity"))
 #feedback_fractals_randint_randslope <- glmer(stickiness~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|feedback_details) + (1|fractals), data=df, family=Gamma(link="identity"))
 
 bic_values <- c(
@@ -945,49 +958,49 @@ summary(basic_model)
 Disgust or not
 
 ``` r
-disgustOrNot <- glmer(stickiness ~ disgustOrNot + (1|participant_no), data=df, family=Gamma(link="log"))
+disgustOrNot <- glmer(stickiness ~ disgustOrNot + (1|participant_no), data=df, family=Gamma(link="identity"))
 summary(disgustOrNot)
 ```
 
     Generalized linear mixed model fit by maximum likelihood (Laplace
       Approximation) [glmerMod]
-     Family: Gamma  ( log )
+     Family: Gamma  ( identity )
     Formula: stickiness ~ disgustOrNot + (1 | participant_no)
        Data: df
 
          AIC      BIC   logLik deviance df.resid 
-      -149.1   -129.4     78.5   -157.1     1016 
+      -196.2   -176.5    102.1   -204.2     1016 
 
     Scaled residuals: 
-        Min      1Q  Median      3Q     Max 
-    -2.4494 -0.5205  0.0498  0.6083  3.1718 
+         Min       1Q   Median       3Q      Max 
+    -2.50254 -0.54618  0.00265  0.56704  2.87801 
 
     Random effects:
      Groups         Name        Variance Std.Dev.
-     participant_no (Intercept) 0.04343  0.2084  
-     Residual                   0.05305  0.2303  
+     participant_no (Intercept) 0.03103  0.1761  
+     Residual                   0.05388  0.2321  
     Number of obs: 1020, groups:  participant_no, 340
 
     Fixed effects:
                     Estimate Std. Error t value Pr(>|z|)    
-    (Intercept)     -0.04341    0.02253  -1.926    0.054 .  
-    disgustOrNotNot -0.09106    0.01342  -6.787 1.15e-11 ***
+    (Intercept)      1.02726    0.01932  53.160  < 2e-16 ***
+    disgustOrNotNot -0.08152    0.01210  -6.736 1.63e-11 ***
     ---
     Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
     Correlation of Fixed Effects:
                 (Intr)
-    dsgstOrNtNt -0.397
+    dsgstOrNtNt -0.439
 
 ``` r
 print(confint.merMod(disgustOrNot, method='Wald'))
 ```
 
-                         2.5 %        97.5 %
-    .sig01                  NA            NA
-    .sigma                  NA            NA
-    (Intercept)     -0.0875767  0.0007542667
-    disgustOrNotNot -0.1173620 -0.0647639347
+                         2.5 %     97.5 %
+    .sig01                  NA         NA
+    .sigma                  NA         NA
+    (Intercept)      0.9893895  1.0651382
+    disgustOrNotNot -0.1052338 -0.0577978
 
 <p>
 
@@ -995,49 +1008,49 @@ Emotion or not
 </p>
 
 ``` r
-emotionOrNot <- glmer(stickiness ~ emotionOrNot + (1|participant_no), data=df, family=Gamma(link="log"))
+emotionOrNot <- glmer(stickiness ~ emotionOrNot + (1|participant_no), data=df, family=Gamma(link="identity"))
 summary(emotionOrNot)
 ```
 
     Generalized linear mixed model fit by maximum likelihood (Laplace
       Approximation) [glmerMod]
-     Family: Gamma  ( log )
+     Family: Gamma  ( identity )
     Formula: stickiness ~ emotionOrNot + (1 | participant_no)
        Data: df
 
          AIC      BIC   logLik deviance df.resid 
-      -139.7   -120.0     73.8   -147.7     1016 
+      -184.9   -165.2     96.4   -192.9     1016 
 
     Scaled residuals: 
          Min       1Q   Median       3Q      Max 
-    -2.52212 -0.53503  0.04116  0.62402  2.84668 
+    -2.39499 -0.55762  0.00763  0.55693  2.73022 
 
     Random effects:
      Groups         Name        Variance Std.Dev.
-     participant_no (Intercept) 0.04336  0.2082  
-     Residual                   0.05342  0.2311  
+     participant_no (Intercept) 0.03103  0.1761  
+     Residual                   0.05433  0.2331  
     Number of obs: 1020, groups:  participant_no, 340
 
     Fixed effects:
                     Estimate Std. Error t value Pr(>|z|)    
-    (Intercept)     -0.07663    0.02115  -3.623 0.000291 ***
-    emotionOrNotNot -0.08186    0.01346  -6.079 1.21e-09 ***
+    (Intercept)      0.99541    0.01785  55.760  < 2e-16 ***
+    emotionOrNotNot -0.06884    0.01132  -6.082 1.19e-09 ***
     ---
     Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
     Correlation of Fixed Effects:
                 (Intr)
-    emotnOrNtNt -0.212
+    emotnOrNtNt -0.230
 
 ``` r
 print(confint.merMod(emotionOrNot, method='Wald'))
 ```
 
-                        2.5 %      97.5 %
-    .sig01                 NA          NA
-    .sigma                 NA          NA
-    (Intercept)     -0.118093 -0.03517671
-    emotionOrNotNot -0.108248 -0.05546765
+                          2.5 %     97.5 %
+    .sig01                   NA         NA
+    .sigma                   NA         NA
+    (Intercept)      0.96042183  1.0303991
+    emotionOrNotNot -0.09102757 -0.0466583
 
 <br>
 <p>
@@ -1061,8 +1074,8 @@ print(bic_df[order(bic_df$BIC), ])
 
                Model       BIC
     1 Original model -178.1293
-    2 Disgust or not -129.3781
-    3 Emotion or not -119.9616
+    2 Disgust or not -176.4529
+    3 Emotion or not -165.1644
 
 <br>
 <h3>
@@ -1159,6 +1172,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
@@ -1168,6 +1182,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     #'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -1175,8 +1190,11 @@ print(bic.sort_values(by=0, axis=1))
 
 </details>
 
-       basic_model  randslope  feedback_randint_randslope
-    0    79.235704  94.605022                  101.526679
+       basic_model  randslope  feedback_randint_randslope  \
+    0    79.235704  94.605022                  101.526679   
+
+       fractals_randint_randslope  
+    0                  101.526679  
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1355,6 +1373,7 @@ feedback_fractals_randint <- glmer(stickiness~ block_type + (1|participant_no) +
 
 #randslope <- glmer(stickiness~ block_type + (block_type|participant_no), data=df, family=Gamma(link="identity"))
 #feedback_randint_randslope <- glmer(stickiness~ block_type + (block_type|participant_no) + (1|feedback_details), data=df, family=Gamma(link="identity"))
+#fractals_randint_randslope <- glmer(stickiness~ block_type + (block_type|participant_no) + (1|fractals), data=df, family=Gamma(link="identity"))
 #feedback_fractals_randint_randslope <- glmer(stickiness~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=df, family=Gamma(link="identity"))
 
 bic_values <- c(
@@ -1363,6 +1382,7 @@ bic_values <- c(
   BIC(fractals_randint),
   BIC(feedback_fractals_randint)
   #BIC(randslope)
+  #BIC(fractals_randint_ranslope)
   #BIC(feedback_randint_randslope)
   #BIC(feedback_fractals_randint_randslope)
 )

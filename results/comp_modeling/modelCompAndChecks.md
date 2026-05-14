@@ -270,12 +270,38 @@ learning rate models))
 ``` r
 #load rhat_neff_df
 rhat_neff_df <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/modelFitting/modelDiagnostics/rhat_neff_df.csv") #created by modelDiagnostics/testingrhatneff.ipynb
+```
+
+</details>
+
+``` r
+print(rhat_neff_df)
+```
+
+                            modelName max_rhat  min_neff
+    1  1lr_stick0_blk3_allparamshared 1.002824 0.6965478
+    2         1lr_stick0_blk3_emVsNot 1.003005 0.8257590
+    3         1lr_stick1_blk3_emVsNot 1.003008 0.8099417
+    4  2lr_stick0_blk3_allparamshared 1.003138 0.7574476
+    5         2lr_stick1_blk3_emVsNot 1.003234 0.3644348
+    6     1lr_stick0_blk3_allparamsep 1.003318 0.8133144
+    7     2lr_stick1_blk3_allparamsep 1.003421 0.3482681
+    8     1lr_stick1_blk3_allparamsep 1.003552 0.7669077
+    9  1lr_stick1_blk3_allparamshared 1.004014 0.8345388
+    10        2lr_stick0_blk3_emVsNot 1.004530 0.5568611
+    11    2lr_stick0_blk3_allparamsep 1.005152 0.3515511
+    12 2lr_stick1_blk3_allparamshared 1.013680 0.3090907
+
+<p>
+
+Looking within stickiness models
+</p>
+
+``` r
 rhat_neff_df <- rhat_neff_df[!grepl("stick0", rhat_neff_df$model, ignore.case = TRUE), ]
 rhat_neff_df <- rhat_neff_df[order(rhat_neff_df$min_neff, decreasing=TRUE), ] 
 print(subset(rhat_neff_df, select = -max_rhat))
 ```
-
-</details>
 
                             modelName  min_neff
     9  1lr_stick1_blk3_allparamshared 0.8345388

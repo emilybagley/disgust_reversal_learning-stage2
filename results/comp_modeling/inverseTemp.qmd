@@ -138,19 +138,21 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) 
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) 
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+#feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                     #'feedback_randint': [feedback_randint.bic], 
                     #'fractals_randint': [fractals_randint.bic],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
+                   # 'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -251,6 +253,7 @@ feedback_randint <- glmer(invTemp~ block_type + (1|participant_no) + (1|feedback
 
 #randslope <- glmer(invTemp~ block_type + (block_type|participant_no), data=df, family=Gamma(link="identity"))
 #feedback_randint_randslope <- glmer(invTemp~ block_type + (block_type|participant_no) + (1|feedback_details), data=df, family=Gamma(link="identity"))
+fractals_randint_randslope <- glmer(invTemp~ block_type + (block_type|participant_no) + (1|fractals), data=df, family=Gamma(link="identity"))
 #feedback_fractals_randint_randslope <- glmer(invTemp~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=df, family=Gamma(link="identity"))
 bic_values <- c(
   BIC(basic_model),
@@ -258,7 +261,8 @@ bic_values <- c(
   #BIC(fractals_randint),
   #BIC(feedback_fractals_randint),
   #BIC(randslope),
-  #BIC(feedback_randint_randslope)
+  #BIC(feedback_randint_randslope),
+  #BIC(fractals_randint_randslope)
   #BIC(feedback_fractals_randint_randslope)
 )
 model_names <- c("basic model", "feedback_randint")
@@ -292,6 +296,7 @@ win3 <- bic_df[which.min(bic_df$BIC), ]$Model
 print(paste0("Winning models: ", win1, " ", win2," ",win3))
 
 ```
+
 
 <p>Results from this model show <b>no significant effect of block-type</b></p>
 
@@ -406,15 +411,17 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                     #'feedback_randint': [feedback_randint.bic], 
                     #'fractals_randint': [fractals_randint.bic],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
+                   # 'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -511,6 +518,7 @@ feedback_randint <- glmer(invTemp~ block_type + valence_diff + arousal_diff + va
 
 #randslope <- glmer(invTemp~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no), data=df, family=Gamma(link="identity"))
 #feedback_randint_randslope <- glmer(invTemp~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|feedback_details), data=df, family=Gamma(link="identity"))
+#fractals_randint_randslope <- glmer(invTemp~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|fractals), data=df, family=Gamma(link="identity"))
 #feedback_fractals_randint_randslope <- glmer(invTemp~ block_type + valence_diff + arousal_diff + valence_habdiff + (block_type + valence_diff + arousal_diff + valence_habdiff|participant_no) + (1|feedback_details) + (1|fractals), data=df, family=Gamma(link="identity"))
 
 bic_values <- c(
@@ -519,7 +527,8 @@ bic_values <- c(
  # BIC(fractals_randint),
   #BIC(feedback_fractals_randint)
   #BIC(randslope),
-  #BIC(feedback_randint_randslope)
+  #BIC(feedback_randint_randslope),
+ # BIC(fractals_randint_randslope)
   #BIC(feedback_fractals_ randint_randslope)
 )
 model_names <- c("basic model", 
@@ -528,6 +537,7 @@ model_names <- c("basic model",
               #  "feedback_fractals_randint"
                 #"randslope",
                 #"feedback_randint_randslope",
+               # "fractals_randint_randslope"
                 #"feedback_fractals_randint_randslope"
                 )
 
@@ -648,19 +658,21 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) 
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) 
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+#feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                     #'feedback_randint': [feedback_randint.bic], 
                     #'fractals_randint': [fractals_randint.bic],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
+                    #'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -771,6 +783,7 @@ feedback_randint <- glmer(invTemp~ block_type + (1|participant_no) + (1|feedback
 
 #randslope <- glmer(invTemp~ block_type + (block_type|participant_no), data=df, family=Gamma(link="identity"))
 #feedback_randint_randslope <- glmer(invTemp~ block_type + (block_type|participant_no) + (1|feedback_details), data=df, family=Gamma(link="identity"))
+#fractals_randint_randslope <- glmer(invTemp~ block_type + (block_type|participant_no) + (1|fractals), data=df, family=Gamma(link="identity"))
 #feedback_fractals_randint_randslope <- glmer(invTemp~ block_type + (block_type|participant_no) + (1|feedback_details) + (1|fractals), data=df, family=Gamma(link="identity"))
 
 bic_values <- c(
@@ -780,6 +793,7 @@ bic_values <- c(
   #BIC(feedback_fractals_randint),
   #BIC(randslope),
   #BIC(feedback_randint_randslope)
+  #BIC(fractals_randint_randslope)
   #BIC(feedback_fractals_randint_randslope)
 )
 model_names <- c("basic model", "feedback_randint")

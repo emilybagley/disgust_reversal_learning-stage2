@@ -120,6 +120,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractalss': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) FAILED TO CONVERGE
 
 
@@ -129,6 +130,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                    # 'feedback_fractals_randint': ['NOT CONVERGE'], 
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -159,8 +161,11 @@ print("Winning models: "+ win1 +" "+ win2)
 
 </details>
 
-        basic_model     randslope  feedback_randint_randslope
-    0  10654.776639  10686.800039                10693.727599
+        basic_model     randslope  feedback_randint_randslope  \
+    0  10654.776639  10686.800039                10693.727599   
+
+       fractals_randint_randslope  
+    0                10693.727599  
        age_covariate  no_covariate  sex_age_covariate  sex_covariate  \
     0   10652.959552  10654.776639       10657.845179    10659.53567   
 
@@ -406,6 +411,7 @@ feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False) 
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False) 
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False) 
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) NOT CONVERGE
 
 
@@ -415,6 +421,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_fractals_randint': [feedback_fractals_randint.bic],
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -446,11 +453,11 @@ print("Winning models: "+ win1 +" "+ win2)
 
 </details>
 
-        basic_model     randslope  feedback_randint_randslope  \
+        basic_model     randslope  fractals_randint_randslope  \
     0  10674.320476  10706.429455                10713.357016   
 
-       feedback_fractals_randint  
-    0               11110.274675  
+       feedback_randint_randslope  feedback_fractals_randint  
+    0                10713.357016               11110.274675  
        age_covariate  no_covariate  sex_age_covariate  sex_covariate  \
     0   10673.131274  10674.320476       10677.939294   10678.981914   
 
@@ -647,6 +654,7 @@ feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) FAILED TO CONVERGE
 
 
@@ -656,6 +664,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_fractals_randint': [feedback_fractals_randint.bic], 
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
                    # 'feedback_fractals_randint_randslope': ['NOT CONVERGE']
                     })
 print(bic.sort_values(by=0, axis=1))
@@ -689,8 +698,8 @@ print("Winning models: "+ win1 +" "+ win2)
         basic_model     randslope  feedback_randint_randslope  \
     0  10831.952157  10861.793462                10868.712156   
 
-       feedback_fractals_randint  
-    0               11252.059459  
+       fractals_randint_randslope  feedback_fractals_randint  
+    0                10868.712156               11252.059459  
        age_covariate  no_covariate  sex_age_covariate  sex_covariate  \
     0   10829.962252  10831.952157       10834.607841   10836.462853   
 
@@ -986,8 +995,8 @@ feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
-
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                   #  'feedback_randint': ['CONVERGENCE WARNING'], 
@@ -995,6 +1004,7 @@ bic=pd.DataFrame({'basic_model': [basic_model.bic],
                     'feedback_fractals_randint': [feedback_fractals_randint.bic], 
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope.bic],
                     'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]})
 print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
@@ -1027,8 +1037,11 @@ print("Winning models: "+ win1 +" "+ win2)
        basic_model     randslope  feedback_randint_randslope  \
     0  11728.03423  11757.948767                11764.810479   
 
-       feedback_fractals_randint_randslope  feedback_fractals_randint  
-    0                         11771.672198               12004.796615  
+       fractals_randint_randslope  feedback_fractals_randint_randslope  \
+    0                11764.810479                         11771.672198   
+
+       feedback_fractals_randint  
+    0               12004.796615  
        age_covariate  no_covariate  sex_age_covariate  digit_span_age_covariate  \
     0   11725.404058   11728.03423       11728.730583              11731.114853   
 
