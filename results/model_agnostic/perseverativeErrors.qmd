@@ -319,7 +319,7 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ttest, bf_null = bayes_factor(task_summary, 'mean_perseverative_er', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <p>We also look at fear vs points (which is not directly assessed by the model)</p>
@@ -697,7 +697,7 @@ print(confint.merMod(generalized_model, method='Wald'))
 ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <p>We also look at fear vs points (which is not directly assessed by the model)</p>
@@ -783,7 +783,7 @@ print(confint.merMod(disgustOrNot, method='Wald'))
 ```
 
 
-<p>And then again for 'emotion or 'not':<p>
+<p>And then again for 'emotion' or 'not':<p>
 ```{r}
 #| label: perseverative er emotion or not
 #| echo: true
@@ -796,6 +796,27 @@ summary(emotionOrNot)
 #| label: emotionOrNot confidence intervals
 #| echo: true
 print(confint.merMod(emotionOrNot, method='Wald'))
+```
+
+<p>Because this result is null, we compute the Bayes factor </p>
+```{python}
+#| code-fold: true
+task_summary.loc[task_summary['block_type']=='Disgust', 'disgustOrNot']='Disgust'
+task_summary.loc[task_summary['block_type']!='Disgust', 'disgustOrNot']='Not'
+task_summary.loc[task_summary['block_type']=='Points', 'emotionOrNot']='Not'
+task_summary.loc[task_summary['block_type']!='Points', 'emotionOrNot']='Emotion'
+
+def emNot_bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
+    df=df[(df.emotionOrNot==condition_1_name)| (df.emotionOrNot==condition_2_name)][[dependent_var, 'emotionOrNot', 'participant_no']]
+    df.dropna(inplace=True)
+    df=df.pivot_table(index='participant_no', columns='emotionOrNot', values=dependent_var, aggfunc='mean').reset_index() #will mean across the two emotion conditions
+    ttest=pg.ttest(df[condition_1_name], df[condition_2_name], paired=True)
+    bf_null=1/float(ttest['BF10'].iloc[0])
+    return ttest, bf_null
+ttest, bf_null = emNot_bayes_factor(task_summary, 'mean_perseverative_er', 'Emotion', 'Not')
+
+print(f"Emotion vs Not: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
+
 ```
 
 <p>Only the 'disgust or not' model finds a significant effect, suggesting that the difference between disgust and other types of learning (both fear and points learning) is the key driver of effects<p>
@@ -952,7 +973,7 @@ explore_df = task_summary[task_summary.percentage_correct > lower_bound]
 ttest, bf_null = bayes_factor(explore_df, 'mean_perseverative_er', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <p>We also look at fear vs points (which is not directly assessed by the model)</p>
@@ -1250,7 +1271,7 @@ print(confint.merMod(generalized_model, method='Wald'))
 
 ttest, bf_null = bayes_factor(sensitivity_df, 'mean_perseverative_er', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 <br>
 <p>Next for disgust vs points:</p>
@@ -1262,7 +1283,7 @@ print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ttest, bf_null = bayes_factor(sensitivity_df, 'mean_perseverative_er', 'Disgust', 'Points')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <br>
@@ -1281,7 +1302,7 @@ print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {t
 #| label: points vs fear bayes factor - sensitivity
 #| echo: true
 #| code-fold: true
-print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Points vs Fear: : T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 

@@ -346,7 +346,7 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
 #print(f"Disgust vs Points: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {ttest['p-val'][0]}")
 ```
 
@@ -357,7 +357,7 @@ print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
 ```
 
 
@@ -848,7 +848,7 @@ print(confint.merMod(no_covariate, method='Wald'))
 
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
 ```
 
 ```{python}
@@ -858,7 +858,7 @@ print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
 ```
 
 

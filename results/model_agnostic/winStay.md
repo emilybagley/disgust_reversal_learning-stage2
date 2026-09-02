@@ -323,12 +323,12 @@ Firstly for disgust vs fear:
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(339) = 12.658227848101266
+    Disgust vs Fear: T(339) = 0.725737356295973 BF01 =12.658227848101266
 
 <br>
 <p>
@@ -343,12 +343,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Disgust', 'Points')
 #print("Disgust vs Points BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(339) = 16.129032258064516
+    Disgust vs Points: T(339) = 0.2114264258015954 BF01 =16.129032258064516
 
 <br>
 <p>
@@ -695,10 +695,10 @@ print("Winning models: "+ win1 +" "+ win2)
 
 </details>
 
-        basic_model     randslope  feedback_randint_randslope  \
+        basic_model     randslope  fractals_randint_randslope  \
     0  10831.952157  10861.793462                10868.712156   
 
-       fractals_randint_randslope  feedback_fractals_randint  
+       feedback_randint_randslope  feedback_fractals_randint  
     0                10868.712156               11252.059459  
        age_covariate  no_covariate  sex_age_covariate  sex_covariate  \
     0   10829.962252  10831.952157       10834.607841   10836.462853   
@@ -831,12 +831,12 @@ Firstly for disgust vs fear:
 ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(334) = 10.638297872340425
+    Disgust vs Fear: T(334) = 0.9306704923525841 BF01 =10.638297872340425
 
 <br>
 <p>
@@ -851,12 +851,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(explore_df, 'win_stay', 'Disgust', 'Points')
 #print("Disgust vs Points BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(332) = 13.88888888888889
+    Disgust vs Points: T(332) = 0.5689262757396831 BF01 =13.88888888888889
 
 <br>
 <p>
@@ -1174,12 +1174,12 @@ Firstly for disgust vs fear:
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(305) = 13.88888888888889
+    Disgust vs Fear: T(305) = 0.4825523821871557 BF01 =13.88888888888889
 
 <br>
 <p>
@@ -1194,12 +1194,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(task_summary, 'win_stay', 'Disgust', 'Points')
 #print("Disgust vs Points BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01 ({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01 (307) = 8.474576271186441
+    Disgust vs Points: T(307) = 1.1103448111649064 BF01 =8.474576271186441
 
 <br>
 <p>

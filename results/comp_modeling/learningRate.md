@@ -492,12 +492,12 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ``` python
 ttest, bf_null = bayes_factor(df, 'LR', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(339) = 2.320185614849188
+    Disgust vs Points: T(339) = -1.9929307016441595 BF01 =2.320185614849188
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -506,12 +506,12 @@ print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ttest, bf_null = bayes_factor(df, 'LR', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(339) = 14.285714285714285
+    Disgust vs Fear: T(339) = -0.5441331560622167 BF01 =14.285714285714285
 
 <p>
 
@@ -2028,12 +2028,12 @@ explore_df = task_summary[task_summary.percentage_correct > lower_bound]
 ttest, bf_null = bayes_factor(explore_df, 'LR', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(334) = 14.285714285714285
+    Disgust vs Fear: T(334) = -0.5277309958958818 BF01 =14.285714285714285
 
 <p>
 
@@ -2063,12 +2063,12 @@ And because the result is null, also get a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Points vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01(334) = 5.555555555555555
+    Points vs Fear: T(334) = 1.4763257609457563 BF01 =5.555555555555555
 
     U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
       warn("Workbook contains no default style, apply openpyxl's default")
@@ -2168,6 +2168,36 @@ print(confint.merMod(disgustOrNot, method='Wald'))
     .sigma                    NA          NA
     (Intercept)     -0.112427953 -0.09436144
     disgustOrNotNot -0.002007152  0.01299851
+
+<p>
+
+Because this result is null, we compute the Bayes factor
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+explore_df.loc[explore_df['block_type']=='Disgust', 'disgustOrNot']='Disgust'
+explore_df.loc[explore_df['block_type']!='Disgust', 'disgustOrNot']='Not'
+explore_df.loc[explore_df['block_type']=='Points', 'emotionOrNot']='Not'
+explore_df.loc[explore_df['block_type']!='Points', 'emotionOrNot']='Emotion'
+
+def disNot_bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
+    df=df[(df.disgustOrNot==condition_1_name)| (df.disgustOrNot==condition_2_name)][[dependent_var, 'disgustOrNot', 'participant_no']]
+    df.dropna(inplace=True)
+    df=df.pivot_table(index='participant_no', columns='disgustOrNot', values=dependent_var, aggfunc='mean').reset_index() #will mean across the two non-disgust conditions
+    ttest=pg.ttest(df[condition_1_name], df[condition_2_name], paired=True)
+    bf_null=1/float(ttest['BF10'].iloc[0])
+    return ttest, bf_null
+ttest, bf_null = disNot_bayes_factor(explore_df, 'LR', 'Disgust', 'Not')
+
+print(f"Disgust vs Not: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
+```
+
+</details>
+
+    Disgust vs Not: T(335) = -1.4606269078350185 BF01 = 5.6818181818181825
 
 <p>
 

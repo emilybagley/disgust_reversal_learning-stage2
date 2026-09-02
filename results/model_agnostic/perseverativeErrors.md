@@ -521,12 +521,12 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ttest, bf_null = bayes_factor(task_summary, 'mean_perseverative_er', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(339) = 2.570694087403599
+    Disgust vs Fear: T(339) = 1.9391208990908602 BF01 =2.570694087403599
 
 <p>
 
@@ -1251,12 +1251,12 @@ the strength of that null:
 ttest, bf_null = bayes_factor(task_summary, 'percentage_correct', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(339) = 10.989010989010989
+    Disgust vs Fear: T(339) = -0.9007458789239435 BF01 =10.989010989010989
 
 <p>
 
@@ -1422,7 +1422,7 @@ print(confint.merMod(disgustOrNot, method='Wald'))
 
 <p>
 
-And then again for ‘emotion or ’not’:
+And then again for ‘emotion’ or ‘not’:
 <p>
 
 ``` r
@@ -1470,6 +1470,36 @@ print(confint.merMod(emotionOrNot, method='Wald'))
     .sigma                   NA       NA
     (Intercept)      1.26109797 1.507759
     emotionOrNotNot -0.01970393 0.275652
+
+<p>
+
+Because this result is null, we compute the Bayes factor
+</p>
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+task_summary.loc[task_summary['block_type']=='Disgust', 'disgustOrNot']='Disgust'
+task_summary.loc[task_summary['block_type']!='Disgust', 'disgustOrNot']='Not'
+task_summary.loc[task_summary['block_type']=='Points', 'emotionOrNot']='Not'
+task_summary.loc[task_summary['block_type']!='Points', 'emotionOrNot']='Emotion'
+
+def emNot_bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
+    df=df[(df.emotionOrNot==condition_1_name)| (df.emotionOrNot==condition_2_name)][[dependent_var, 'emotionOrNot', 'participant_no']]
+    df.dropna(inplace=True)
+    df=df.pivot_table(index='participant_no', columns='emotionOrNot', values=dependent_var, aggfunc='mean').reset_index() #will mean across the two emotion conditions
+    ttest=pg.ttest(df[condition_1_name], df[condition_2_name], paired=True)
+    bf_null=1/float(ttest['BF10'].iloc[0])
+    return ttest, bf_null
+ttest, bf_null = emNot_bayes_factor(task_summary, 'mean_perseverative_er', 'Emotion', 'Not')
+
+print(f"Emotion vs Not: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
+```
+
+</details>
+
+    Emotion vs Not: T(339) = 2.5456563018619165 BF01 = 0.6816632583503749
 
 <p>
 
@@ -1727,12 +1757,12 @@ explore_df = task_summary[task_summary.percentage_correct > lower_bound]
 ttest, bf_null = bayes_factor(explore_df, 'mean_perseverative_er', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01({{ttest['dof'].iloc[0]}}): " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(334) = 3.6363636363636362
+    Disgust vs Fear: T(334) = 1.743215747563128 BF01 =3.6363636363636362
 
 <p>
 
@@ -2213,12 +2243,12 @@ Firstly for disgust vs fear:
 ``` python
 ttest, bf_null = bayes_factor(sensitivity_df, 'mean_perseverative_er', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(311) = 15.15151515151515
+    Disgust vs Fear: T(311) = 0.3037094677361312 BF01 =15.15151515151515
 
 <br>
 <p>
@@ -2233,12 +2263,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(sensitivity_df, 'mean_perseverative_er', 'Disgust', 'Points')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(315) = 12.5
+    Disgust vs Points: T(315) = 0.6861323430329245 BF01 =12.5
 
 <br>
 <p>
@@ -2269,12 +2299,12 @@ And because the result is null, also get a Bayes factor:
 <summary>Code</summary>
 
 ``` python
-print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Points vs Fear: : T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Points vs Fear: BF01(324) = 12.658227848101266
+    Points vs Fear: : T(324) = -0.6958254159548561 BF01 =12.658227848101266
 
     U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\openpyxl\styles\stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
       warn("Workbook contains no default style, apply openpyxl's default")

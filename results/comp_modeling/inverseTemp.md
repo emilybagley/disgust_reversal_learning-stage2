@@ -512,12 +512,12 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(339) = 3.2051282051282053
+    Disgust vs Points: T(339) = -1.8209548940463982 BF01 = 3.2051282051282053
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -534,12 +534,12 @@ print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(339) = 12.5
+    Disgust vs Fear: T(339) = -0.73910409505308 BF01 = 12.5
 
 <p>
 
@@ -1392,12 +1392,12 @@ Compute a Bayesian t-test to compare Disgust and Points conditions
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(330) = 4.25531914893617
+    Disgust vs Points: T(330) = -1.645085292871381 BF01 = 4.25531914893617
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1405,12 +1405,12 @@ print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ``` python
 ttest, bf_null = bayes_factor(df, 'invTemp', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(328) = 16.129032258064516
+    Disgust vs Fear: T(328) = 0.018380304131091818 BF01 = 16.129032258064516
 
 <p>
 

@@ -364,7 +364,7 @@ palette = { 'disgust': "#673ab7",
 ###VALENCE
 fig.text(0.25, 1.05, 'All videos', va='center', ha='center', fontsize=14, weight='bold')         
 
-sns.boxplot(data=long_vid_ratings, ax=axes[0], x='Timepoint', y='Valence', hue='trial_type', hue_order=order, fill=True, saturation=0.5, palette=dark_palette, notch=True, linewidth=2)
+sns.boxplot(data=long_vid_ratings, ax=axes[0], x='Timepoint', y='Valence', hue='trial_type', hue_order=order, fill=True, saturation=0.5, palette=palette, notch=True, linewidth=2)
 sns.pointplot(data=long_vid_ratings, ax=axes[0], x='Timepoint', y='Valence', hue='trial_type', hue_order=order, color='black', marker='D', markersize=4, dodge=0.4, linestyle='none', ci=None, zorder=3)
 axes[0].set_ylim(top=11.4)
 axes[0].set_yticks(range(0, 11, 2)) 
@@ -389,7 +389,7 @@ if timepoint_annot != 'NonSig':
     axes[0].plot([x1, x1, x2, x2], [y, y+h, y+h, y], lw=1.5, c=col)  
     axes[0].text((x1+x2)*.5, y+h, timepoint_annot, ha='center', va='bottom', color=col) 
 
-sns.boxplot(data=long_vid_ratings, ax=axes[1], x='Timepoint', y='Arousal', hue='trial_type', hue_order=order, fill=True, saturation=0.5, palette=dark_palette, notch=True, linewidth=2)
+sns.boxplot(data=long_vid_ratings, ax=axes[1], x='Timepoint', y='Arousal', hue='trial_type', hue_order=order, fill=True, saturation=0.5, palette=palette, notch=True, linewidth=2)
 sns.pointplot(data=long_vid_ratings, ax=axes[1], x='Timepoint', y='Arousal', hue='trial_type', hue_order=order, color='black', marker='D', markersize=4, dodge=0.4, linestyle='none', ci=None, zorder=3)
 axes[1].set_ylim(top=11.4)
 axes[1].set_yticks(range(0, 11, 2)) 

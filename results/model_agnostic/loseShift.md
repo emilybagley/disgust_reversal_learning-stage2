@@ -383,12 +383,12 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ttest, bf_null = bayes_factor(task_summary, 'lose_shift', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(339) = 6.172839506172839
+    Disgust vs Fear: T(339) = -1.4069219403364857 BF01 =6.172839506172839
 
 <p>
 

@@ -318,7 +318,7 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 
 ttest, bf_null = bayes_factor(df, 'LR', 'Disgust', 'Points')
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 
@@ -330,7 +330,7 @@ print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ttest, bf_null = bayes_factor(df, 'LR', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <p>We also look at fear vs points (which is not directly assessed by the model)</p>
@@ -1318,7 +1318,7 @@ explore_df = task_summary[task_summary.percentage_correct > lower_bound]
 ttest, bf_null = bayes_factor(explore_df, 'LR', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <p>We also look at fear vs points (which is not directly assessed by the model)</p>
@@ -1336,7 +1336,7 @@ print(f"Points vs Fear: T = {ttest['T'][0]}, CI95% = {ttest['CI95%'][0]}, p = {t
 #| label: points vs fear bayes factor - alternative outlier
 #| echo: true
 #| code-fold: true
-print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Points vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 ```{r}
@@ -1394,6 +1394,27 @@ summary(disgustOrNot)
 #| echo: true
 print(confint.merMod(disgustOrNot, method='Wald'))
 ```
+
+<p>Because this result is null, we compute the Bayes factor </p>
+```{python}
+#| code-fold: true
+explore_df.loc[explore_df['block_type']=='Disgust', 'disgustOrNot']='Disgust'
+explore_df.loc[explore_df['block_type']!='Disgust', 'disgustOrNot']='Not'
+explore_df.loc[explore_df['block_type']=='Points', 'emotionOrNot']='Not'
+explore_df.loc[explore_df['block_type']!='Points', 'emotionOrNot']='Emotion'
+
+def disNot_bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
+    df=df[(df.disgustOrNot==condition_1_name)| (df.disgustOrNot==condition_2_name)][[dependent_var, 'disgustOrNot', 'participant_no']]
+    df.dropna(inplace=True)
+    df=df.pivot_table(index='participant_no', columns='disgustOrNot', values=dependent_var, aggfunc='mean').reset_index() #will mean across the two non-disgust conditions
+    ttest=pg.ttest(df[condition_1_name], df[condition_2_name], paired=True)
+    bf_null=1/float(ttest['BF10'].iloc[0])
+    return ttest, bf_null
+ttest, bf_null = disNot_bayes_factor(explore_df, 'LR', 'Disgust', 'Not')
+
+print(f"Disgust vs Not: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 = {bf_null}")
+```
+
 
 <p>And then again for 'emotion or 'not':<p>
 ```{r}

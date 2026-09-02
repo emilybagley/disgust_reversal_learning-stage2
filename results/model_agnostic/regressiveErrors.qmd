@@ -327,7 +327,7 @@ def bayes_factor(df, dependent_var, condition_1_name, condition_2_name):
 ttest, bf_null = bayes_factor(task_summary, 'mean_regressive_er', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear ({ttest['dof'].iloc[0]}): BF01 = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <br>
@@ -340,7 +340,7 @@ print(f"Disgust vs Fear ({ttest['dof'].iloc[0]}): BF01 = {bf_null}")
 ttest, bf_null = bayes_factor(task_summary, 'mean_regressive_er', 'Disgust', 'Points')
 #print("Disgust vs Points BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: : T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <br>
@@ -637,7 +637,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) CONVERGENCE WARNING
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+#feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
@@ -648,7 +648,7 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                    # 'feedback_andint': ['CONVERGENCE WARNING'], 
                   #  'fractals_randint': ['CONVERGENCE WARNING'],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic],
+                   # 'feedback_fractals_randint': [feedback_fractals_randint.bic],
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     'fractals_randint_randslope': [fractals_randint_randslope.bic]
@@ -841,7 +841,7 @@ print(confint.merMod(no_covariate, method='Wald'))
 
 ttest, bf_null = bayes_factor(explore_df, 'mean_regressive_er', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 <br>
 <p>Next for disgust vs points:</p>
@@ -853,7 +853,7 @@ print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ttest, bf_null = bayes_factor(explore_df, 'mean_regressive_er', 'Disgust', 'Points')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <br>
@@ -1036,7 +1036,7 @@ print(results.summary())
 
 ttest, bf_null = bayes_factor(sensitivity_df, 'mean_regressive_er', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 <br>
 <p>Next for disgust vs points:</p>
@@ -1048,7 +1048,7 @@ print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 ttest, bf_null = bayes_factor(sensitivity_df, 'mean_regressive_er', 'Disgust', 'Points')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 <br>

@@ -536,12 +536,12 @@ Firstly for disgust vs fear:
 ttest, bf_null = bayes_factor(task_summary, 'mean_regressive_er', 'Disgust', 'Fear')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Fear ({ttest['dof'].iloc[0]}): BF01 = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear (339): BF01 = 15.873015873015873
+    Disgust vs Fear: T(339) = 0.2472921936541035 BF01 =15.873015873015873
 
 <br>
 <p>
@@ -556,12 +556,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(task_summary, 'mean_regressive_er', 'Disgust', 'Points')
 #print("Disgust vs Points BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: : T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(339) = 6.849315068493151
+    Disgust vs Points: : T(339) = 1.332225518004529 BF01 =6.849315068493151
 
 <br>
 <p>
@@ -1079,7 +1079,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) CONVERGENCE WARNING
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+#feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
@@ -1090,7 +1090,7 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                    # 'feedback_andint': ['CONVERGENCE WARNING'], 
                   #  'fractals_randint': ['CONVERGENCE WARNING'],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic],
+                   # 'feedback_fractals_randint': [feedback_fractals_randint.bic],
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     'fractals_randint_randslope': [fractals_randint_randslope.bic]
@@ -1101,11 +1101,11 @@ bic.sort_values(by=0, axis=1)
 
 </details>
 
-       basic_model   randslope  fractals_randint_randslope  \
+       basic_model   randslope  feedback_randint_randslope  \
     0   574.788389  606.080641                  612.999338   
 
-       feedback_randint_randslope  feedback_fractals_randint  
-    0                  612.999338                 836.170706  
+       fractals_randint_randslope  
+    0                  612.999338  
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1184,8 +1184,8 @@ for key, val in dict(zip(labels, norm_res)).items():
 
 </details>
 
-    Statistic 0.9944523263994975
-    p-value 0.0008811105301453065
+    Statistic 0.9944523263994968
+    p-value 0.0008811105301443361
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1219,10 +1219,10 @@ for key, val in dict(zip(labels, het_white_res)).items():
 
 </details>
 
-    LM Statistic 1.6629483960326392
-    LM-Test p-value 0.43540693692006205
-    F-Statistic 0.8303727583056189
-    F-Test p-value 0.4361847171461035
+    LM Statistic 1.6629483960324145
+    LM-Test p-value 0.435406936920111
+    F-Statistic 0.8303727583055319
+    F-Test p-value 0.43618471714612794
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1464,12 +1464,12 @@ Firstly for disgust vs fear:
 ``` python
 ttest, bf_null = bayes_factor(explore_df, 'mean_regressive_er', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(334) = 16.39344262295082
+    Disgust vs Fear: T(334) = -0.04426381544336839 BF01 =16.39344262295082
 
 <br>
 <p>
@@ -1484,12 +1484,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(explore_df, 'mean_regressive_er', 'Disgust', 'Points')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(332) = 10.75268817204301
+    Disgust vs Points: T(332) = 0.9138071392413029 BF01 =10.75268817204301
 
 <br>
 <p>
@@ -1635,10 +1635,10 @@ bic.sort_values(by=0, axis=1)
 </details>
 
        basic_model    randslope  feedback_randint_randslope  \
-    0  1147.738017  1173.506853                 1180.316999   
+    0  1147.738072  1173.506908                 1180.317054   
 
        fractals_randint_randslope  
-    0                 1180.316999  
+    0                 1180.317054  
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1669,13 +1669,13 @@ bic.sort_values(by=0, axis=1)
 </details>
 
        no_covariate  digit_span_covariate  sex_covariate  age_covariate  \
-    0   1147.738017           1152.475186    1153.013855    1154.548158   
+    0   1147.738072           1152.475241     1153.01391    1154.548213   
 
        sex_digit_span_covariate  digit_span_age_covariate  sex_age_covariate  \
-    0               1158.136926               1159.249442        1159.822608   
+    0               1158.136981               1159.249497        1159.822663   
 
        sex_age_digit_span_covariate  
-    0                   1164.905545  
+    0                     1164.9056  
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1717,8 +1717,8 @@ for key, val in dict(zip(labels, norm_res)).items():
 
 </details>
 
-    Statistic 0.9988694126723006
-    p-value 0.8539183639658268
+    Statistic 0.9988694126328862
+    p-value 0.8539183442692735
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1752,10 +1752,10 @@ for key, val in dict(zip(labels, het_white_res)).items():
 
 </details>
 
-    LM Statistic 3.7851740201083066
-    LM-Test p-value 0.1506814896455357
-    F-Statistic 1.89423225557972
-    F-Test p-value 0.1510303973629437
+    LM Statistic 3.7851739890991993
+    LM-Test p-value 0.150681491981785
+    F-Statistic 1.8942322399966978
+    F-Test p-value 0.15103039970662344
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1815,12 +1815,12 @@ Firstly for disgust vs fear:
 ``` python
 ttest, bf_null = bayes_factor(sensitivity_df, 'mean_regressive_er', 'Disgust', 'Fear')
 
-print(f"Disgust vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Fear: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Fear: BF01(285) = 14.084507042253522
+    Disgust vs Fear: T(285) = -0.3573425974816653 BF01 =14.084507042253522
 
 <br>
 <p>
@@ -1835,12 +1835,12 @@ Next for disgust vs points:
 ttest, bf_null = bayes_factor(sensitivity_df, 'mean_regressive_er', 'Disgust', 'Points')
 #print("Disgust vs Fear BF01: " + bf_null)
 
-print(f"Disgust vs Points: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
+print(f"Disgust vs Points: T({ttest['dof'].iloc[0]}) = {ttest['T'][0]} BF01 ={bf_null}")
 ```
 
 </details>
 
-    Disgust vs Points: BF01(285) = 14.925373134328357
+    Disgust vs Points: T(285) = -0.14363786339214474 BF01 =14.925373134328357
 
 <br>
 <p>
