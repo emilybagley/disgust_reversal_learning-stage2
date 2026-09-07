@@ -77,12 +77,14 @@ library(cowplot)
 <p>Firstly, we must compare q-learning models to a model which assumes random learning. This shows that q-learning models are a much better fit to the data</p>
 
 ```{r, message=FALSE}
-#| label: WAIC model comparison
+#| label: model comparison
 #| echo: true
 #| code-fold: true
 #| warning: false
 
-folder <- "//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelOutputs"
+# folder <- "//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelOutputs"
+
+folder <- "modelFitting/modelOutputs"
 loglik_list <- list()
 waic_list <- list()
 modelname_list <-list()
@@ -102,56 +104,13 @@ for (filename in list.dirs(folder, recursive=FALSE)){
 
 df <- data.frame(
   model = names(waic_list),
-  waic = c(
-    waic_list[[modelname_list[[1]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[2]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[3]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[4]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[5]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[6]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[7]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[8]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[9]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[10]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[11]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[12]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[13]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[14]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[15]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[16]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[17]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[18]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[19]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[20]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[21]]]]$estimates["waic", "Estimate"]
-    ),
-  se = c(
-    waic_list[[modelname_list[[1]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[2]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[3]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[4]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[5]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[6]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[7]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[8]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[9]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[10]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[11]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[12]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[13]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[14]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[15]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[16]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[17]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[18]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[19]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[20]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[21]]]]$estimates["waic", "SE"]
-    )
+  waic = sapply(modelname_list, function(m) waic_list[[m]]$estimates["waic", "Estimate"]),
+  se   = sapply(modelname_list, function(m) waic_list[[m]]$estimates["waic", "SE"])
 )
+
 df <- df[order(df$waic), ] 
 df$model <- factor(df$model, levels = df$model[order(df$waic)])
-df <- df[!grepl("hybrid", df$model, ignore.case = TRUE), ]
+#df <- df[!grepl("hybrid", df$model, ignore.case = TRUE), ]
 print(df)
 
 ggplot(df, aes(x = model, y = waic)) +
@@ -199,17 +158,13 @@ ggplot(df, aes(x = model, y = waic, color=model)) +
 #| warning: false
 
 #load rhat_neff_df
-rhat_neff_df <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/modelFitting/modelDiagnostics/rhat_neff_df.csv") #created by modelDiagnostics/testingrhatneff.ipynb
-```{r}
-print(rhat_neff_df)
-```
+rhat_neff_df <- read.csv("modelFitting/modelDiagnostics/rhat_neff_df.csv") #created by modelDiagnostics/testingrhatneff.ipynb
 
-<p>Looking within stickiness models</p>
-```{r}
 rhat_neff_df <- rhat_neff_df[!grepl("stick0", rhat_neff_df$model, ignore.case = TRUE), ]
 rhat_neff_df <- rhat_neff_df[order(rhat_neff_df$min_neff, decreasing=TRUE), ] 
 print(subset(rhat_neff_df, select = -max_rhat))
 ```
+
 
 <p>Within this, the 'all parameter separately' flavour of model is the most theoretically informative (as it allows us to compare the three feedback-types) and it has the lowest WAIC value, suggesting that despite having the most free parameters, it is the most parsimonious. </p>
 
@@ -278,8 +233,9 @@ in_range_df <- data.frame()
 for(participant_no in 1:340){
     for(block_no in 1:3){
     subj_df = out_df[out_df$subject==participant_no,]
-    block_df = subj_df[subj_df$block_no, ]
-    in_range_prob = mean(subj_df[subj_df$subject==participant_no,]$in_range)
+    block_df = subj_df[subj_df$block == block_no, ]
+    #in_range_prob = mean(subj_df[subj_df$subject==participant_no,]$in_range)
+    in_range_prob = mean(block_df$in_range)
     df <- data.frame(
         subject = participant_no,
         block=block_no,
@@ -288,7 +244,7 @@ for(participant_no in 1:340){
     in_range_df <- rbind(in_range_df, df)
 }
 }
-saveRDS(in_range_df, "U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/modelFitting/modelDiagnostics/PPCs/in_range_df.rds")
+saveRDS(in_range_df, "modelFitting/modelDiagnostics/PPCs/in_range_df.rds")
 
 med<-as.numeric(quantile(in_range_df$in_range_prob, probs=0.5))
 q_index <- which.min(abs(in_range_df$in_range_prob - med))
@@ -317,8 +273,11 @@ ggplot(block_df, aes(x=trial)) +
 #| code-fold: true
 #| warning: false
 
-simul_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/simParams.rds")
-model_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/modelOutput/modelPars_1lr_stick1_blk3_allparamsep.rds")
+simul_pars <- readRDS("modelFitting/modelDiagnostics/ParamRecov/simParams.rds")
+model_pars <- readRDS("modelFitting/modelDiagnostics/ParamRecov/modelOutputs/modelPars_1lr_stick1_blk3_allparamsep.rds")
+
+# simul_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/simParams.rds")
+# model_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/modelOutput/modelPars_1lr_stick1_blk3_allparamsep.rds")
 
 param_recov <- merge(simul_pars, model_pars, by ='subjID')
 param_cors = cor(param_recov)

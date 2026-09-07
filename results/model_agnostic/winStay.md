@@ -16,13 +16,12 @@ feedback type (fear, disgust, points) on win-stay probability.
 - assessing whether adding video-ratings differences (identified in
   video-rating analyses) moderates results
 - sensitivity analysis
-- final conclusions
 
 </p>
 
 <h3>
 
-Load in packages and data- in python
+Load in packages and data in python
 </h3>
 
 <details class="code-fold">
@@ -37,8 +36,6 @@ import scipy.stats as stats
 import jsonlines
 from functools import reduce
 import statistics
-import scipy.stats
-import seaborn as sns
 import math
 import os
 import json
@@ -60,7 +57,7 @@ import itertools
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 
-task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary=pd.read_csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 
@@ -120,7 +117,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
-fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractalss': '0+fractals'}, re_formula='~block_type').fit(reml=False)
+fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) FAILED TO CONVERGE
 
 
@@ -407,7 +404,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) CONVERGENCE WARNING
 feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False) 
-        #had to comment out because it does not converge and errors out
+     
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False) 
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False) 
@@ -470,7 +467,7 @@ print("Winning models: "+ win1 +" "+ win2)
 
 <p>
 
-(again, the model with no additional random effects/slopes, with an age
+(again, the model with no additional random effects/slopes with an age
 covariate produced the best fit)
 </p>
 
@@ -585,7 +582,7 @@ assess whether outliers are driving this effect.
 
 <p>
 
-The originally planned outlier criteria is not fit for purpose due to
+The originally planned outlier criteria are not fit for purpose due to
 the large skew of the win-stay outcome. Instead, we run a sensitivity
 analysis excluding data-points that are outliers in terms of accuracy
 </p>
@@ -606,7 +603,12 @@ IQR_value = Q3 - Q1
 lower_bound = Q1 - 1.5 * IQR_value
 upper_bound = Q3 + 1.5 * IQR_value
 
-explore_df = task_summary[task_summary["percentage_correct"] >= lower_bound]
+#explore_df = task_summary[task_summary["percentage_correct"] >= lower_bound]
+
+explore_df = task_summary[
+    (task_summary["percentage_correct"] >= lower_bound) &
+    (task_summary["percentage_correct"] <= upper_bound)
+]
 ```
 
 </details>
@@ -650,7 +652,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
 feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
-        #had to comment out because it does not converge and errors out
+        
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
@@ -991,7 +993,7 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False)
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
 feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
-        #had to comment out because it does not converge and errors out
+      
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)

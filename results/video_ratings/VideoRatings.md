@@ -53,11 +53,11 @@ This notebook contains
   identify any differences in valence, arousal and habituation between
   the two stimulus types (models A and B).
 - Analysis of ratings of the selected Cowen and Keltner videos to
-  validate that fear and disgust was successfully induced (models C and
+  validate that fear and disgust were successfully induced (models C and
   D)
 - Analysis of the points ratings (in comparison to timepoint 1 of the
   selected videos) to assess how the points feedback differed from the
-  fear and disgust feedback (models E-G)
+  fear and disgust feedback (models E-H)
 - Exploratory video ratings analyses looking at <b>all</b> videos (not
   just those selected for the reversal learning task)
 
@@ -94,7 +94,7 @@ from numpy import std, mean, sqrt
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-chosen_stim_df = pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv")
+chosen_stim_df = pd.read_csv("../../csvs/chosen_stim_excluded.csv")
 chosen_stim_df.drop('Unnamed: 0', axis="columns", inplace=True)
 
 long_chosen_stim_df=pd.DataFrame()
@@ -509,7 +509,7 @@ print("Winning models: "+ win1 +" "+ win2)
 <p>
 
 - This model found an effect of trial-type: fear videos were more
-  frightening than fear (this was <b>as predicted</b>)
+  frightening than disgust (this was <b>as predicted</b>)
 - There was an effect of timepoint
 - There was a trial-type\*timepoint interaction (the fear ratings for
   fear and disgust videos changed differentially over time)
@@ -1120,8 +1120,8 @@ Firstly, create a long-form dataframe to allow for this
 
 ``` python
 #load additional data in
-vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
-task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+vid_ratings_df=pd.read_csv('../../csvs/ratings_df.csv')
+task_summary=pd.read_csv("../../csvs/dem_vids_task_excluded.csv")
 
 long_vid_ratings=pd.DataFrame()
 for i in vid_ratings_df.index:

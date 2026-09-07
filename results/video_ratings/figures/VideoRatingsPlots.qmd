@@ -38,16 +38,16 @@ plt.rcParams['figure.dpi'] = 300
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 warnings.simplefilter(action='ignore', category=UserWarning)
-FD_pvals=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/video_ratings/pvals/videoRating_pvals_fearDisgust.csv")
-expl_FD_pvals=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/video_ratings/pvals/exploratory_videoRating_pvals_fearDisgust.csv")
-#expl_points_pvals=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/Full_results_markdown/exploratory_videoRating_pvals_points.csv")
-points_pvals=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/video_ratings/pvals/videoRating_pvals_points.csv")
+FD_pvals=pd.read_csv("../pvals/videoRating_pvals_fearDisgust.csv")
+expl_FD_pvals=pd.read_csv("../pvals/exploratory_videoRating_pvals_fearDisgust.csv")
+#expl_points_pvals=pd.read_csv("../../../Full_results_markdown/exploratory_videoRating_pvals_points.csv")
+points_pvals=pd.read_csv("../pvals/videoRating_pvals_points.csv")
 
 
-task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
-chosen_stim_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
-vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
-excluded_demographics=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/demographics_excluded.csv')
+task_summary=pd.read_csv("../../../csvs/dem_vids_task_excluded.csv")
+chosen_stim_df=pd.read_csv('../../../csvs/chosen_stim_excluded.csv')
+vid_ratings_df=pd.read_csv('../../../csvs/ratings_df.csv')
+excluded_demographics=pd.read_csv('../../../csvs/demographics_excluded.csv')
 
 def pVal_annot(outcomeVar):
     fear_pVal=p_vals[p_vals.outcomeVar==outcomeVar].block_typeFear.iloc[0]

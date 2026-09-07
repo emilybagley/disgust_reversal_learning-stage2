@@ -9,6 +9,25 @@ fig-format: jpeg
 
 <h3>Load in packages and data- in python and then in r </h3>
 
+```{r, message=FALSE}
+#| label: R packages
+#| echo: true
+#| code-fold: true
+library(tidyverse, quietly=TRUE)
+library(lme4)
+library(emmeans)
+library(DHARMa)
+library('readxl')
+library('xlsx')
+
+#load winning model parameters
+params <- readRDS("modelFitting/modelOutputs/1lr_stick1_blk3_allparamsep/modelPars_1lr_stick1_blk3_allparamsep.rds")
+
+#save out as csv to be usable in Python
+write.csv(params, file="csvs/1lr_stick1_blk3_allparamsep_params.csv")
+```
+
+
 ```{python}
 #| label: Python packages
 #| echo: true
@@ -46,9 +65,11 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 pd.set_option('display.max_columns', None)
 
-filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1lr_stick1_blk3_allparamsep_params.csv"
+filepath="csvs/1lr_stick1_blk3_allparamsep_params.csv"
+
+
 params = pd.read_csv(filepath)
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
+task_summary=pd.read_csv('../../csvs/dem_vids_task_excluded.csv')
 task_summary.sort_values(by=['participant_no', 'block_type'], inplace=True)
 params['participant_no']=list(set(task_summary.participant_no))
 
@@ -86,17 +107,10 @@ df.to_csv("csvs/winningModelOutput.csv")
 pvals_file = 'pvals/ModelingPvalsForPlotting.xlsx'
 ```
 
+
 ```{r, message=FALSE}
-#| label: R packages
 #| echo: true
 #| code-fold: true
-library(tidyverse, quietly=TRUE)
-library(lme4)
-library(emmeans)
-library(DHARMa)
-library('readxl')
-library('xlsx')
-
 df <- read.csv("csvs/winningModelOutput.csv")
 pvals_file <- 'pvals/ModelingPvalsForPlotting.xlsx'
 ```
@@ -860,14 +874,14 @@ pvalForPlotting.to_excel(pvals_file, index=False)
 #| code-fold: true
 
 #load in all files
-filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1lr_stick1_blk3_allparamsep_params.csv"
+filepath="csvs/1lr_stick1_blk3_allparamsep_params.csv"
 params = pd.read_csv(filepath)
 
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
+task_summary=pd.read_csv('../../csvs/dem_vids_task_excluded.csv')
 task_summary.sort_values(by=['participant_no', 'block_type'], inplace=True)
 
-chosen_stim_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
-vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
+chosen_stim_df=pd.read_csv('../../csvs/chosen_stim_excluded.csv')
+vid_ratings_df=pd.read_csv('../../csvs/ratings_df.csv')
 
 ##due to error some don't have points values - so will have to exclude them
 participants_to_remove=list(set(chosen_stim_df[chosen_stim_df.unpleasant_1.isna()].participant_no))

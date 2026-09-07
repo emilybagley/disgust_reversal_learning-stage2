@@ -59,9 +59,9 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 pd.set_option('display.max_columns', None)
 
-filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1LR_stick1_blk3_allparamsep_params.csv"
+filepath="csvs/1lr_stick1_blk3_allparamsep_params.csv"
 params = pd.read_csv(filepath)
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
+task_summary=pd.read_csv('../../csvs/dem_vids_task_excluded.csv')
 task_summary.sort_values(by=['participant_no', 'block_type'], inplace=True)
 params['participant_no']=list(set(task_summary.participant_no))
 
@@ -1148,9 +1148,9 @@ print('stickiness skew: '+str(skew(df.stickiness.dropna())))
 <b>Mixed effects model assumptions violated</b>
 <p>
 
-In this case, a model with a random by-participant slope and no
-covariate produced the best fit (as indexed by BIC scores). But the
-model assumptions were violated:
+In this case, a model with no additional random effects and no covariate
+produced the best fit (as indexed by BIC scores). But the model
+assumptions were violated:
 
 <p>
 

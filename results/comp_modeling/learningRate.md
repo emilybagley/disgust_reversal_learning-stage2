@@ -25,6 +25,26 @@ Load in packages and data- in python and then in r
 <details class="code-fold">
 <summary>Code</summary>
 
+``` r
+library(tidyverse, quietly=TRUE)
+library(lme4)
+library(emmeans)
+library(DHARMa)
+library('readxl')
+library('xlsx')
+
+#load winning model parameters
+params <- readRDS("modelFitting/modelOutputs/1lr_stick1_blk3_allparamsep/modelPars_1lr_stick1_blk3_allparamsep.rds")
+
+#save out as csv to be usable in Python
+write.csv(params, file="csvs/1lr_stick1_blk3_allparamsep_params.csv")
+```
+
+</details>
+
+<details class="code-fold">
+<summary>Code</summary>
+
 ``` python
 import numpy as np
 import pandas as pd
@@ -59,9 +79,11 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 pd.set_option('display.max_columns', None)
 
-filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1lr_stick1_blk3_allparamsep_params.csv"
+filepath="csvs/1lr_stick1_blk3_allparamsep_params.csv"
+
+
 params = pd.read_csv(filepath)
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
+task_summary=pd.read_csv('../../csvs/dem_vids_task_excluded.csv')
 task_summary.sort_values(by=['participant_no', 'block_type'], inplace=True)
 params['participant_no']=list(set(task_summary.participant_no))
 
@@ -105,13 +127,6 @@ pvals_file = 'pvals/ModelingPvalsForPlotting.xlsx'
 <summary>Code</summary>
 
 ``` r
-library(tidyverse, quietly=TRUE)
-library(lme4)
-library(emmeans)
-library(DHARMa)
-library('readxl')
-library('xlsx')
-
 df <- read.csv("csvs/winningModelOutput.csv")
 pvals_file <- 'pvals/ModelingPvalsForPlotting.xlsx'
 ```
@@ -1391,14 +1406,14 @@ with the perseverative error outcome)
 
 ``` python
 #load in all files
-filepath="//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/1lr_stick1_blk3_allparamsep_params.csv"
+filepath="csvs/1lr_stick1_blk3_allparamsep_params.csv"
 params = pd.read_csv(filepath)
 
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
+task_summary=pd.read_csv('../../csvs/dem_vids_task_excluded.csv')
 task_summary.sort_values(by=['participant_no', 'block_type'], inplace=True)
 
-chosen_stim_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
-vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
+chosen_stim_df=pd.read_csv('../../csvs/chosen_stim_excluded.csv')
+vid_ratings_df=pd.read_csv('../../csvs/ratings_df.csv')
 
 ##due to error some don't have points values - so will have to exclude them
 participants_to_remove=list(set(chosen_stim_df[chosen_stim_df.unpleasant_1.isna()].participant_no))
@@ -1581,7 +1596,7 @@ axes[1,1].set_xlabel('Lose-shift')
 
 </details>
 
-![](learningRate_files/figure-commonmark/unnamed-chunk-37-3.jpeg)
+![](learningRate_files/figure-commonmark/unnamed-chunk-38-3.jpeg)
 
 <p>
 
@@ -1649,7 +1664,7 @@ axes[2].set_xlabel('Stickiness')
 
 </details>
 
-![](learningRate_files/figure-commonmark/unnamed-chunk-38-5.jpeg)
+![](learningRate_files/figure-commonmark/unnamed-chunk-39-5.jpeg)
 
 <p>
 
@@ -1738,7 +1753,7 @@ axes[1,1].set_xlabel('')
 
 </details>
 
-![](learningRate_files/figure-commonmark/unnamed-chunk-39-7.jpeg)
+![](learningRate_files/figure-commonmark/unnamed-chunk-40-7.jpeg)
 
 <p>
 

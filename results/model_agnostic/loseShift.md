@@ -22,7 +22,7 @@ feedback type (fear, disgust, points) on lose-shift probability.
 
 <h3>
 
-Load in packages and data- in python and in r
+Load in packages and data in python and in r
 </h3>
 
 <details class="code-fold">
@@ -37,8 +37,6 @@ import scipy.stats as stats
 import jsonlines
 from functools import reduce
 import statistics
-import scipy.stats
-import seaborn as sns
 import math
 import os
 import json
@@ -60,7 +58,7 @@ import itertools
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 
-task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary=pd.read_csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 
@@ -78,7 +76,7 @@ library(lme4)
 library(emmeans)
 library(DHARMa)
 
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary <- read.csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 ```
@@ -418,7 +416,7 @@ video-rating covariates.</b>
 
 <p>
 
-(again, the model with no additional random effects/slopes, with an age
+(again, the model with no additional random effects/slopes with an age
 covariate produced the best fit - but this time the model assumptions
 were violated)
 </p>
@@ -811,7 +809,7 @@ perseverative errors):
   (combining the fear and disgust block) and non-emotional learning (the
   points block)
 - Another assessing the presence of a difference between disgust-based
-  learning and learning which is not about digsust (combining the fear
+  learning and learning which is not about disgust (combining the fear
   and points blocks)
   <p>
 
@@ -954,9 +952,9 @@ Prepare the dataframe for this analysis
 <summary>Code</summary>
 
 ``` python
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
-chosen_stim_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
-vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
+task_summary=pd.read_csv('../../csvs/dem_vids_task_excluded.csv')
+chosen_stim_df=pd.read_csv('../../csvs/chosen_stim_excluded.csv')
+vid_ratings_df=pd.read_csv('../../csvs/ratings_df.csv')
 
 ##due to error some don't have points values - so will have to exclude them
 participants_to_remove=list(set(chosen_stim_df[chosen_stim_df.unpleasant_1.isna()].participant_no))
@@ -971,7 +969,7 @@ for participant_no in set(chosen_stim_df_short.participant_no):
     points=participant_df[participant_df.trial_type=="points"]
     fear=participant_df[participant_df.trial_type=="fear"]
     mean_valence=(int(disgust.unpleasant_1)+int(fear.unpleasant_1))/2
-    mean_arousal=(int(disgust.unpleasant_1)+int(fear.unpleasant_1))/2
+    mean_arousal=(int(disgust.arousing_1)+int(fear.arousing_1))/2
     valence_diff=int(points.unpleasant_1)-mean_valence
     arousal_diff=int(points.arousing_1)-mean_arousal
     
@@ -987,7 +985,7 @@ for participant_no in set(chosen_stim_df_short.participant_no):
 
 <p>
 
-Now show that the original effects remains in this slightly smaller
+Now show that the original effects remain in this slightly smaller
 sample:
 </p>
 
@@ -1043,18 +1041,18 @@ print(results.summary())
     Model:              MixedLM   Dependent Variable:   lose_shift
     No. Observations:   774       Method:               ML        
     No. Groups:         258       Scale:                0.0086    
-    Min. group size:    3         Log-Likelihood:       506.5560  
+    Min. group size:    3         Log-Likelihood:       506.4422  
     Max. group size:    3         Converged:            Yes       
     Mean group size:    3.0                                       
     --------------------------------------------------------------
                          Coef. Std.Err.   z    P>|z| [0.025 0.975]
     --------------------------------------------------------------
-    Intercept            0.584    0.027 21.564 0.000  0.531  0.637
+    Intercept            0.583    0.027 21.488 0.000  0.530  0.636
     block_type[T.Fear]   0.008    0.008  0.991 0.322 -0.008  0.024
     block_type[T.Points] 0.024    0.008  2.935 0.003  0.008  0.040
-    points_valence_diff  0.002    0.004  0.420 0.674 -0.006  0.009
-    points_arousal_diff  0.002    0.004  0.483 0.629 -0.006  0.010
-    prolific_age         0.001    0.001  2.326 0.020  0.000  0.002
+    points_valence_diff  0.002    0.004  0.692 0.489 -0.004  0.009
+    points_arousal_diff  0.000    0.004  0.075 0.940 -0.007  0.008
+    prolific_age         0.001    0.001  2.345 0.019  0.000  0.002
     Group Var            0.015    0.021                           
     ==============================================================
 

@@ -17,7 +17,6 @@ feedback type (fear, disgust, points) on regressive errors.
 - assessing whether adding video-ratings differences (identified in
   video-rating analyses) moderates results
 - sensitivity analysis (including generalized mixed effects models)
-- final conclusions
 
 </p>
 
@@ -37,7 +36,7 @@ library(DHARMa)
 library('xlsx')
 library('readxl')
 
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary <- read.csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 ```
@@ -79,7 +78,7 @@ import itertools
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 
-task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary=pd.read_csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 
@@ -632,7 +631,7 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
-                  #  'feedback_andint': ['CONVERGENCE WRANING'], 
+                  #  'feedback_randint': ['CONVERGENCE WARNING'], 
                    # 'fractals_randint': ['CONVERGENCE WARNING'],
                     'feedback_fractals_randint': [feedback_fractals_randint.bic], 
                     'randslope': [randslope.bic],
@@ -983,7 +982,7 @@ assess whether outliers are driving this effect.
 
 <p>
 
-The originally planned outlier criteria is not fit for purpose due to
+The originally planned outlier criteria are not fit for purpose due to
 the large skew of the regressive error outcome. Instead, we run a
 sensitivity analysis excluding data-points that are outliers in terms of
 accuracy
@@ -1088,7 +1087,7 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
-                   # 'feedback_andint': ['CONVERGENCE WARNING'], 
+                   # 'feedback_randint': ['CONVERGENCE WARNING'], 
                   #  'fractals_randint': ['CONVERGENCE WARNING'],
                    # 'feedback_fractals_randint': [feedback_fractals_randint.bic],
                     'randslope': [randslope.bic],
@@ -1242,7 +1241,7 @@ So we run a generalized mixed effects model (done in R)
 <summary>Code</summary>
 
 ``` r
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary <- read.csv("../../csvs/dem_vids_task_excluded.csv")
 Q1 <- quantile(task_summary$percentage_correct, 0.25)
 Q3 <- quantile(task_summary$percentage_correct, 0.75)
 
@@ -1602,17 +1601,38 @@ scores).
 <summary>Code</summary>
 
 ``` python
-data=task_summary.reset_index()
+data=sensitivity_df.reset_index()
 
 formula = 'regressive_er_transformed ~ block_type'
 
 basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
 
 #test which random effects to include
-#feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False)
-#fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
+feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False)
+```
+
+</details>
+
+    U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\statsmodels\regression\mixed_linear_model.py:2261: ConvergenceWarning: The Hessian matrix at the estimated parameter values is not positive definite.
+      warnings.warn(msg, ConvergenceWarning)
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
+fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
+```
+
+</details>
+
+    U:\Documents\envs\disgust_reversal_venv\Lib\site-packages\statsmodels\regression\mixed_linear_model.py:2261: ConvergenceWarning: The Hessian matrix at the estimated parameter values is not positive definite.
+      warnings.warn(msg, ConvergenceWarning)
+
+<details class="code-fold">
+<summary>Code</summary>
+
+``` python
 #feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
-        #had to comment out because it does not converge and errors out
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
@@ -1621,8 +1641,8 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
        
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
-                   # 'feedback_andint': ['CONVERGENCE WARNING'], 
-                   # 'fractals_randint': ['CONVERGENCE WARNING'],
+                    'feedback_randint': [feedback_randint.bic], 
+                    'fractals_randint': [fractals_randint.bic],
                    # 'feedback_fractals_randint': ['NOT CONVERGED'],
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
@@ -1637,8 +1657,8 @@ bic.sort_values(by=0, axis=1)
        basic_model    randslope  feedback_randint_randslope  \
     0  1147.738072  1173.506908                 1180.317054   
 
-       fractals_randint_randslope  
-    0                 1180.317054  
+       fractals_randint_randslope  fractals_randint  feedback_randint  
+    0                 1180.317054       1264.460955       1264.460955  
 
 <details class="code-fold">
 <summary>Code</summary>

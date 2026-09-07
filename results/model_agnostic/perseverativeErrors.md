@@ -18,7 +18,6 @@ feedback type (fear, disgust, points) on perseverative errors.
 - assessing whether adding video-ratings differences (identified in
   video-rating analyses) moderates results
 - sensitivity analysis (including generalized mixed effects models)
-- final conclusions
 
 </p>
 
@@ -38,7 +37,7 @@ library(DHARMa)
 library('readxl')
 library('xlsx')
 
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary <- read.csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 ```
@@ -81,7 +80,7 @@ import itertools
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 
-task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary=pd.read_csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 
@@ -591,7 +590,7 @@ Again, we select the best model using BIC values:
 ``` python
 data=task_summary.reset_index()
 
-formula = 'perseverative_er_transformed ~ block_type + +valence_diff + arousal_diff + valence_habdiff'
+formula = 'perseverative_er_transformed ~ block_type + valence_diff + arousal_diff + valence_habdiff'
 
 basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
 
@@ -1551,7 +1550,7 @@ range of accuracy (\>1.5 IQRs outside of the IQR)
 </p>
 
 ``` r
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary <- read.csv("../../csvs/dem_vids_task_excluded.csv")
 Q1 <- quantile(task_summary$percentage_correct, 0.25)
 Q3 <- quantile(task_summary$percentage_correct, 0.75)
 
@@ -1622,8 +1621,8 @@ feedback_fractals_randint <- glmer(pos_perseverative_er ~ block_type + (1|partic
 
 bic_values <- c(
   BIC(basic_model),
-  #BIC(feedback_fractals_randint),
-  BIC(fractals_randint_randslope)
+  BIC(feedback_fractals_randint)
+  #BIC(fractals_randint_randslope)
 )
 model_names <- c("basic model", "feedback_fractals_randint")
 
@@ -1637,7 +1636,7 @@ print(bic_df[order(bic_df$BIC), ])
 
                           Model      BIC
     1               basic model 1553.470
-    2 feedback_fractals_randint 1653.293
+    2 feedback_fractals_randint 1567.307
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -1806,7 +1805,7 @@ print(f"Points vs Fear: BF01({ttest['dof'].iloc[0]}) = {bf_null}")
 completeness</b>
 <p>
 
-Firstly, exclude outliers from the dataframe (outliers are define as
+Firstly, exclude outliers from the dataframe (outliers are defined as
 those \>1.5 IQRs above or below the upper or lower quartile)
 
 <details class="code-fold">

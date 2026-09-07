@@ -14,7 +14,6 @@ Includes:
 * resulting generalized mixed effects model
 * assessing whether adding video-ratings differences (identified in video-rating analyses) moderates results
 * sensitivity analysis (including generalized mixed effects models)
-* final conclusions
 </p>
 <h3>Load in packages and data- in r and then in python </h3>
 ```{r, message=FALSE}
@@ -28,7 +27,7 @@ library(DHARMa)
 library('xlsx')
 library('readxl')
 
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary <- read.csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 ```
@@ -69,7 +68,7 @@ import itertools
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 
-task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary=pd.read_csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 
@@ -400,7 +399,7 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
-                  #  'feedback_andint': ['CONVERGENCE WRANING'], 
+                  #  'feedback_randint': ['CONVERGENCE WARNING'], 
                    # 'fractals_randint': ['CONVERGENCE WARNING'],
                     'feedback_fractals_randint': [feedback_fractals_randint.bic], 
                     'randslope': [randslope.bic],
@@ -583,7 +582,7 @@ print(confint.merMod(generalized_model, method='Wald'))
 <h3> <b> Sensitivity analysis </b></h3>
 We also ran the same analyses after outliers had been excluded, to assess whether outliers are driving this effect.
 
-<p>The originally planned outlier criteria is not fit for purpose due to the large skew of the regressive error outcome. Instead, we run a sensitivity analysis excluding data-points that are outliers in terms of accuracy</p>
+<p>The originally planned outlier criteria are not fit for purpose due to the large skew of the regressive error outcome. Instead, we run a sensitivity analysis excluding data-points that are outliers in terms of accuracy</p>
 
 <p>And also show that, as expected, accuracy is negatively correlated with the regressive error outcome.</p>
 ```{python}
@@ -646,7 +645,7 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
-                   # 'feedback_andint': ['CONVERGENCE WARNING'], 
+                   # 'feedback_randint': ['CONVERGENCE WARNING'], 
                   #  'fractals_randint': ['CONVERGENCE WARNING'],
                    # 'feedback_fractals_randint': [feedback_fractals_randint.bic],
                     'randslope': [randslope.bic],
@@ -721,7 +720,7 @@ for key, val in dict(zip(labels, het_white_res)).items():
 ```{R}
 #| label: alternative outlier exclusion R
 #| code-fold: true
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary <- read.csv("../../csvs/dem_vids_task_excluded.csv")
 Q1 <- quantile(task_summary$percentage_correct, 0.25)
 Q3 <- quantile(task_summary$percentage_correct, 0.75)
 
@@ -926,17 +925,16 @@ In this case, the basic model (no random slopes or random intercepts) with no ad
 #| echo: true
 #| code-fold: true
 
-data=task_summary.reset_index()
+data=sensitivity_df.reset_index()
 
 formula = 'regressive_er_transformed ~ block_type'
 
 basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
 
 #test which random effects to include
-#feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False)
-#fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
+feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False)
+fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
 #feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
-        #had to comment out because it does not converge and errors out
 
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
@@ -945,8 +943,8 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
        
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
-                   # 'feedback_andint': ['CONVERGENCE WARNING'], 
-                   # 'fractals_randint': ['CONVERGENCE WARNING'],
+                    'feedback_randint': [feedback_randint.bic], 
+                    'fractals_randint': [fractals_randint.bic],
                    # 'feedback_fractals_randint': ['NOT CONVERGED'],
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],

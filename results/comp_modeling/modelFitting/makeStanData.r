@@ -28,7 +28,7 @@ data$block_no=data$block_no+1
 data$block_Type <- tolower(data$block_Type)
 data <- as.data.frame(data)
 
-#set up sim data for stan
+#set up data for stan
 df <- data %>% arrange(subjID, block_Type) ##make sure blocks go disgust, fear, points
 subj_list <- unique(df$subjID)
 N <- length(subj_list)

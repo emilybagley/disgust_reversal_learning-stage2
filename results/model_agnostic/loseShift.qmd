@@ -15,7 +15,7 @@ Includes:
 * sensitivity analysis 
 * final conclusions
 </p>
-<h3>Load in packages and data- in python and in r </h3>
+<h3>Load in packages and data in python and in r </h3>
 ```{python}
 #| label: Python packages
 #| echo: true
@@ -28,8 +28,6 @@ import scipy.stats as stats
 import jsonlines
 from functools import reduce
 import statistics
-import scipy.stats
-import seaborn as sns
 import math
 import os
 import json
@@ -51,7 +49,7 @@ import itertools
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.copy_on_write = True
 
-task_summary=pd.read_csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary=pd.read_csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 
@@ -67,7 +65,7 @@ library(lme4)
 library(emmeans)
 library(DHARMa)
 
-task_summary <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv")
+task_summary <- read.csv("../../csvs/dem_vids_task_excluded.csv")
 
 pvals_file = 'pvals/pvalsForPlotting.xlsx'
 ```
@@ -260,7 +258,7 @@ pvalForPlotting.to_excel(pvals_file, index=False)
 
 <br>
 <p><b>Next, we showed that this result is unchanged by the addition of video-rating covariates.</b></p>
-<p>(again, the model with no additional random effects/slopes, with an age covariate produced the best fit - but this time the model assumptions were violated)</p>
+<p>(again, the model with no additional random effects/slopes with an age covariate produced the best fit - but this time the model assumptions were violated)</p>
 
 ```{python}
 #| label: Mixed effects model video ratings - model selection
@@ -466,7 +464,7 @@ print("Number of lose-shift outliers: "+str(len(sensitivity_df[sensitivity_df.lo
 <p>To assess this, we run two competing models (as was done before for perseverative errors):
 <p>
 * One assessing the presence of a difference between emotional learning (combining the fear and disgust block) and non-emotional learning (the points block)
-* Another assessing the presence of a difference between disgust-based learning and learning which is not about digsust (combining the fear and points blocks)
+* Another assessing the presence of a difference between disgust-based learning and learning which is not about disgust (combining the fear and points blocks)
 <p>We will use a) the presence/absence of significant results and b) the model fit (as indexed by BIC - as before) to guide interpretation of these competing models</p>
 
 ```{python}
@@ -529,9 +527,9 @@ print(bic.sort_values(by=0, axis=1))
 <p>Prepare the dataframe for this analysis</p>
 ```{python}
 #| code-fold: true
-task_summary=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/dem_vids_task_excluded.csv')
-chosen_stim_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/chosen_stim_excluded.csv')
-vid_ratings_df=pd.read_csv('U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/csvs/ratings_df.csv')
+task_summary=pd.read_csv('../../csvs/dem_vids_task_excluded.csv')
+chosen_stim_df=pd.read_csv('../../csvs/chosen_stim_excluded.csv')
+vid_ratings_df=pd.read_csv('../../csvs/ratings_df.csv')
 
 ##due to error some don't have points values - so will have to exclude them
 participants_to_remove=list(set(chosen_stim_df[chosen_stim_df.unpleasant_1.isna()].participant_no))
@@ -546,7 +544,7 @@ for participant_no in set(chosen_stim_df_short.participant_no):
     points=participant_df[participant_df.trial_type=="points"]
     fear=participant_df[participant_df.trial_type=="fear"]
     mean_valence=(int(disgust.unpleasant_1)+int(fear.unpleasant_1))/2
-    mean_arousal=(int(disgust.unpleasant_1)+int(fear.unpleasant_1))/2
+    mean_arousal=(int(disgust.arousing_1)+int(fear.arousing_1))/2
     valence_diff=int(points.unpleasant_1)-mean_valence
     arousal_diff=int(points.arousing_1)-mean_arousal
     
@@ -558,7 +556,7 @@ for participant_no in set(chosen_stim_df_short.participant_no):
     stim_ratings_covariates=pd.concat([stim_ratings_covariates, row])
 ```
 
-<p> Now show that the original effects remains in this slightly smaller sample: </p>
+<p> Now show that the original effects remain in this slightly smaller sample: </p>
 
 ```{python}
 #| code-fold: true

@@ -113,7 +113,9 @@ to the data
 <summary>Code</summary>
 
 ``` r
-folder <- "//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelOutputs"
+# folder <- "//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelOutputs"
+
+folder <- "modelFitting/modelOutputs"
 loglik_list <- list()
 waic_list <- list()
 modelname_list <-list()
@@ -133,75 +135,32 @@ for (filename in list.dirs(folder, recursive=FALSE)){
 
 df <- data.frame(
   model = names(waic_list),
-  waic = c(
-    waic_list[[modelname_list[[1]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[2]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[3]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[4]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[5]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[6]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[7]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[8]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[9]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[10]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[11]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[12]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[13]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[14]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[15]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[16]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[17]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[18]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[19]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[20]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[21]]]]$estimates["waic", "Estimate"]
-    ),
-  se = c(
-    waic_list[[modelname_list[[1]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[2]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[3]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[4]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[5]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[6]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[7]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[8]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[9]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[10]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[11]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[12]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[13]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[14]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[15]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[16]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[17]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[18]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[19]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[20]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[21]]]]$estimates["waic", "SE"]
-    )
+  waic = sapply(modelname_list, function(m) waic_list[[m]]$estimates["waic", "Estimate"]),
+  se   = sapply(modelname_list, function(m) waic_list[[m]]$estimates["waic", "SE"])
 )
+
 df <- df[order(df$waic), ] 
 df$model <- factor(df$model, levels = df$model[order(df$waic)])
-df <- df[!grepl("hybrid", df$model, ignore.case = TRUE), ]
+#df <- df[!grepl("hybrid", df$model, ignore.case = TRUE), ]
 print(df)
 ```
 
 </details>
 
                                 model     waic       se
-    16    2lr_stick1_blk3_allparamsep 109838.9 3639.941
-    6     1lr_stick1_blk3_allparamsep 110113.0 3638.806
-    18        2lr_stick1_blk3_emVsNot 110679.9 3660.760
-    8         1lr_stick1_blk3_emVsNot 110958.8 3658.060
-    17 2lr_stick1_blk3_allparamshared 111141.4 3673.464
-    7  1lr_stick1_blk3_allparamshared 111438.2 3668.803
-    11    2lr_stick0_blk3_allparamsep 112864.5 3546.958
+    10    2lr_stick1_blk3_allparamsep 109838.9 3639.941
+    4     1lr_stick1_blk3_allparamsep 110113.0 3638.806
+    12        2lr_stick1_blk3_emVsNot 110679.9 3660.760
+    6         1lr_stick1_blk3_emVsNot 110958.8 3658.060
+    11 2lr_stick1_blk3_allparamshared 111141.4 3673.464
+    5  1lr_stick1_blk3_allparamshared 111438.2 3668.803
+    7     2lr_stick0_blk3_allparamsep 112864.5 3546.958
     1     1lr_stick0_blk3_allparamsep 113142.1 3549.225
-    13        2lr_stick0_blk3_emVsNot 113585.9 3574.687
+    9         2lr_stick0_blk3_emVsNot 113585.9 3574.687
     3         1lr_stick0_blk3_emVsNot 113851.4 3572.948
-    12 2lr_stick0_blk3_allparamshared 114083.8 3598.087
+    8  2lr_stick0_blk3_allparamshared 114083.8 3598.087
     2  1lr_stick0_blk3_allparamshared 114378.1 3595.745
-    21                    random_blk3 153385.1 2693.042
+    13                    random_blk3 153385.1 2693.042
 
 <details class="code-fold">
 <summary>Code</summary>
@@ -220,7 +179,7 @@ ggplot(df, aes(x = model, y = waic)) +
 
 </details>
 
-![](modelCompAndChecks_files/figure-commonmark/WAIC%20model%20comparison-1.jpeg)
+![](modelCompAndChecks_files/figure-commonmark/model%20comparison-1.jpeg)
 
 <p>
 
@@ -269,39 +228,14 @@ learning rate models))
 
 ``` r
 #load rhat_neff_df
-rhat_neff_df <- read.csv("U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/modelFitting/modelDiagnostics/rhat_neff_df.csv") #created by modelDiagnostics/testingrhatneff.ipynb
-```
+rhat_neff_df <- read.csv("modelFitting/modelDiagnostics/rhat_neff_df.csv") #created by modelDiagnostics/testingrhatneff.ipynb
 
-</details>
-
-``` r
-print(rhat_neff_df)
-```
-
-                            modelName max_rhat  min_neff
-    1  1lr_stick0_blk3_allparamshared 1.002824 0.6965478
-    2         1lr_stick0_blk3_emVsNot 1.003005 0.8257590
-    3         1lr_stick1_blk3_emVsNot 1.003008 0.8099417
-    4  2lr_stick0_blk3_allparamshared 1.003138 0.7574476
-    5         2lr_stick1_blk3_emVsNot 1.003234 0.3644348
-    6     1lr_stick0_blk3_allparamsep 1.003318 0.8133144
-    7     2lr_stick1_blk3_allparamsep 1.003421 0.3482681
-    8     1lr_stick1_blk3_allparamsep 1.003552 0.7669077
-    9  1lr_stick1_blk3_allparamshared 1.004014 0.8345388
-    10        2lr_stick0_blk3_emVsNot 1.004530 0.5568611
-    11    2lr_stick0_blk3_allparamsep 1.005152 0.3515511
-    12 2lr_stick1_blk3_allparamshared 1.013680 0.3090907
-
-<p>
-
-Looking within stickiness models
-</p>
-
-``` r
 rhat_neff_df <- rhat_neff_df[!grepl("stick0", rhat_neff_df$model, ignore.case = TRUE), ]
 rhat_neff_df <- rhat_neff_df[order(rhat_neff_df$min_neff, decreasing=TRUE), ] 
 print(subset(rhat_neff_df, select = -max_rhat))
 ```
+
+</details>
 
                             modelName  min_neff
     9  1lr_stick1_blk3_allparamshared 0.8345388
@@ -412,8 +346,9 @@ in_range_df <- data.frame()
 for(participant_no in 1:340){
     for(block_no in 1:3){
     subj_df = out_df[out_df$subject==participant_no,]
-    block_df = subj_df[subj_df$block_no, ]
-    in_range_prob = mean(subj_df[subj_df$subject==participant_no,]$in_range)
+    block_df = subj_df[subj_df$block == block_no, ]
+    #in_range_prob = mean(subj_df[subj_df$subject==participant_no,]$in_range)
+    in_range_prob = mean(block_df$in_range)
     df <- data.frame(
         subject = participant_no,
         block=block_no,
@@ -422,7 +357,7 @@ for(participant_no in 1:340){
     in_range_df <- rbind(in_range_df, df)
 }
 }
-saveRDS(in_range_df, "U:/Documents/Disgust learning project/github/disgust_reversal_learning-final/results/comp_modeling/modelFitting/modelDiagnostics/PPCs/in_range_df.rds")
+saveRDS(in_range_df, "modelFitting/modelDiagnostics/PPCs/in_range_df.rds")
 
 med<-as.numeric(quantile(in_range_df$in_range_prob, probs=0.5))
 q_index <- which.min(abs(in_range_df$in_range_prob - med))
@@ -466,8 +401,11 @@ parameters used to simulate the dataset
 <summary>Code</summary>
 
 ``` r
-simul_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/simParams.rds")
-model_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/modelOutput/modelPars_1lr_stick1_blk3_allparamsep.rds")
+simul_pars <- readRDS("modelFitting/modelDiagnostics/ParamRecov/simParams.rds")
+model_pars <- readRDS("modelFitting/modelDiagnostics/ParamRecov/modelOutputs/modelPars_1lr_stick1_blk3_allparamsep.rds")
+
+# simul_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/simParams.rds")
+# model_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/modelOutput/modelPars_1lr_stick1_blk3_allparamsep.rds")
 
 param_recov <- merge(simul_pars, model_pars, by ='subjID')
 param_cors = cor(param_recov)

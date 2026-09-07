@@ -45,7 +45,9 @@ Model comparison
 <summary>Code</summary>
 
 ``` r
-folder <- "//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelOutputs"
+#folder <- "//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelOutputs"
+folder <- '../modelFitting/modelOutputs'
+
 loglik_list <- list()
 waic_list <- list()
 modelname_list <-list()
@@ -65,58 +67,14 @@ for (filename in list.dirs(folder, recursive=FALSE)){
 
 df <- data.frame(
   model = names(waic_list),
-  waic = c(
-    waic_list[[modelname_list[[1]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[2]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[3]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[4]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[5]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[6]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[7]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[8]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[9]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[10]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[11]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[12]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[13]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[14]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[15]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[16]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[17]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[18]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[19]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[20]]]]$estimates["waic", "Estimate"],
-    waic_list[[modelname_list[[21]]]]$estimates["waic", "Estimate"]
-    ),
-  se = c(
-    waic_list[[modelname_list[[1]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[2]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[3]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[4]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[5]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[6]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[7]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[8]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[9]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[10]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[11]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[12]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[13]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[14]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[15]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[16]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[17]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[18]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[19]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[20]]]]$estimates["waic", "SE"],
-    waic_list[[modelname_list[[21]]]]$estimates["waic", "SE"]
-    )
+  waic = sapply(modelname_list, function(m) waic_list[[m]]$estimates["waic", "Estimate"]),
+  se   = sapply(modelname_list, function(m) waic_list[[m]]$estimates["waic", "SE"])
 )
+
 df <- df[order(df$waic), ] 
 df$winner <- FALSE
 df$winner[2] <- TRUE #the winning model has the second lowest BIC score
 df$model <- factor(df$model, levels = df$model[order(df$waic)])
-df <- df[!grepl("hybrid", df$model, ignore.case = TRUE), ]
 
 theme_set(theme_bw())
 df <- df[!grepl("random", df$model, ignore.case = TRUE), ]
@@ -201,10 +159,10 @@ plot <- plot +
   ) +
   geom_text(
     data = df[df$winner, ],
-    aes(x = model, y = y_arrow - 300, label = "Selected model"),
+    aes(x = model, y = y_arrow - 300, label = "Winning model"),
     inherit.aes = FALSE,
-    size = 5,
-    fontface = "bold"
+    size = 5
+    #fontface = "bold"
   )
 
 ggsave("ModelComp_plot.png", plot, width = 6, height = 4, dpi = 300, bg='white', units='in')
@@ -259,8 +217,11 @@ Parameter recovery
 <summary>Code</summary>
 
 ``` r
-simul_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/simParams.rds")
-model_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/modelOutput/modelPars_1lr_stick1_blk3_allparamsep.rds")
+simul_pars <- readRDS("../modelFitting/modelDiagnostics/ParamRecov/simParams.rds")
+model_pars <- readRDS("../modelFitting/modelDiagnostics/ParamRecov/modelOutputs/modelPars_1lr_stick1_blk3_allparamsep.rds")
+
+# simul_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/simParams.rds")
+# model_pars <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/ParamRecov/modelOutput/modelPars_1lr_stick1_blk3_allparamsep.rds")
 
 param_recov <- merge(simul_pars, model_pars, by ='subjID')
 param_cors = cor(param_recov)
@@ -464,7 +425,7 @@ base_theme <- theme_minimal(base_size = 20) +
     axis.text = element_text(size = 20)
   )
 
-postpred_alltrials <- readRDS("//cbsu/data/Group/Nord/DisgustReversalLearningModeling/finalModelComp/modelCompAndDiagnostics/PPCs/postpred_alltrials_1lr_stick1_blk3_allparamsep.rds")
+postpred_alltrials <- readRDS("../modelFitting/modelDiagnostics/PPCs/postpred_alltrials_1lr_stick1_blk3_allparamsep.rds")
 in_range_df <- readRDS("../modelFitting/modelDiagnostics/PPCs/in_range_df.rds")
         #created by PPCs.R script
 
