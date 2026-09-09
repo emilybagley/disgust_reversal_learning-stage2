@@ -152,9 +152,19 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) 
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) 
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
 
-randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+    feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+    feedback_fractals_randint_bic = feedback_fractals_randint.bic
+except Exception as e:
+    feedback_fractals_randint_bic = None
+
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+    randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+    randslope_bic = randslope.bic
+except Exception as e:
+    feedback_fractals_randint_bic = None
+
 #feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
 #fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
@@ -163,8 +173,8 @@ randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='dro
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                     #'feedback_randint': [feedback_randint.bic], 
                     #'fractals_randint': [fractals_randint.bic],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
-                    'randslope': [randslope.bic],
+                    'feedback_fractals_randint': [feedback_fractals_randint_bic], 
+                    'randslope': [randslope_bic],
                     #'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     #'fractals_randint_randslope': [fractals_randint_randslope.bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
@@ -646,21 +656,39 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) 
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) 
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
 
-randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+    feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+    feedback_fractals_randint_bic = feedback_fractals_randint.bic
+except Exception as e:
+    feedback_fractals_randint_bic = None
+
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+    randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+    randslope_bic = randslope.bic
+except Exception as e:
+    randslope_bic = None
+
 #feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
-fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
+
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+    fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
+    fractals_randint_randslope_bic = fractals_randint_randslope.bic
+except Exception as e:
+    fractals_randint_randslope_bic = None
+
+
+
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 bic=pd.DataFrame({#'basic_model': [basic_model.bic], 
                     #'feedback_randint': [feedback_randint.bic], 
                     #'fractals_randint': [fractals_randint.bic],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic], ##added manually
-                    'randslope': [randslope.bic],
+                    'feedback_fractals_randint': [feedback_fractals_randint_bic], 
+                    'randslope': [randslope_bic],
                     #'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     'fractals_randint_randslope':
-                    [fractals_randint_randslope.bic],
+                    [fractals_randint_randslope_bic],
                     #'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]
                     })
 print(bic.sort_values(by=0, axis=1))

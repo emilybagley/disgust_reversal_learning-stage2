@@ -1997,12 +1997,20 @@ White Lagrange multiplier Test for Heteroscedasticity
 #chosen model
 ##homoskedasticity of variance 
 #White Lagrange Multiplier Test for Heteroscedasticity
-het_white_res = het_white(results.resid, results.model.exog)
 
-labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+  het_white_res = het_white(results.resid, results.model.exog)
+  labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
 
-for key, val in dict(zip(labels, het_white_res)).items():
-    print(key, val)
+  for key, val in dict(zip(labels, het_white_res)).items():
+      print(key, val)
+      ##again, only violated if you get a significant p value
+except Exception as e:
+    import traceback
+    print(f"White's test for heteroscedasticity failed on this platform: {type(e).__name__}: {e}")
+    print(f"Design matrix (exog) shape: {results.model.exog.shape}")
+    print(f"Design matrix column names: {results.model.exog_names}")
+    print(f"Residuals shape: {results.resid.shape}")
 ```
 
 </details>
@@ -2011,15 +2019,6 @@ for key, val in dict(zip(labels, het_white_res)).items():
     LM-Test p-value 1.0
     F-Statistic -1.168669420239847
     F-Test p-value 1.0
-
-<details class="code-fold">
-<summary>Code</summary>
-
-``` python
-    ##again, only violated if you get a significant p value
-```
-
-</details>
 
 <h4>
 

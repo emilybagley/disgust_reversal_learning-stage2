@@ -418,9 +418,14 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
-        
 
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+    feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+    feedback_fractals_randint_bic = feedback_fractals_randint.bic
+except Exception as e:
+    feedback_fractals_randint_bic = None
+
+     
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
 fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
@@ -430,7 +435,7 @@ fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_n
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                     #'feedback_randint': ['CONVERGENCE WARNING'], 
                    # 'fractals_randint': ['CONVERGENCE WARNING'],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic], 
+                    'feedback_fractals_randint': [feedback_fractals_randint_bic], 
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     'fractals_randint_randslope': [fractals_randint_randslope.bic]
@@ -583,7 +588,7 @@ def replace_outliers_with_nan(df, column):
 key_outcomes=['percentage_correct', 'mean_perseverative_er', 'mean_regressive_er', 'median_till_correct', 'win_stay', 'lose_shift']
 for col in key_outcomes:
     task_summary=replace_outliers_with_nan(task_summary, col)
-task_summary.to_csv('sensitivity_df.csv')
+#task_summary.to_csv('sensitivity_df.csv')
 sensitivity_df=task_summary
 ```
 
@@ -614,22 +619,31 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False)
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
-      
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+    feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+    feedback_fractals_randint_bic = feedback_fractals_randint.bic
+except Exception as e:
+    feedback_fractals_randint_bic = None
 
+      
 randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
 feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
 fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
-feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
+
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+    feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
+    feedback_fractals_randint_randslope_bic = feedback_fractals_randint_randslope.bic
+except Exception as e:
+    feedback_fractals_randint_randslope_bic = None
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                   #  'feedback_randint': ['CONVERGENCE WARNING'], 
                    # 'fractals_randint': ['CONVERGENCE WARNING'],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic], 
+                    'feedback_fractals_randint': [feedback_fractals_randint_bic], 
                     'randslope': [randslope.bic],
                     'feedback_randint_randslope':[feedback_randint_randslope.bic],
                     'fractals_randint_randslope': [fractals_randint_randslope.bic],
-                    'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope.bic]})
+                    'feedback_fractals_randint_randslope': [feedback_fractals_randint_randslope_bic]})
 print(bic.sort_values(by=0, axis=1))
 win1=bic.sort_values(by=0, axis=1).columns[0]
 

@@ -1280,15 +1280,19 @@ White Lagrange multiplier Test for Heteroscedasticity
 <summary>Code</summary>
 
 ``` python
-#chosen model
-##homoskedasticity of variance 
-#White Lagrange Multiplier Test for Heteroscedasticity
-het_white_res = het_white(results.resid, results.model.exog)
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+  het_white_res = het_white(results.resid, results.model.exog)
+  labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
 
-labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
-
-for key, val in dict(zip(labels, het_white_res)).items():
-    print(key, val)
+  for key, val in dict(zip(labels, het_white_res)).items():
+      print(key, val)
+      ##again, only violated if you get a significant p value
+except Exception as e:
+    import traceback
+    print(f"White's test for heteroscedasticity failed on this platform: {type(e).__name__}: {e}")
+    print(f"Design matrix (exog) shape: {results.model.exog.shape}")
+    print(f"Design matrix column names: {results.model.exog_names}")
+    print(f"Residuals shape: {results.resid.shape}")
 ```
 
 </details>

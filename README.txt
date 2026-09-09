@@ -7,12 +7,35 @@ Alternatively, this folder can be downloaded in its entirety - markdown files ca
 
 Instructions for reproducibility:
 1. Download folder in its entirety
-2. Install quarto 
-3. Create a python environment using Python3.12 and the requirements.txt file
-4. Replicate the renv (Rscript -e 'renv::restore()') and install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering
-5. Render quarto files (e.g., quarto render VideoRatings.qmd)
-NB model fitting/comparisons within the computational modeling section (comp_modeling) are too computationally expensive to be run this way and full details of this process is found within the comp_modeling/modelFitting folder
 
+2. Install quarto (https://quarto.org/docs/get-started/)
+
+3. Create and activate a python environment within the folder using Python3.12 and the requirements.txt file:
+python3.12 -m venv disgust_env
+source disgust_env/bin/activate
+pip install -r requirements.txt
+
+4. Create a .renvignore file in the project root to exclude non-R directories from dependency scanning:
+cat > .renvignore << 'EOF'
+disgust_env
+data/
+csvs/
+results/
+EOF
+
+5. Restore the renv environment: Rscript -e 'renv::restore()' and install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering
+
+6. Render quarto files (e.g., quarto render results/video_ratings/VideoRatings.qmd)
+
+Trouble shooting:
+If Quarto cannot find R packages when rendering, confirm it is using 
+the correct R installation by running `quarto check` and comparing 
+the R path shown against `R.home()` run inside R. If they differ, set:
+export QUARTO_R=$(Rscript -e 'cat(R.home())'). 
+
+If Quarto reports that a package is unavailable, first run Rscript -e 'renv::status()' to check whether the installed R library is consistent with renv.lock. If packages are out of sync, run Rscript -e 'renv::restore()' before attempting to install packages manually.
+
+NB model fitting/comparisons within the computational modeling section (comp_modeling/modelFitting) were run using a HPC rather than localy rendered quarto files
 
 LIST OF FOLDERS AND FILES:
 Csvs folder:
@@ -39,9 +62,11 @@ C_power_analysis_withinsubjcorr: carries out additional checks for the main powe
 D_power_analysis_maximalmodels:  carries out additional checks for the main power analysis. 
     namely, assessing the effects of a more maximal model on power.
 
+
 renv folder:
 necessary contents for activating R environment  (allows you to replicate the renv (Rscript -e 'renv::restore()')
 Then should install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering)
+
 
 results folder:
 /video_ratings folder
@@ -74,10 +99,10 @@ sensitivity_winningModelOutput.csv: parameters from the winning model once outli
 
 modelCompAndChecks.md: contains model comparison and checks on the winning model
 modelCompAndChecks.qmd: quartofile to create markdown
-inverseTemp.md: contains analyses on inverse temperature parameter
-inverseTemp.qmd: quartofile to create markdown
 learningRate.md: contains analyses on learning rate parameter
 learningRate.qmd: quartofile to create markdown
+inverseTemp.md: contains analyses on inverse temperature parameter
+inverseTemp.qmd: quartofile to create markdown
 stickiness.md: contains analyses on stickiness parameter
 stickiness.qmd:quartofile to create markdown
 

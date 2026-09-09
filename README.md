@@ -9,11 +9,20 @@ Note, data is not shared in this repo but can be found on the corresponding OSF 
 <br>
 <b>Instructions for reproducibility:</b>
 <p>1. Download folder in its entirety
+
 <p>2. Install quarto 
+
 <p>3. Create a python environment using Python3.12 and the requirements.txt file
-<p>4. Replicate the renv (Rscript -e 'renv::restore()') and install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering
-<p>5. Render quarto files (e.g., quarto render VideoRatings.qmd)
-<p>NB model fitting/comparisons within the computational modeling section (comp_modeling) are too computationally expensive to be run this way and full details of this process is found within the comp_modeling/modelFitting folder
+
+
+<p>4. Create a .renvignore file in the project root to exclude non-R directories from dependency scanning
+
+<p>5. Restore the renv (Rscript -e 'renv::restore()') and install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering
+
+
+<p>6. Render quarto files (e.g., quarto render VideoRatings.qmd)
+
+<p>NB model fitting/comparisons within the computational modeling section (comp_modeling/modelFitting) were run using a HPC rather than locally rendered quarto files
 
 <br>
 <h3>Csvs folder:</h3>
