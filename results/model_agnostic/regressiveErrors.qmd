@@ -20,6 +20,7 @@ Includes:
 #| label: R packages
 #| echo: true
 #| code-fold: true
+#install.packages("reticulate")
 library(tidyverse, quietly=TRUE)
 library(lme4)
 library(emmeans)
@@ -106,21 +107,40 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) CONVERGENCE WARNING
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + 	feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+    feedback_fractals_randint_bic = feedback_fractals_randint.bic
+except Exception as e:
+    feedback_fractals_randint_bic = None
 
-randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
-feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
-fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+    randslope_bic = randslope.bic
+except Exception as e:
+    randslope_bic = None
+
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0	+feedback_details'}, re_formula='~block_type').fit(reml=False)
+    feedback_randint_randslope_bic = feedback_randint_randslope.bic
+except Exception as e:
+    feedback_randint_randslope_bic=None
+
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, 	re_formula='~block_type').fit(reml=False)
+    fractals_randint_randslope_bic = fractals_randint_randslope.bic
+except Exception as e:
+    fractals_randint_randslope_bic = None
+
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) CONVERGENCE WARNING
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                    # 'feedback_andint': ['CONVERGENCE WARNING'], 
                   #  'fractals_randint': ['CONVERGENCE WARNING'],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic],
-                    'randslope': [randslope.bic],
-                    'feedback_randint_randslope':[feedback_randint_randslope.bic],
-                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
+                    'feedback_fractals_randint': [feedback_fractals_randint_bic],
+                    'randslope': [randslope_bic],
+                    'feedback_randint_randslope':[feedback_randint_randslope_bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope_bic]
                    # 'feedback_fractals_randint_randslope': ['CONVERGENCE WARNING']
                    })
 bic.sort_values(by=0, axis=1)
@@ -176,13 +196,19 @@ for key, val in dict(zip(labels, norm_res)).items():
 #chosen model
 ##homoskedasticity of variance 
 #White Lagrange Multiplier Test for Heteroscedasticity
-het_white_res = het_white(results.resid, results.model.exog)
+try: #this model runs on windows but not on Mac. Modified code so that it doesn't break the notebook when using mac
+  het_white_res = het_white(results.resid, results.model.exog)
+  labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
 
-labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
-
-for key, val in dict(zip(labels, het_white_res)).items():
-    print(key, val)
-    ##again, only violated if you get a significant p value
+  for key, val in dict(zip(labels, het_white_res)).items():
+      print(key, val)
+      ##again, only violated if you get a significant p value
+except Exception as e:
+    import traceback
+    print(f"White's test for heteroscedasticity failed on this platform: {type(e).__name__}: {e}")
+    print(f"Design matrix (exog) shape: {results.model.exog.shape}")
+    print(f"Design matrix column names: {results.model.exog_names}")
+    print(f"Residuals shape: {results.resid.shape}")
 ```
 
 
@@ -389,22 +415,39 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #test which random effects to include
 #feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False) CONVERGENCE WARNING
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) CONVERGENCE WARNING
-feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
-        #had to comment out because it does not converge and errors out
+try:
+    feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
+    feedback_fractals_randint_bic = feedback_fractals_randint.bic
+except Exception as e:
+    feedback_fractals_randint_bic = None
 
-randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
-feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
-fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
+try:
+    randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+    randslope_bic = randslope.bic
+except Exception as e:
+    randslope_bic = None
+
+try:
+    feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
+    feedback_randint_randslope_bic = feedback_randint_randslope.bic
+except Exception as e:
+    feedback_randint_randslope_bic = None
+
+try:
+    fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
+    fractals_randint_randslope_bic = fractals_randint_randslope.bic
+except Exception as e:
+    fractals_randint_randslope_bic = None
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                   #  'feedback_randint': ['CONVERGENCE WARNING'], 
                    # 'fractals_randint': ['CONVERGENCE WARNING'],
-                    'feedback_fractals_randint': [feedback_fractals_randint.bic], 
-                    'randslope': [randslope.bic],
-                    'feedback_randint_randslope':[feedback_randint_randslope.bic],
-                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
+                    'feedback_fractals_randint': [feedback_fractals_randint_bic], 
+                    'randslope': [randslope_bic],
+                    'feedback_randint_randslope':[feedback_randint_randslope_bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope_bic]
                   #  'feedback_fractals_randint_randslope': ['CONVERGENCE WARNING']
                   })
 bic.sort_values(by=0, axis=1)
@@ -453,12 +496,21 @@ for key, val in dict(zip(labels, norm_res)).items():
 #| label: Mixed effects model w video ratings -white lagrange
 #| echo: true
 #| code-fold: true
-het_white_res = het_white(results.resid, results.model.exog)
 
-labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
+try: 
+  het_white_res = het_white(results.resid, results.model.exog)
+  labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
 
-for key, val in dict(zip(labels, het_white_res)).items():
-    print(key, val)
+  for key, val in dict(zip(labels, het_white_res)).items():
+      print(key, val)
+      ##again, only violated if you get a significant p value
+except Exception as e:
+    import traceback
+    print(f"White's test for heteroscedasticity failed on this platform: {type(e).__name__}: {e}")
+    print(f"Design matrix (exog) shape: {results.model.exog.shape}")
+    print(f"Design matrix column names: {results.model.exog_names}")
+    print(f"Residuals shape: {results.resid.shape}")
+
 ```
 
 
@@ -638,19 +690,34 @@ basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='d
 #fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False) CONVERGENCE WARNING
 #feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
 
-randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
-feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
-fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+    randslope_bic = randslope.bic
+except Exception as e:
+    randslope_bic = None
+
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0	+feedback_details'}, re_formula='~block_type').fit(reml=False)
+    feedback_randint_randslope_bic = feedback_randint_randslope.bic
+except Exception as e:
+    feedback_randint_randslope_bic = None
+
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, 	re_formula='~block_type').fit(reml=False)
+    fractals_randint_randslope_bic = fractals_randint_randslope.bic
+except Exception as e:
+    fractals_randint_randslope_bic = None
+
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False) CONVERGENCE WARNING
 
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
                    # 'feedback_randint': ['CONVERGENCE WARNING'], 
                   #  'fractals_randint': ['CONVERGENCE WARNING'],
-                   # 'feedback_fractals_randint': [feedback_fractals_randint.bic],
-                    'randslope': [randslope.bic],
-                    'feedback_randint_randslope':[feedback_randint_randslope.bic],
-                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
+                   # 'feedback_fractals_randint': ['CONVERGENCE WARNING'],
+                    'randslope': [randslope_bic],
+                    'feedback_randint_randslope':[feedback_randint_randslope_bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope_bic]
                    # 'feedback_fractals_randint_randslope': ['CONVERGENCE WARNING']
                    })
 bic.sort_values(by=0, axis=1)
@@ -706,13 +773,19 @@ for key, val in dict(zip(labels, norm_res)).items():
 #chosen model
 ##homoskedasticity of variance 
 #White Lagrange Multiplier Test for Heteroscedasticity
-het_white_res = het_white(results.resid, results.model.exog)
+try:
+  het_white_res = het_white(results.resid, results.model.exog)
+  labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
 
-labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
-
-for key, val in dict(zip(labels, het_white_res)).items():
-    print(key, val)
-    ##again, only violated if you get a significant p value
+  for key, val in dict(zip(labels, het_white_res)).items():
+      print(key, val)
+      ##again, only violated if you get a significant p value
+except Exception as e:
+    import traceback
+    print(f"White's test for heteroscedasticity failed on this platform: {type(e).__name__}: {e}")
+    print(f"Design matrix (exog) shape: {results.model.exog.shape}")
+    print(f"Design matrix column names: {results.model.exog_names}")
+    print(f"Residuals shape: {results.resid.shape}")
 ```
 
 <h4>So we run a generalized mixed effects model (done in R)</h4>
@@ -932,23 +1005,38 @@ formula = 'regressive_er_transformed ~ block_type'
 basic_model=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop').fit(reml=False)
 
 #test which random effects to include
-feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False)
-fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
+#feedback_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}).fit(reml=False)
+#fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}).fit(reml=False)
 #feedback_fractals_randint=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={"feedback_details": "0 + feedback_details", "fractals": "0 + fractals"}).fit(reml=False)
 
-randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
-feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details'}, re_formula='~block_type').fit(reml=False)
-fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, re_formula='~block_type').fit(reml=False)
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', re_formula='~block_type').fit(reml=False)
+    randslope_bic = randslope.bic
+except Exception as e:
+    randslope_bic = None
+
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    feedback_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0	+feedback_details'}, re_formula='~block_type').fit(reml=False)
+    feedback_randint_randslope_bic = feedback_randint_randslope.bic
+except Exception as e:
+    feedback_randint_randslope_bic = None
+
+try: #some models runs on windows and mac but not linux. Modified code so that it doesn't break the notebook when using mac
+    fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'fractals': '0+fractals'}, 	re_formula='~block_type').fit(reml=False)
+    fractals_randint_randslope_bic = fractals_randint_randslope.bic
+except Exception as e:
+    fractals_randint_randslope_bic = None
+
 #feedback_fractals_randint_randslope=smf.mixedlm(formula, data, groups=data['participant_no'], missing='drop', vc_formula={'feedback_details': '0+feedback_details', "fractals": "0 + fractals"}, re_formula='~block_type').fit(reml=False)
        
 
 bic=pd.DataFrame({'basic_model': [basic_model.bic], 
-                    'feedback_randint': [feedback_randint.bic], 
-                    'fractals_randint': [fractals_randint.bic],
+                   # 'feedback_randint': ['CONVERGENCE WARNING'], 
+                   # 'fractals_randint': ['CONVERGENCE WARNING'],
                    # 'feedback_fractals_randint': ['NOT CONVERGED'],
-                    'randslope': [randslope.bic],
-                    'feedback_randint_randslope':[feedback_randint_randslope.bic],
-                    'fractals_randint_randslope': [fractals_randint_randslope.bic]
+                    'randslope': [randslope_bic],
+                    'feedback_randint_randslope':[feedback_randint_randslope_bic],
+                    'fractals_randint_randslope': [fractals_randint_randslope_bic]
                     #'feedback_fractals_randint_randslope': ['NOT CONVERGED']
                     })
 bic.sort_values(by=0, axis=1)
@@ -1003,13 +1091,19 @@ for key, val in dict(zip(labels, norm_res)).items():
 #chosen model
 ##homoskedasticity of variance 
 #White Lagrange Multiplier Test for Heteroscedasticity
-het_white_res = het_white(results.resid, results.model.exog)
+try: 
+  het_white_res = het_white(results.resid, results.model.exog)
+  labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
 
-labels = ["LM Statistic", "LM-Test p-value", "F-Statistic", "F-Test p-value"]
-
-for key, val in dict(zip(labels, het_white_res)).items():
-    print(key, val)
-    ##again, only violated if you get a significant p value
+  for key, val in dict(zip(labels, het_white_res)).items():
+      print(key, val)
+      ##again, only violated if you get a significant p value
+except Exception as e:
+    import traceback
+    print(f"White's test for heteroscedasticity failed on this platform: {type(e).__name__}: {e}")
+    print(f"Design matrix (exog) shape: {results.model.exog.shape}")
+    print(f"Design matrix column names: {results.model.exog_names}")
+    print(f"Residuals shape: {results.resid.shape}")
 ```
 
 <h4> Hypothesis test </h4>

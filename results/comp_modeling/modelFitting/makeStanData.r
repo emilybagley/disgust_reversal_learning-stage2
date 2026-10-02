@@ -14,7 +14,7 @@ library(posterior)
 library(loo)
 library(rstanarm)
 
-raw_data <- read.csv("../csvs/complete_task_excluded.csv")
+raw_data <- read.csv("../../../csvs/complete_task_excluded.csv")
 
 data<-raw_data[!is.na(raw_data$trial_till_correct), ]
 data <- data[, c('participant_no', 'n_trial', 'block_no',"block_type", 'stim_selected', 'feedback')]

@@ -449,7 +449,7 @@
     },
     "RcppParallel": {
       "Package": "RcppParallel",
-      "Version": "5.1.10",
+      "Version": "6.2.0",
       "Source": "Repository",
       "Type": "Package",
       "Title": "Parallel Programming Tools for 'Rcpp'",
@@ -1794,7 +1794,7 @@
     },
     "digest": {
       "Package": "digest",
-      "Version": "0.6.35",
+      "Version": "0.6.39",
       "Source": "Repository",
       "Author": "Dirk Eddelbuettel <edd@debian.org> with contributions by Antoine Lucas, Jarek Tuszynski, Henrik Bengtsson, Simon Urbanek, Mario Frasca, Bryan Lewis, Murray Stokely, Hannes Muehleisen, Duncan Murdoch, Jim Hester, Wush Wu, Qiang Kou, Thierry Onkelinx, Michel Lang, Viliam Simko, Kurt Hornik, Radford Neal, Kendon Bell, Matthew de Queljoe, Ion Suruceanu, Bill Denney, Dirk Schumacher, Winston Chang, Dean Attali, and Michael Chirico.",
       "Date": "2024-03-10",
@@ -3471,7 +3471,7 @@
     },
     "knitr": {
       "Package": "knitr",
-      "Version": "1.46",
+      "Version": "1.50",
       "Source": "Repository",
       "Type": "Package",
       "Title": "A General-Purpose Package for Dynamic Report Generation in R",
@@ -3553,7 +3553,7 @@
     },
     "later": {
       "Package": "later",
-      "Version": "1.4.1",
+      "Version": "1.4.8",
       "Source": "Repository",
       "Type": "Package",
       "Title": "Utilities for Scheduling Functions to Execute Later with Event Loops",
@@ -5510,7 +5510,7 @@
         "htmltools (>= 0.5.1)",
         "jquerylib",
         "jsonlite",
-        "knitr (>= 1.43)",
+        "knitr (>= 1.50)",
         "methods",
         "tinytex (>= 0.31)",
         "tools",

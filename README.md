@@ -7,25 +7,67 @@
 Note, data is not shared in this repo but can be found on the corresponding OSF page: https://osf.io/f5rmt/files/osfstorage
 
 <br>
-<b>Instructions for reproducibility:</b>
-<p>1. Download folder in its entirety
+<b>SETUP INSTRUCTIONS</b>
 
+<p>1. Install system dependencies</p>
+<b>**Linux (Debian/Ubuntu)**:</b></p>
+  sudo apt install cmake default-jdk gsfonts libcurl4-openssl-dev \
+    libfontconfig1-dev libfreetype6-dev libglpk-dev libmagick++-dev \
+    libssl-dev libx11-dev libxml2-dev libzmq3-dev pandoc \
+    libharfbuzz-dev libfribidi-dev libnlopt-dev
+<p>
+<p><b>**macOS**:</b></p>
+  <p>* Xcode Command Line Tools: `xcode-select --install`
+  <p>* A Java Development Kit matching your Mac's architecture (e.g. via 
+    https://adoptium.net — select "aarch64" for Apple Silicon)
+<br>
 <p>2. Install quarto 
+<br>
+<p>3. Download folder in its entirety
+<br>
+<p>4. Create a python environment using Python3.12 and the requirements.txt file
+<br>
 
-<p>3. Create a python environment using Python3.12 and the requirements.txt file
+<p>5. Create a .renvignore file in the project root to exclude non-R directories from dependency scanning
+<br>
+<p>6. Restore the renv (Rscript -e 'renv::restore()') and install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering
+<br>
+<p>7. Render quarto files (e.g., quarto render VideoRatings.qmd)
 
-
-<p>4. Create a .renvignore file in the project root to exclude non-R directories from dependency scanning
-
-<p>5. Restore the renv (Rscript -e 'renv::restore()') and install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering
-
-
-<p>6. Render quarto files (e.g., quarto render VideoRatings.qmd)
-
+<br>
 <p>NB model fitting/comparisons within the computational modeling section (comp_modeling/modelFitting) were run using a HPC rather than locally rendered quarto files
 
 <br>
+<b>INSTRUCTIONS FOR REPRODUCIBILITY</b></p>
+Scripts should be run in the order in which they were created. Steps with asterisk require re-running computational models (high compute power and memory requirement). These steps can be safely missed out because the key output fil are included in this folder. 
+
+1. power_analysis folder (scripts should be run in order and are labelled A-D) - creates power analysis described in supplement
+
+2. data_cleaning (scripts should be run in order and  labelled 0-1) - creates cleaned datafiles (stored in the ../csvs folder
+
+3. results/videoratings/VideoRatings.qmd - carries out video ratings analyses
+
+4. results/model_agnostic folder (quarto files should be rendered in order and are labelled 1-4)
+
+5. results/comp_modeling/modelFitting (quarto files should be rendered in order)*
+makeStandata.R (converts raw data into suitable format)
+submitcluster.sh (calls runRandomModel.sh/.r (requires STANfiles); runModel.sh/.r (requires STANfiles); checkModel_extractParams.sh/.r)
+
+6. results/comp_modeling/modelFitting/modelDiagnostics/testingrhatneff.ipynb (quarto files should be rendered in order)*
+
+7. results/comp_modeling/modelFitting/modelDiagnostics/ParamRecov folder* (quarto files should be rendered in order)*
+simData.sh (calls simData.r)
+runModel.sh (calls runModel.r)
+
+8. results/comp_modeling/modelFitting/modelDiagnostics/PPCs/PPCs.sh (calls PPCs.r)*
+
+9. results/comp_modeling folder (quarto files should be rendered in order are are labeled 1-4) (NB 1_modelCompAndChecks* requires outputs of computational models)
+
+
+<br>
+<b>LIST OF CONTENTS</b></p>
 <h3>Csvs folder:</h3>
+<p> Contained raw blinded csvs (blinded_data_full.csv and blinded_demography.csv)
 <p> Contained the csvs created in the data-cleaning scripts 
 <p> (e.g., a full blinded dataframe, a demography dataframe, a dataframe with video-ratings, task dataframes, exclusion details)
 

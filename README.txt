@@ -3,19 +3,33 @@ Contains all scripts for all analyses detailed in the stage 2 registered report.
 
 Note, many of the results are in markdown form using quarto notebooks (necessary to the combination of R and Python in these analyses) which can more clearly be read on GitHub. Link to repo: https://github.com/emilybagley/disgust_reversal_learning-stage2 
 
-Alternatively, this folder can be downloaded in its entirety - markdown files can be viewed and quarto notebooks can be re-run.
+Alternatively, this folder can be downloaded in its entirety - markdown files can be viewed and quarto notebooks can be re-run. results-stage2RR_reproducable folder can be used to do this - as this folder does not contain output files. 
 
-Instructions for reproducibility:
-1. Download folder in its entirety
+SETUP INSTRUCTIONS:
+1. Install system dependencies
+**Linux (Debian/Ubuntu)**:
+  sudo apt install cmake default-jdk gsfonts libcurl4-openssl-dev \
+    libfontconfig1-dev libfreetype6-dev libglpk-dev libmagick++-dev \
+    libssl-dev libx11-dev libxml2-dev libzmq3-dev pandoc \
+    libharfbuzz-dev libfribidi-dev libnlopt-dev
+
+**macOS**:
+  - Xcode Command Line Tools: `xcode-select --install`
+  - A Java Development Kit matching your Mac's architecture (e.g. via 
+    https://adoptium.net — select "aarch64" for Apple Silicon)
+
 
 2. Install quarto (https://quarto.org/docs/get-started/)
 
-3. Create and activate a python environment within the folder using Python3.12 and the requirements.txt file:
+3. Download folder in its entirety
+
+
+4. Create and activate a python environment within the folder using Python3.12 and the requirements.txt file:
 python3.12 -m venv disgust_env
 source disgust_env/bin/activate
 pip install -r requirements.txt
 
-4. Create a .renvignore file in the project root to exclude non-R directories from dependency scanning:
+5. Create a .renvignore file in the project root to exclude non-R directories from dependency scanning:
 cat > .renvignore << 'EOF'
 disgust_env
 data/
@@ -23,9 +37,11 @@ csvs/
 results/
 EOF
 
-5. Restore the renv environment: Rscript -e 'renv::restore()' and install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering
+6. Restore the renv environment: Rscript -e 'renv::restore()' and install reticulate package (Rscript -e 'install.packages("reticulate")') for quarto rendering
 
-6. Render quarto files (e.g., quarto render results/video_ratings/VideoRatings.qmd)
+7. Render quarto files (e.g., quarto render results/video_ratings/VideoRatings.qmd)
+[add order]
+
 
 Trouble shooting:
 If Quarto cannot find R packages when rendering, confirm it is using 
@@ -35,10 +51,40 @@ export QUARTO_R=$(Rscript -e 'cat(R.home())').
 
 If Quarto reports that a package is unavailable, first run Rscript -e 'renv::status()' to check whether the installed R library is consistent with renv.lock. If packages are out of sync, run Rscript -e 'renv::restore()' before attempting to install packages manually.
 
-NB model fitting/comparisons within the computational modeling section (comp_modeling/modelFitting) were run using a HPC rather than localy rendered quarto files
+NB model fitting/comparisons within the computational modeling section (comp_modeling/modelFitting) were run using a HPC rather than locally rendered quarto files
+
+INSTRUCTIONS FOR REPRODUCIBILITY:
+Scripts should be run in the order in which they were created. Steps with asterisk require re-running computational models (high compute power and memory requirement). These steps can be safely missed out because the output files are included in this folder. 
+1. power_analysis folder (scripts should be run in order and are labelled A-D) - creates power analysis described in supplement
+
+2. data_cleaning (scripts should be run in order and  labelled 0-1) - creates cleaned datafiles (stored in the ../csvs folder
+
+3. results/videoratings/VideoRatings.qmd - carries out video ratings analyses
+
+4. results/model_agnostic folder (quarto files should be rendered in order and are labelled 1-4)
+
+5. results/comp_modeling/modelFitting (quarto files should be rendered in order)*
+makeStandata.R (converts raw data into suitable format)
+submitcluster.sh (calls runRandomModel.sh/.r (requires STANfiles); runModel.sh/.r (requires STANfiles); checkModel_extractParams.sh/.r)
+
+6. results/comp_modeling/modelFitting/modelDiagnostics/testingrhatneff.ipynb (quarto files should be rendered in order)*
+
+7. results/comp_modeling/modelFitting/modelDiagnostics/ParamRecov folder* (quarto files should be rendered in order)*
+simData.sh (calls simData.r)
+runModel.sh (calls runModel.r)
+
+8. results/comp_modeling/modelFitting/modelDiagnostics/PPCs/PPCs.sh (calls PPCs.r)*
+
+9. results/comp_modeling folder (quarto files should be rendered in order are are labeled 1-4) (NB 1_modelCompAndChecks* requires outputs of computational models)
+
+
+RESULTS IN MANUSCRIPT:
+can  be found in their corresponding quarto files (within video_ratings, model_agnostic and comp_modeling folders). E.g., all perseverative error analyses are found in the 1_perseverativeErrors.qmd quarto file within the model_agnostic folder, all stickiness analyses are in 4_stickiness.qmd in the comp_modeling folder. 
+
 
 LIST OF FOLDERS AND FILES:
 Csvs folder:
+Contains raw blinded csv files (blinded_data_full.csv and blinded_demography.csv)
 Contains the csvs created in the data-cleaning scripts 
 (e.g., a full blinded dataframe, a demography dataframe, a dataframe with video-ratings, task dataframes, exclusion details)
 
